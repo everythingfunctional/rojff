@@ -1,11 +1,14 @@
 module json_test
+    use iso_varying_string, only: varying_string
     use rojff, only: &
             json_array_t, &
             json_bool_t, &
             json_element_t, &
             json_integer_t, &
+            json_member_t, &
             json_null_t, &
             json_number_t, &
+            json_object_t, &
             json_string_t, &
             json_value_t, &
             create_json_bool, &
@@ -13,9 +16,12 @@ module json_test
             create_json_null, &
             create_json_number, &
             create_json_string_unsafe, &
+            json_member_unsafe, &
             json_string_unsafe, &
             move_into_array, &
-            move_into_element
+            move_into_element, &
+            move_into_member_unsafe, &
+            move_into_object
     use vegetables, only: &
             result_t, &
             test_item_t, &
@@ -58,6 +64,9 @@ contains
                 , it( &
                         "an array has the correct string representation", &
                         check_array_to_string) &
+                , it( &
+                        "an object has the correct string representation", &
+                        check_object_to_string) &
                 ])
     end function
 
@@ -184,5 +193,42 @@ contains
         result_ = &
                 assert_equals('[null,"Hello",2.0]', copied%to_compact_string(), "copied") &
                 .and.assert_equals('[null,"Hello",2.0]', created%to_compact_string(), "created")
+    end function
+
+    function check_object_to_string() result(result_)
+        type(result_t) :: result_
+
+        type(json_object_t) :: copied
+        type(varying_string) :: copied_string
+        class(json_value_t), allocatable :: created
+        type(varying_string) :: created_string
+        type(json_member_t), allocatable :: members(:)
+
+        copied = json_object_t( &
+                [ json_member_unsafe("sayHello", json_bool_t(.true.)) &
+                , json_member_unsafe("aNumber", json_number_t(3.0d0)) &
+                ])
+
+        allocate(members(2))
+        call create_json_bool(created, .true.)
+        call move_into_member_unsafe(members(1), "sayHello", created)
+        call create_json_number(created, 3.0d0)
+        call move_into_member_unsafe(members(2), "aNumber", created)
+        call move_into_object(created, members)
+
+        copied_string = copied%to_compact_string()
+        created_string = created%to_compact_string()
+
+        result_ = &
+                assert_includes('"sayHello":true', copied_string, "copied") &
+                .and.assert_includes('"sayHello":true', created_string, "created") &
+                .and.assert_includes('"aNumber":3.0', copied_string, "copied") &
+                .and.assert_includes('"aNumber":3.0', created_string, "created") &
+                .and.assert_includes("{", copied_string, "copied") &
+                .and.assert_includes("{", created_string, "created") &
+                .and.assert_includes("}", copied_string, "copied") &
+                .and.assert_includes("}", created_string, "created") &
+                .and.assert_includes(",", copied_string, "copied") &
+                .and.assert_includes(",", created_string, "created")
     end function
 end module

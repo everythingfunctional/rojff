@@ -16,7 +16,7 @@ module rojff_json_bool_m
         module procedure constructor
     end interface
 contains
-    function constructor(bool) result(json_bool)
+    elemental function constructor(bool) result(json_bool)
         type(json_bool_t) :: json_bool
         logical, intent(in) :: bool
 
