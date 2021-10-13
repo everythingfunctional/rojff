@@ -1,5 +1,5 @@
 module json_test
-    use rojff, only: json_null_t
+    use rojff, only: json_value_t, json_null_t, create_json_null
     use vegetables, only: &
             result_t, &
             test_item_t, &
@@ -29,8 +29,14 @@ contains
     function check_null_to_string() result(result_)
         type(result_t) :: result_
 
-        type(json_null_t) :: json_null
+        type(json_null_t) :: copied
+        class(json_value_t), allocatable :: created
 
-        result_ = assert_equals("null", json_null%to_compact_string())
+        copied = json_null_t()
+        call create_json_null(created)
+
+        result_ = &
+                assert_equals("null", copied%to_compact_string(), "copied") &
+                .and.assert_equals("null", created%to_compact_string(), "created")
     end function
 end module
