@@ -3,9 +3,11 @@ module json_test
             json_value_t, &
             json_bool_t, &
             json_null_t, &
+            json_number_t, &
             json_string_t, &
             create_json_bool, &
             create_json_null, &
+            create_json_number, &
             create_json_string_unsafe, &
             json_string_unsafe
     use vegetables, only: &
@@ -38,6 +40,12 @@ contains
                         "false has the correct string representation", &
                         check_false_to_string) &
                 , it("a string can be converted back", check_string_to_string) &
+                , it( &
+                        "a number has the correct string representation", &
+                        check_number_to_string) &
+                , it( &
+                        "a number gets converted to a string with the specified precision", &
+                        check_number_with_precision) &
                 ])
     end function
 
@@ -95,5 +103,33 @@ contains
         result_ = &
                 assert_equals('"Hello"', copied%to_compact_string(), "copied") &
                 .and.assert_equals('"Hello"', created%to_compact_string(), "created")
+    end function
+
+    function check_number_to_string() result(result_)
+        type(result_t) :: result_
+
+        type(json_number_t) :: copied
+        class(json_value_t), allocatable :: created
+
+        copied = json_number_t(1.0d0)
+        call create_json_number(created, 1.0d0)
+
+        result_ = &
+                assert_equals('1.0', copied%to_compact_string(), "copied") &
+                .and.assert_equals('1.0', created%to_compact_string(), "created")
+    end function
+
+    function check_number_with_precision() result(result_)
+        type(result_t) :: result_
+
+        type(json_number_t) :: copied
+        class(json_value_t), allocatable :: created
+
+        copied = json_number_t(1.234d0, 3)
+        call create_json_number(created, 1.234d0, 3)
+
+        result_ = &
+                assert_equals('1.23', copied%to_compact_string(), "copied") &
+                .and.assert_equals('1.23', created%to_compact_string(), "created")
     end function
 end module
