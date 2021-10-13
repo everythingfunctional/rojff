@@ -1,11 +1,13 @@
 module json_test
     use rojff, only: &
-            json_value_t, &
             json_bool_t, &
+            json_integer_t, &
             json_null_t, &
             json_number_t, &
             json_string_t, &
+            json_value_t, &
             create_json_bool, &
+            create_json_integer, &
             create_json_null, &
             create_json_number, &
             create_json_string_unsafe, &
@@ -46,6 +48,9 @@ contains
                 , it( &
                         "a number gets converted to a string with the specified precision", &
                         check_number_with_precision) &
+                , it( &
+                        "an integer has the correct string representation", &
+                        check_integer_to_string) &
                 ])
     end function
 
@@ -131,5 +136,19 @@ contains
         result_ = &
                 assert_equals('1.23', copied%to_compact_string(), "copied") &
                 .and.assert_equals('1.23', created%to_compact_string(), "created")
+    end function
+
+    function check_integer_to_string() result(result_)
+        type(result_t) :: result_
+
+        type(json_integer_t) :: copied
+        class(json_value_t), allocatable :: created
+
+        copied = json_integer_t(1)
+        call create_json_integer(created, 1)
+
+        result_ = &
+                assert_equals('1', copied%to_compact_string(), "copied") &
+                .and.assert_equals('1', created%to_compact_string(), "created")
     end function
 end module

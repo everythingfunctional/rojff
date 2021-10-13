@@ -19,7 +19,7 @@ module rojff_json_number_m
         module procedure constructor
     end interface
 contains
-    function constructor(number, precision) result(json_number)
+    elemental function constructor(number, precision) result(json_number)
         type(json_number_t) :: json_number
         double precision, intent(in) :: number
         integer, optional, intent(in) :: precision

@@ -1,5 +1,6 @@
 module rojff
     use rojff_json_bool_m, only: json_bool_t, create_json_bool
+    use rojff_json_integer_m, only: json_integer_t, create_json_integer
     use rojff_json_null_m, only: json_null_t, create_json_null
     use rojff_json_number_m, only: json_number_t, create_json_number
     use rojff_json_string_m, only: &
