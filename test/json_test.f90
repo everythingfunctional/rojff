@@ -1,6 +1,8 @@
 module json_test
     use rojff, only: &
+            json_array_t, &
             json_bool_t, &
+            json_element_t, &
             json_integer_t, &
             json_null_t, &
             json_number_t, &
@@ -11,7 +13,9 @@ module json_test
             create_json_null, &
             create_json_number, &
             create_json_string_unsafe, &
-            json_string_unsafe
+            json_string_unsafe, &
+            move_into_array, &
+            move_into_element
     use vegetables, only: &
             result_t, &
             test_item_t, &
@@ -51,6 +55,9 @@ contains
                 , it( &
                         "an integer has the correct string representation", &
                         check_integer_to_string) &
+                , it( &
+                        "an array has the correct string representation", &
+                        check_array_to_string) &
                 ])
     end function
 
@@ -150,5 +157,32 @@ contains
         result_ = &
                 assert_equals('1', copied%to_compact_string(), "copied") &
                 .and.assert_equals('1', created%to_compact_string(), "created")
+    end function
+
+    function check_array_to_string() result(result_)
+        type(result_t) :: result_
+
+        type(json_array_t) :: copied
+        class(json_value_t), allocatable :: created
+        type(json_element_t), allocatable :: elements(:)
+
+        copied = json_array_t( &
+                [ json_element_t(json_null_t()) &
+                , json_element_t(json_string_unsafe("Hello")) &
+                , json_element_t(json_number_t(2.0d0)) &
+                ])
+
+        allocate(elements(3))
+        call create_json_null(created)
+        call move_into_element(elements(1), created)
+        call create_json_string_unsafe(created, "Hello")
+        call move_into_element(elements(2), created)
+        call create_json_number(created, 2.0d0)
+        call move_into_element(elements(3), created)
+        call move_into_array(created, elements)
+
+        result_ = &
+                assert_equals('[null,"Hello",2.0]', copied%to_compact_string(), "copied") &
+                .and.assert_equals('[null,"Hello",2.0]', created%to_compact_string(), "created")
     end function
 end module
