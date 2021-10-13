@@ -3,8 +3,11 @@ module json_test
             json_value_t, &
             json_bool_t, &
             json_null_t, &
+            json_string_t, &
             create_json_bool, &
-            create_json_null
+            create_json_null, &
+            create_json_string_unsafe, &
+            json_string_unsafe
     use vegetables, only: &
             result_t, &
             test_item_t, &
@@ -34,6 +37,7 @@ contains
                 , it( &
                         "false has the correct string representation", &
                         check_false_to_string) &
+                , it("a string can be converted back", check_string_to_string) &
                 ])
     end function
 
@@ -77,5 +81,19 @@ contains
         result_ = &
                 assert_equals("false", copied%to_compact_string(), "copied") &
                 .and.assert_equals("false", created%to_compact_string(), "created")
+    end function
+
+    function check_string_to_string() result(result_)
+        type(result_t) :: result_
+
+        type(json_string_t) :: copied
+        class(json_value_t), allocatable :: created
+
+        copied = json_string_unsafe("Hello")
+        call create_json_string_unsafe(created, "Hello")
+
+        result_ = &
+                assert_equals('"Hello"', copied%to_compact_string(), "copied") &
+                .and.assert_equals('"Hello"', created%to_compact_string(), "created")
     end function
 end module
