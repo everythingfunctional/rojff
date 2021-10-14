@@ -11,6 +11,7 @@ module rojff_json_array_m
     type, extends(json_value_t) :: json_array_t
         type(json_element_t), allocatable :: elements(:)
     contains
+        procedure :: equals
         procedure :: to_compact_string
     end type
 contains
@@ -31,6 +32,19 @@ contains
         call move_alloc(elements, local%elements)
         call move_alloc(local, json)
     end subroutine
+
+    elemental function equals(lhs, rhs)
+        class(json_array_t), intent(in) :: lhs
+        class(json_value_t), intent(in) :: rhs
+        logical :: equals
+
+        select type (rhs)
+        type is (json_array_t)
+            equals = size(lhs%elements) == size(rhs%elements) .and. all(lhs%elements == rhs%elements)
+        class default
+            equals = .false.
+        end select
+    end function
 
     elemental recursive function to_compact_string(self) result(string)
         class(json_array_t), intent(in) :: self

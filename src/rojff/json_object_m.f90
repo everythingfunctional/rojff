@@ -11,6 +11,7 @@ module rojff_json_object_m
     type, extends(json_value_t) :: json_object_t
         type(json_member_t), allocatable :: members(:)
     contains
+        procedure :: equals
         procedure :: to_compact_string
     end type
 
@@ -35,6 +36,26 @@ contains
         call move_alloc(members, local%members)
         call move_alloc(local, json)
     end subroutine
+
+    elemental function equals(lhs, rhs)
+        class(json_object_t), intent(in) :: lhs
+        class(json_value_t), intent(in) :: rhs
+        logical :: equals
+
+        integer :: i
+
+        select type (rhs)
+        type is (json_object_t)
+            ! looping over both sides avoids inadvertent equality on the off chance
+            ! that one side has a duplicate entry that the other side has only one of
+            equals = &
+                    size(lhs%members) == size(rhs%members) &
+                    .and. all([(any(lhs%members(i) == rhs%members), i = 1, size(lhs%members))]) &
+                    .and. all([(any(rhs%members(i) == lhs%members), i = 1, size(rhs%members))])
+        class default
+            equals = .false.
+        end select
+    end function
 
     elemental recursive function to_compact_string(self) result(string)
         class(json_object_t), intent(in) :: self

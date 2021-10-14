@@ -10,6 +10,8 @@ module rojff_json_member_m
         character(len=:), allocatable :: key
         class(json_value_t), allocatable :: value_
     contains
+        procedure :: equals
+        generic :: operator(==) => equals
         procedure :: to_compact_string
     end type
 contains
@@ -30,6 +32,14 @@ contains
         member%key = key
         call move_alloc(value_, member%value_)
     end subroutine
+
+    elemental function equals(lhs, rhs)
+        class(json_member_t), intent(in) :: lhs
+        type(json_member_t), intent(in) :: rhs
+        logical :: equals
+
+        equals = lhs%key == rhs%key .and. lhs%value_ == rhs%value_
+    end function
 
     elemental recursive function to_compact_string(self) result(string)
         class(json_member_t), intent(in) :: self

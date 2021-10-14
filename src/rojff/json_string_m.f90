@@ -9,6 +9,7 @@ module rojff_json_string_m
     type, extends(json_value_t) :: json_string_t
         character(len=:), allocatable :: string
     contains
+        procedure :: equals
         procedure :: to_compact_string => to_string
     end type
 contains
@@ -29,6 +30,19 @@ contains
         local%string = string
         call move_alloc(local, json)
     end subroutine
+
+    elemental function equals(lhs, rhs)
+        class(json_string_t), intent(in) :: lhs
+        class(json_value_t), intent(in) :: rhs
+        logical :: equals
+
+        select type (rhs)
+        type is (json_string_t)
+            equals = lhs%string == rhs%string
+        class default
+            equals = .false.
+        end select
+    end function
 
     elemental function to_string(self) result(string)
         class(json_string_t), intent(in) :: self

@@ -9,6 +9,7 @@ module rojff_json_bool_m
     type, extends(json_value_t) :: json_bool_t
         logical :: bool
     contains
+        procedure :: equals
         procedure :: to_compact_string => to_string
     end type
 
@@ -33,6 +34,19 @@ contains
         local%bool = bool
         call move_alloc(local, json)
     end subroutine
+
+    elemental function equals(lhs, rhs)
+        class(json_bool_t), intent(in) :: lhs
+        class(json_value_t), intent(in) :: rhs
+        logical :: equals
+
+        select type (rhs)
+        type is (json_bool_t)
+            equals = lhs%bool .eqv. rhs%bool
+        class default
+            equals = .false.
+        end select
+    end function
 
     elemental function to_string(self) result(string)
         class(json_bool_t), intent(in) :: self

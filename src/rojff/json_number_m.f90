@@ -12,6 +12,7 @@ module rojff_json_number_m
         integer :: precision
         logical :: precision_provided
     contains
+        procedure :: equals
         procedure :: to_compact_string => number_to_string
     end type
 
@@ -50,6 +51,20 @@ contains
         end if
         call move_alloc(local, json)
     end subroutine
+
+    elemental function equals(lhs, rhs)
+        class(json_number_t), intent(in) :: lhs
+        class(json_value_t), intent(in) :: rhs
+        logical :: equals
+
+        select type (rhs)
+        type is (json_number_t)
+            ! avoids warnings about comparing floating point numbers
+            equals = (.not. (lhs%number < rhs%number)) .and. (.not. (lhs%number > rhs%number))
+        class default
+            equals = .false.
+        end select
+    end function
 
     elemental function number_to_string(self) result(string)
         class(json_number_t), intent(in) :: self

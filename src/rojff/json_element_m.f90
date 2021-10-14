@@ -9,6 +9,8 @@ module rojff_json_element_m
     type :: json_element_t
         class(json_value_t), allocatable :: json
     contains
+        procedure :: equals
+        generic :: operator(==) => equals
         procedure :: to_compact_string
     end type
 
@@ -29,6 +31,14 @@ contains
 
         call move_alloc(json, element%json)
     end subroutine
+
+    elemental function equals(lhs, rhs)
+        class(json_element_t), intent(in) :: lhs
+        type(json_element_t), intent(in) :: rhs
+        logical :: equals
+
+        equals = lhs%json == rhs%json
+    end function
 
     elemental recursive function to_compact_string(self) result(string)
         class(json_element_t), intent(in) :: self
