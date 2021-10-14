@@ -6,6 +6,7 @@ maintainer = "everythingfunctional@protonmail.com"
 copyright = "Copyright 2021, Brad Richardson"
 
 [dependencies]
+erloff = { git = "https://gitlab.com/everythingfunctional/erloff.git", tag = "v2.1.0" }
 iso_varying_string = { git = "https://gitlab.com/everythingfunctional/iso_varying_string", tag = "v2.1.0" }
 strff = { git = "https://gitlab.com/everythingfunctional/strff", tag = "v2.1.0" }
 

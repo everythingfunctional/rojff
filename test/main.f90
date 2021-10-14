@@ -7,12 +7,15 @@ contains
     subroutine run()
         use json_test, only: &
                 json_json => test_json
+        use parse_json_test, only: &
+                parse_json_parse_json => test_parse_json
         use vegetables, only: test_item_t, test_that, run_tests
 
         type(test_item_t) :: tests
-        type(test_item_t) :: individual_tests(1)
+        type(test_item_t) :: individual_tests(2)
 
         individual_tests(1) = json_json()
+        individual_tests(2) = parse_json_parse_json()
         tests = test_that(individual_tests)
 
         call run_tests(tests)

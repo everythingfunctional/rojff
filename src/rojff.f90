@@ -1,4 +1,7 @@
 module rojff
+    use rojff_cursor_m, only: cursor_t
+    use rojff_fallible_json_value_m, only: &
+            fallible_json_value_t, move_into_fallible_json
     use rojff_json_array_m, only: json_array_t, move_into_array
     use rojff_json_bool_m, only: json_bool_t, create_json_bool
     use rojff_json_element_m, only: json_element_t, move_into_element
@@ -11,4 +14,6 @@ module rojff
     use rojff_json_string_m, only: &
             json_string_t, create_json_string_unsafe, json_string_unsafe
     use rojff_json_value_m, only: json_value_t
+    use rojff_parser_m, only: parse_json_from_string
+    use rojff_string_cursor_m, only: string_cursor_t
 end module
