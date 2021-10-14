@@ -4,6 +4,7 @@ module rojff_parser_m
     use rojff_cursor_m, only: cursor_t
     use rojff_fallible_json_value_m, only: &
             fallible_json_value_t, move_into_fallible_json
+    use rojff_json_bool_m, only: create_json_bool
     use rojff_json_null_m, only: create_json_null
     use rojff_json_value_m, only: json_value_t
     use rojff_string_cursor_m, only: string_cursor_t
@@ -68,6 +69,10 @@ contains
         select case (next_character)
         case ("n")
             call parse_json_null(cursor, json, errors)
+        case ("t")
+            call parse_json_true(cursor, json, errors)
+        case ("f")
+            call parse_json_false(cursor, json, errors)
         case default
             errors = error_list_t(fatal_t( &
                     INVALID_INPUT, &
@@ -113,6 +118,66 @@ contains
                     // " and column " // to_string(starting_column) &
                     // " found " // null_string(1:min(i, 4)) &
                     // ', but expected null'))
+        end if
+    end subroutine
+
+    subroutine parse_json_true(cursor, json, errors)
+        class(cursor_t), intent(inout) :: cursor
+        class(json_value_t), allocatable, intent(out) :: json
+        type(error_list_t), intent(out) :: errors
+
+        character(len=4) :: true_string
+        integer :: starting_line, starting_column, i
+
+        starting_line = cursor%current_line()
+        starting_column = cursor%current_column()
+
+        do i = 1, 4
+            true_string(i:i) = cursor%peek()
+            call cursor%next()
+            if (cursor%finished()) exit
+        end do
+        if (true_string == "true") then
+            call create_json_bool(json, .true.)
+        else
+            errors = error_list_t(fatal_t( &
+                    INVALID_INPUT, &
+                    module_t(MODULE_NAME), &
+                    procedure_t("parse_json_true"), &
+                    "At line " // to_string(starting_line) &
+                    // " and column " // to_string(starting_column) &
+                    // " found " // true_string(1:min(i, 4)) &
+                    // ', but expected true'))
+        end if
+    end subroutine
+
+    subroutine parse_json_false(cursor, json, errors)
+        class(cursor_t), intent(inout) :: cursor
+        class(json_value_t), allocatable, intent(out) :: json
+        type(error_list_t), intent(out) :: errors
+
+        character(len=5) :: false_string
+        integer :: starting_line, starting_column, i
+
+        starting_line = cursor%current_line()
+        starting_column = cursor%current_column()
+
+        do i = 1, 5
+            false_string(i:i) = cursor%peek()
+            call cursor%next()
+            if (cursor%finished()) exit
+        end do
+        if (false_string == "false") then
+            call create_json_bool(json, .false.)
+        else
+            errors = error_list_t(fatal_t( &
+                    INVALID_INPUT, &
+                    module_t(MODULE_NAME), &
+                    procedure_t("parse_json_false"), &
+                    "At line " // to_string(starting_line) &
+                    // " and column " // to_string(starting_column) &
+                    // " found " // false_string(1:min(i, 4)) &
+                    // ', but expected false'))
         end if
     end subroutine
 
