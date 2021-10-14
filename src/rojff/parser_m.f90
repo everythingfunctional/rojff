@@ -38,9 +38,24 @@ contains
             errors = error_list_t(errors, module_t(MODULE_NAME), procedure_t(PROCEDURE_NAME))
             return
         end if
+        if (.not.cursor%finished()) then
+            block
+                character(len=:), allocatable :: trailing_content
+                trailing_content = ""
+                do while (.not. cursor%finished())
+                    trailing_content = trailing_content // cursor%peek()
+                    call cursor%next()
+                end do
+                errors = error_list_t(fatal_t( &
+                        INVALID_INPUT, &
+                        module_t(MODULE_NAME), &
+                        procedure_t(PROCEDURE_NAME), &
+                        "Unexpected trailing content: " // trailing_content))
+            end block
+        end if
     end subroutine
 
-    subroutine parse_json_value(cursor, json, errors)
+    recursive subroutine parse_json_value(cursor, json, errors)
         class(cursor_t), intent(inout) :: cursor
         class(json_value_t), allocatable, intent(out) :: json
         type(error_list_t), intent(out) :: errors
@@ -66,6 +81,8 @@ contains
         end select
         if (errors%has_any()) then
             errors = error_list_t(errors, module_t(MODULE_NAME), procedure_t(PROCEDURE_NAME))
+        else
+            call skip_whitespace(cursor)
         end if
     end subroutine
 
