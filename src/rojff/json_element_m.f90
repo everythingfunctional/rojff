@@ -1,5 +1,4 @@
 module rojff_json_element_m
-    use iso_varying_string, only: varying_string
     use rojff_json_value_m, only: json_value_t
     use rojff_string_sink_m, only: string_sink_t
 
@@ -12,7 +11,6 @@ module rojff_json_element_m
     contains
         procedure :: equals
         generic :: operator(==) => equals
-        procedure :: to_compact_string
         procedure :: write_to_compactly
     end type
 
@@ -40,13 +38,6 @@ contains
         logical :: equals
 
         equals = lhs%json == rhs%json
-    end function
-
-    recursive function to_compact_string(self) result(string)
-        class(json_element_t), intent(in) :: self
-        type(varying_string) :: string
-
-        string = self%json%to_compact_string()
     end function
 
     recursive subroutine write_to_compactly(self, sink)

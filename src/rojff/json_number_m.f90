@@ -1,5 +1,5 @@
 module rojff_json_number_m
-    use iso_varying_string, only: varying_string, assignment(=), char
+    use iso_varying_string, only: char
     use rojff_json_value_m, only: json_value_t
     use rojff_string_sink_m, only: string_sink_t
     use strff, only: to_string
@@ -14,8 +14,7 @@ module rojff_json_number_m
         logical :: precision_provided
     contains
         procedure :: equals
-        procedure :: to_compact_string => number_to_string
-        procedure :: write_to_compactly => write_to
+        procedure :: write_to_compactly
     end type
 
     interface json_number_t
@@ -68,21 +67,14 @@ contains
         end select
     end function
 
-    pure function number_to_string(self) result(string)
-        class(json_number_t), intent(in) :: self
-        type(varying_string) :: string
-
-        if (self%precision_provided) then
-            string = to_string(self%number, self%precision)
-        else
-            string = to_string(self%number)
-        end if
-    end function
-
-    subroutine write_to(self, sink)
+    subroutine write_to_compactly(self, sink)
         class(json_number_t), intent(in) :: self
         class(string_sink_t), intent(inout) :: sink
 
-        call sink%append(char(self%to_compact_string()))
+        if (self%precision_provided) then
+            call sink%append(char(to_string(self%number, self%precision)))
+        else
+            call sink%append(char(to_string(self%number)))
+        end if
     end subroutine
 end module

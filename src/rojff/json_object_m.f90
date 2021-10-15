@@ -1,8 +1,6 @@
 module rojff_json_object_m
-    use iso_varying_string, only: varying_string, assignment(=)
     use rojff_json_member_m, only: json_member_t
     use rojff_json_value_m, only: json_value_t
-    use rojff_string_builder_m, only: string_builder_t
     use rojff_string_sink_m, only: string_sink_t
     use strff, only: join
 
@@ -14,7 +12,6 @@ module rojff_json_object_m
         type(json_member_t), allocatable :: members(:)
     contains
         procedure :: equals
-        procedure :: to_compact_string
         procedure :: write_to_compactly
     end type
 
@@ -60,19 +57,7 @@ contains
         end select
     end function
 
-    recursive function to_compact_string(self) result(string)
-        class(json_object_t), intent(in) :: self
-        type(varying_string) :: string
-
-        type(string_builder_t) :: sink
-        character(len=:), allocatable :: plain_string
-
-        call self%write_to_compactly(sink)
-        call sink%move_into(plain_string)
-        string = plain_string
-    end function
-
-    subroutine write_to_compactly(self, sink)
+    recursive subroutine write_to_compactly(self, sink)
         class(json_object_t), intent(in) :: self
         class(string_sink_t), intent(inout) :: sink
 

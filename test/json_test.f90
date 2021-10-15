@@ -1,5 +1,4 @@
 module json_test
-    use iso_varying_string, only: varying_string
     use rojff, only: &
             json_array_t, &
             json_bool_t, &
@@ -199,9 +198,9 @@ contains
         type(result_t) :: result_
 
         type(json_object_t) :: copied
-        type(varying_string) :: copied_string
+        character(len=:), allocatable :: copied_string
         class(json_value_t), allocatable :: created
-        type(varying_string) :: created_string
+        character(len=:), allocatable :: created_string
         type(json_member_t), allocatable :: members(:)
 
         copied = json_object_t( &

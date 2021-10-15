@@ -1,5 +1,5 @@
 module rojff_json_integer_m
-    use iso_varying_string, only: varying_string, assignment(=), char
+    use iso_varying_string, only: char
     use rojff_json_value_m, only: json_value_t
     use rojff_string_sink_m, only: string_sink_t
     use strff, only: to_string
@@ -12,8 +12,7 @@ module rojff_json_integer_m
         integer :: number
     contains
         procedure :: equals
-        procedure :: to_compact_string => integer_to_string
-        procedure :: write_to_compactly => write_to
+        procedure :: write_to_compactly
     end type
 
     interface json_integer_t
@@ -51,14 +50,7 @@ contains
         end select
     end function
 
-    pure function integer_to_string(self) result(string)
-        class(json_integer_t), intent(in) :: self
-        type(varying_string) :: string
-
-        string = to_string(self%number)
-    end function
-
-    subroutine write_to(self, sink)
+    subroutine write_to_compactly(self, sink)
         class(json_integer_t), intent(in) :: self
         class(string_sink_t), intent(inout) :: sink
 

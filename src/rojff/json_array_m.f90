@@ -1,8 +1,6 @@
 module rojff_json_array_m
-    use iso_varying_string, only: varying_string, assignment(=)
     use rojff_json_element_m, only: json_element_t
     use rojff_json_value_m, only: json_value_t
-    use rojff_string_builder_m, only: string_builder_t
     use rojff_string_sink_m, only: string_sink_t
     use strff, only: join
 
@@ -14,7 +12,6 @@ module rojff_json_array_m
         type(json_element_t), allocatable :: elements(:)
     contains
         procedure :: equals
-        procedure :: to_compact_string
         procedure :: write_to_compactly
     end type
 contains
@@ -47,18 +44,6 @@ contains
         class default
             equals = .false.
         end select
-    end function
-
-    recursive function to_compact_string(self) result(string)
-        class(json_array_t), intent(in) :: self
-        type(varying_string) :: string
-
-        type(string_builder_t) :: sink
-        character(len=:), allocatable :: plain_string
-
-        call self%write_to_compactly(sink)
-        call sink%move_into(plain_string)
-        string = plain_string
     end function
 
     recursive subroutine write_to_compactly(self, sink)

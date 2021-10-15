@@ -1,5 +1,4 @@
 module rojff_json_string_m
-    use iso_varying_string, only: varying_string, assignment(=)
     use rojff_json_value_m, only: json_value_t
     use rojff_string_sink_m, only: string_sink_t
 
@@ -11,8 +10,7 @@ module rojff_json_string_m
         character(len=:), allocatable :: string
     contains
         procedure :: equals
-        procedure :: to_compact_string => to_string
-        procedure :: write_to_compactly => write_to
+        procedure :: write_to_compactly
     end type
 contains
     function json_string_unsafe(string) result(json_string)
@@ -46,14 +44,7 @@ contains
         end select
     end function
 
-    pure function to_string(self) result(string)
-        class(json_string_t), intent(in) :: self
-        type(varying_string) :: string
-
-        string = '"' // self%string // '"'
-    end function
-
-    subroutine write_to(self, sink)
+    subroutine write_to_compactly(self, sink)
         class(json_string_t), intent(in) :: self
         class(string_sink_t), intent(inout) :: sink
 
