@@ -2,9 +2,8 @@ program compactor
     !! parse json from first file, and write it without whitespace to the second
     use erloff, only: error_list_t
     use, intrinsic :: iso_fortran_env, only: error_unit
-    use iso_varying_string, only : put_line, char
-    use rojff, only: parse_json_from_string, fallible_json_value_t, json_value_t
-    use strff, only: read_file
+    use iso_varying_string, only : put_line
+    use rojff, only: parse_json_from_file, fallible_json_value_t
 
     implicit none
     type(fallible_json_value_t) :: json
@@ -19,7 +18,7 @@ program compactor
     call get_argument(1, input_file)
     call get_argument(2, output_file)
 
-    json = parse_json_from_string(char(read_file(input_file)))
+    json = parse_json_from_file(input_file)
     if (json%failed()) then
         call put_line(error_unit, json%errors%to_string())
     else

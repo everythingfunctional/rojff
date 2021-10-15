@@ -36,7 +36,6 @@ contains
         if (stat == iostat_end) then
             cursor%reached_end = .true.
         else if (stat == iostat_eor) then
-            ! read(cursor%unit, *)
             cursor%buffer = new_line('a')
         else if (stat /= 0) then
             read(cursor%unit, *)
@@ -75,7 +74,6 @@ contains
             if (stat == iostat_end) then
                 self%reached_end = .true.
             else if (stat == iostat_eor) then
-                ! read(self%unit, *)
                 self%buffer = new_line('a')
             else if (stat /= 0) then
                 read(self%unit, *)
