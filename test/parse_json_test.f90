@@ -5,7 +5,9 @@ module parse_json_test
     use number_input_m, only: number_input_t
     use rojff, only: &
             fallible_json_value_t, &
+            json_array_t, &
             json_bool_t, &
+            json_element_t, &
             json_integer_t, &
             json_null_t, &
             json_number_t, &
@@ -60,6 +62,9 @@ contains
                         ], &
                         check_parse_integer) &
                 , it("can parse a string", check_parse_string) &
+                , it("can parse an empty array", check_parse_empty_array) &
+                , it("can parse an array with a single element", check_parse_single_array) &
+                , it("can parse an array with multiple elements", check_parse_multi_array) &
                 ])
     end function
 
@@ -183,6 +188,53 @@ contains
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
             result_ = assert_equals(json_string_unsafe(THE_STRING(2:len(THE_STRING)-1)), json%json)
+        end if
+    end function
+
+    function check_parse_empty_array() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string("[ ]")
+
+        result_ = assert_not(json%errors%has_any(), json%errors%to_string())
+        if (result_%passed()) then
+            result_ = assert_equals(json_array_t([json_element_t::]), json%json)
+        end if
+    end function
+
+    function check_parse_single_array() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string("[20e1]")
+
+        result_ = assert_not(json%errors%has_any(), json%errors%to_string())
+        if (result_%passed()) then
+            result_ = assert_equals( &
+                    json_array_t([json_element_t(json_number_t(20d1))]), &
+                    json%json)
+        end if
+    end function
+
+    function check_parse_multi_array() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string("[ null, null ,null ]")
+
+        result_ = assert_not(json%errors%has_any(), json%errors%to_string())
+        if (result_%passed()) then
+            result_ = assert_equals( &
+                    json_array_t( &
+                            [ json_element_t(json_null_t()) &
+                            , json_element_t(json_null_t()) &
+                            , json_element_t(json_null_t()) &
+                            ]), &
+                    json%json)
         end if
     end function
 end module

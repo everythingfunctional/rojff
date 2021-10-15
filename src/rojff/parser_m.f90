@@ -4,8 +4,11 @@ module rojff_parser_m
     use rojff_cursor_m, only: cursor_t
     use rojff_fallible_json_value_m, only: &
             fallible_json_value_t, move_into_fallible_json
+    use rojff_json_array_m, only: move_into_array
     use rojff_json_bool_m, only: create_json_bool
+    use rojff_json_element_m, only: json_element_t
     use rojff_json_integer_m, only: create_json_integer
+    use rojff_json_linked_list_m, only: json_linked_list_t
     use rojff_json_null_m, only: create_json_null
     use rojff_json_number_m, only: create_json_number
     use rojff_json_string_m, only: create_json_string_unsafe
@@ -81,6 +84,9 @@ contains
         case ('"')
             call cursor%next()
             call parse_json_string(cursor, json, errors)
+        case ('[')
+            call cursor%next()
+            call parse_json_array(cursor, json, errors)
         case default
             errors = error_list_t(fatal_t( &
                     INVALID_INPUT, &
@@ -330,6 +336,79 @@ contains
             call cursor%next()
         end do
         call create_json_string_unsafe(json, the_string)
+    end subroutine
+
+    recursive subroutine parse_json_array(cursor, json, errors)
+        class(cursor_t), intent(inout) :: cursor
+        class(json_value_t), allocatable, intent(out) :: json
+        type(error_list_t), intent(out) :: errors
+
+        character(len=*), parameter :: PROCEDURE_NAME = "parse_json_array"
+        character(len=1) :: next_character
+        type(json_element_t), allocatable :: elements(:)
+        type(json_linked_list_t) :: parsed
+
+        call skip_whitespace(cursor)
+        if (cursor%finished()) then
+            errors = error_list_t(fatal_t( &
+                    INVALID_INPUT, &
+                    module_t(MODULE_NAME), &
+                    procedure_t(PROCEDURE_NAME), &
+                    "Unexpected end of input while parsing array"))
+            return
+        end if
+        if (cursor%peek() == ']') then
+            allocate(elements(0))
+            call move_into_array(json, elements)
+            call cursor%next()
+            return
+        end if
+        do
+            if (cursor%finished()) then
+                errors = error_list_t(fatal_t( &
+                        INVALID_INPUT, &
+                        module_t(MODULE_NAME), &
+                        procedure_t(PROCEDURE_NAME), &
+                        "Unexpected end of input while parsing array"))
+                return
+            end if
+            call parse_json_value(cursor, json, errors)
+            if (errors%has_any()) then
+                errors = error_list_t(errors, module_t(MODULE_NAME), procedure_t(PROCEDURE_NAME))
+                return
+            end if
+            call parsed%append(json)
+            call skip_whitespace(cursor)
+            if (cursor%finished()) then
+                errors = error_list_t(fatal_t( &
+                        INVALID_INPUT, &
+                        module_t(MODULE_NAME), &
+                        procedure_t(PROCEDURE_NAME), &
+                        "Unexpected end of input while parsing array"))
+                return
+            end if
+            next_character = cursor%peek()
+            select case (next_character)
+            case (',')
+                call cursor%next()
+                call skip_whitespace(cursor)
+            case (']')
+                call cursor%next()
+                exit
+            case default
+                errors = error_list_t(fatal_t( &
+                        INVALID_INPUT, &
+                        module_t(MODULE_NAME), &
+                        procedure_t(PROCEDURE_NAME), &
+                        "At line " // to_string(cursor%current_line()) &
+                        // " and column " // to_string(cursor%current_column()) &
+                        // " unexpected character in array: found " // next_character &
+                        // ', but expected one of ",", or "]"'))
+                return
+            end select
+        end do
+        call parsed%move_into_elements(elements)
+        call move_into_array(json, elements)
     end subroutine
 
     function parse_json_from_string(string) result(fallible_json)
