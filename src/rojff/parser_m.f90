@@ -9,10 +9,13 @@ module rojff_parser_m
     use rojff_json_element_m, only: json_element_t
     use rojff_json_integer_m, only: create_json_integer
     use rojff_json_linked_list_m, only: json_linked_list_t
+    use rojff_json_member_m, only: json_member_t
     use rojff_json_null_m, only: create_json_null
     use rojff_json_number_m, only: create_json_number
-    use rojff_json_string_m, only: create_json_string_unsafe
+    use rojff_json_object_m, only: move_into_object
+    use rojff_json_string_m, only: json_string_t, create_json_string_unsafe
     use rojff_json_value_m, only: json_value_t
+    use rojff_member_linked_list_m, only: member_linked_list_t
     use rojff_string_cursor_m, only: string_cursor_t
     use strff, only: to_string
 
@@ -87,6 +90,9 @@ contains
         case ('[')
             call cursor%next()
             call parse_json_array(cursor, json, errors)
+        case ('{')
+            call cursor%next()
+            call parse_json_object(cursor, json, errors)
         case default
             errors = error_list_t(fatal_t( &
                     INVALID_INPUT, &
@@ -344,7 +350,6 @@ contains
         type(error_list_t), intent(out) :: errors
 
         character(len=*), parameter :: PROCEDURE_NAME = "parse_json_array"
-        character(len=1) :: next_character
         type(json_element_t), allocatable :: elements(:)
         type(json_linked_list_t) :: parsed
 
@@ -387,8 +392,7 @@ contains
                         "Unexpected end of input while parsing array"))
                 return
             end if
-            next_character = cursor%peek()
-            select case (next_character)
+            select case (cursor%peek())
             case (',')
                 call cursor%next()
                 call skip_whitespace(cursor)
@@ -402,13 +406,131 @@ contains
                         procedure_t(PROCEDURE_NAME), &
                         "At line " // to_string(cursor%current_line()) &
                         // " and column " // to_string(cursor%current_column()) &
-                        // " unexpected character in array: found " // next_character &
+                        // " unexpected character in array: found " // cursor%peek() &
                         // ', but expected one of ",", or "]"'))
                 return
             end select
         end do
         call parsed%move_into_elements(elements)
         call move_into_array(json, elements)
+    end subroutine
+
+    recursive subroutine parse_json_object(cursor, json, errors)
+        class(cursor_t), intent(inout) :: cursor
+        class(json_value_t), allocatable, intent(out) :: json
+        type(error_list_t), intent(out) :: errors
+
+        character(len=*), parameter :: PROCEDURE_NAME = "parse_json_object"
+        type(json_member_t), allocatable :: members(:)
+        type(member_linked_list_t) :: parsed
+        class(json_value_t), allocatable :: key
+
+        call skip_whitespace(cursor)
+        if (cursor%finished()) then
+            errors = error_list_t(fatal_t( &
+                    INVALID_INPUT, &
+                    module_t(MODULE_NAME), &
+                    procedure_t(PROCEDURE_NAME), &
+                    "Unexpected end of input while parsing object"))
+            return
+        end if
+        if (cursor%peek() == '}') then
+            allocate(members(0))
+            call move_into_object(json, members)
+            call cursor%next()
+            return
+        end if
+        do
+            if (cursor%finished()) then
+                errors = error_list_t(fatal_t( &
+                        INVALID_INPUT, &
+                        module_t(MODULE_NAME), &
+                        procedure_t(PROCEDURE_NAME), &
+                        "Unexpected end of input while parsing object"))
+                return
+            end if
+            if (cursor%peek() /= '"') then
+                errors = error_list_t(fatal_t( &
+                        INVALID_INPUT, &
+                        module_t(MODULE_NAME), &
+                        procedure_t(PROCEDURE_NAME), &
+                        "At line " // to_string(cursor%current_line()) &
+                        // " and column " // to_string(cursor%current_column()) &
+                        // " unexpected character in object: found " // cursor%peek() &
+                        // ", but expected '""'"))
+                return
+            else
+                call cursor%next()
+            end if
+            call parse_json_string(cursor, key, errors)
+            if (errors%has_any()) then
+                errors = error_list_t(errors, module_t(MODULE_NAME), procedure_t(PROCEDURE_NAME))
+                return
+            end if
+            call skip_whitespace(cursor)
+            if (cursor%peek() /= ":") then
+                errors = error_list_t(fatal_t( &
+                        INVALID_INPUT, &
+                        module_t(MODULE_NAME), &
+                        procedure_t(PROCEDURE_NAME), &
+                        "At line " // to_string(cursor%current_line()) &
+                        // " and column " // to_string(cursor%current_column()) &
+                        // " unexpected character in object: found " // cursor%peek() &
+                        // ', but expected ":"'))
+                return
+            else
+                call cursor%next()
+            end if
+            call skip_whitespace(cursor)
+            if (cursor%finished()) then
+                errors = error_list_t(fatal_t( &
+                        INVALID_INPUT, &
+                        module_t(MODULE_NAME), &
+                        procedure_t(PROCEDURE_NAME), &
+                        "Unexpected end of input while parsing object"))
+                return
+            end if
+            call parse_json_value(cursor, json, errors)
+            if (errors%has_any()) then
+                errors = error_list_t(errors, module_t(MODULE_NAME), procedure_t(PROCEDURE_NAME))
+                return
+            end if
+            select type (key)
+            type is (json_string_t)
+                call parsed%append(key%string, json)
+            class default
+                error stop "somehow parsing a string didn't produce a string?"
+            end select
+            if (cursor%finished()) then
+                errors = error_list_t(fatal_t( &
+                        INVALID_INPUT, &
+                        module_t(MODULE_NAME), &
+                        procedure_t(PROCEDURE_NAME), &
+                        "Unexpected end of input while parsing object"))
+                return
+            end if
+            call skip_whitespace(cursor)
+            select case (cursor%peek())
+            case (',')
+                call cursor%next()
+                call skip_whitespace(cursor)
+            case ('}')
+                call cursor%next()
+                exit
+            case default
+                errors = error_list_t(fatal_t( &
+                        INVALID_INPUT, &
+                        module_t(MODULE_NAME), &
+                        procedure_t(PROCEDURE_NAME), &
+                        "At line " // to_string(cursor%current_line()) &
+                        // " and column " // to_string(cursor%current_column()) &
+                        // " unexpected character in array: found " // cursor%peek() &
+                        // ', but expected one of ",", or "]"'))
+                return
+            end select
+        end do
+        call parsed%move_into_members(members)
+        call move_into_object(json, members)
     end subroutine
 
     function parse_json_from_string(string) result(fallible_json)

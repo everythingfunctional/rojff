@@ -9,8 +9,11 @@ module parse_json_test
             json_bool_t, &
             json_element_t, &
             json_integer_t, &
+            json_member_t, &
             json_null_t, &
             json_number_t, &
+            json_object_t, &
+            json_member_unsafe, &
             json_string_unsafe, &
             parse_json_from_string
     use vegetables, only: &
@@ -65,6 +68,9 @@ contains
                 , it("can parse an empty array", check_parse_empty_array) &
                 , it("can parse an array with a single element", check_parse_single_array) &
                 , it("can parse an array with multiple elements", check_parse_multi_array) &
+                , it("can parse an empty object", check_parse_empty_object) &
+                , it("can parse an object with a single member", check_parse_single_object) &
+                , it("can parse an object with multiple members", check_parse_multi_object) &
                 ])
     end function
 
@@ -233,6 +239,53 @@ contains
                             [ json_element_t(json_null_t()) &
                             , json_element_t(json_null_t()) &
                             , json_element_t(json_null_t()) &
+                            ]), &
+                    json%json)
+        end if
+    end function
+
+    function check_parse_empty_object() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string("{ }")
+
+        result_ = assert_not(json%errors%has_any(), json%errors%to_string())
+        if (result_%passed()) then
+            result_ = assert_equals(json_object_t([json_member_t::]), json%json)
+        end if
+    end function
+
+    function check_parse_single_object() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string('{"first" : null}')
+
+        result_ = assert_not(json%errors%has_any(), json%errors%to_string())
+        if (result_%passed()) then
+            result_ = assert_equals( &
+                    json_object_t([json_member_unsafe("first", json_null_t())]), &
+                    json%json)
+        end if
+    end function
+
+    function check_parse_multi_object() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string('{"first" : null, "second" : null, "third" : null}')
+
+        result_ = assert_not(json%errors%has_any(), json%errors%to_string())
+        if (result_%passed()) then
+            result_ = assert_equals( &
+                    json_object_t( &
+                            [ json_member_unsafe("first", json_null_t()) &
+                            , json_member_unsafe("second", json_null_t()) &
+                            , json_member_unsafe("third", json_null_t()) &
                             ]), &
                     json%json)
         end if
