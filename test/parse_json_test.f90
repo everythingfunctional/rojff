@@ -9,6 +9,7 @@ module parse_json_test
             json_integer_t, &
             json_null_t, &
             json_number_t, &
+            json_string_unsafe, &
             parse_json_from_string
     use vegetables, only: &
             example_t, &
@@ -58,6 +59,7 @@ contains
                         , example_t(integer_input_t("3", 3)) &
                         ], &
                         check_parse_integer) &
+                , it("can parse a string", check_parse_string) &
                 ])
     end function
 
@@ -167,5 +169,20 @@ contains
         class default
             result_ = fail("Expected to get a integer_input_t")
         end select
+    end function
+
+    function check_parse_string() result(result_)
+        type(result_t) :: result_
+
+        character(len=*), parameter :: THE_STRING = &
+                '"AB\"\\\/\b\n\r\t\u1a2f"'
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string(THE_STRING)
+
+        result_ = assert_not(json%errors%has_any(), json%errors%to_string())
+        if (result_%passed()) then
+            result_ = assert_equals(json_string_unsafe(THE_STRING(2:len(THE_STRING)-1)), json%json)
+        end if
     end function
 end module

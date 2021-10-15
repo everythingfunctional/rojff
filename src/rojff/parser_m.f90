@@ -8,6 +8,7 @@ module rojff_parser_m
     use rojff_json_integer_m, only: create_json_integer
     use rojff_json_null_m, only: create_json_null
     use rojff_json_number_m, only: create_json_number
+    use rojff_json_string_m, only: create_json_string_unsafe
     use rojff_json_value_m, only: json_value_t
     use rojff_string_cursor_m, only: string_cursor_t
     use strff, only: to_string
@@ -77,6 +78,9 @@ contains
             call parse_json_false(cursor, json, errors)
         case ("+", "-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
             call parse_json_number(cursor, json, errors)
+        case ('"')
+            call cursor%next()
+            call parse_json_string(cursor, json, errors)
         case default
             errors = error_list_t(fatal_t( &
                     INVALID_INPUT, &
@@ -249,6 +253,83 @@ contains
                         // " as a number"))
             end if
         end if
+    end subroutine
+
+    subroutine parse_json_string(cursor, json, errors)
+        class(cursor_t), intent(inout) :: cursor
+        class(json_value_t), allocatable, intent(out) :: json
+        type(error_list_t), intent(out) :: errors
+
+        character(len=*), parameter :: PROCEDURE_NAME = "parse_json_string"
+        character(len=:), allocatable :: the_string
+        character(len=1) :: next_character
+        integer :: i
+
+        the_string = ""
+        do
+            if (cursor%finished()) then
+                errors = error_list_t(fatal_t( &
+                        INVALID_INPUT, &
+                        module_t(MODULE_NAME), &
+                        procedure_t(PROCEDURE_NAME), &
+                        "Unexpected end of input while parsing string"))
+                return
+            end if
+            next_character = cursor%peek()
+            select case (next_character)
+            case ('\')
+                the_string = the_string // next_character
+                call cursor%next()
+                next_character = cursor%peek()
+                select case (next_character)
+                case ('"', '\', '/', 'b', 'f', 'n', 'r', 't')
+                    the_string = the_string // next_character
+                case ('u')
+                    the_string = the_string // next_character
+                    do i = 1, 4
+                        call cursor%next()
+                        if (cursor%finished()) then
+                            errors = error_list_t(fatal_t( &
+                                    INVALID_INPUT, &
+                                    module_t(MODULE_NAME), &
+                                    procedure_t(PROCEDURE_NAME), &
+                                    "Unexpected end of input while parsing escaped unicode string"))
+                            return
+                        end if
+                        next_character = cursor%peek()
+                        if (index("0123456789abcdefABCDEF", next_character) == 0) then
+                            errors = error_list_t(fatal_t( &
+                                    INVALID_INPUT, &
+                                    module_t(MODULE_NAME), &
+                                    procedure_t(PROCEDURE_NAME), &
+                                    "At line " // to_string(cursor%current_line()) &
+                                    // " and column " // to_string(cursor%current_column()) &
+                                    // " unexpected character in escaped unicode: found " // next_character &
+                                    // ', but expected one of 0-9, a-f, or A-F'))
+                            return
+                        end if
+                        the_string = the_string // next_character
+                    end do
+                case default
+                    errors = error_list_t(fatal_t( &
+                            INVALID_INPUT, &
+                            module_t(MODULE_NAME), &
+                            procedure_t(PROCEDURE_NAME), &
+                            "At line " // to_string(cursor%current_line()) &
+                            // " and column " // to_string(cursor%current_column()) &
+                            // " unexpected escaped character in string: found " // next_character &
+                            // ', but expected one of ", \, /, b, f, n, r, t, or u'))
+                    return
+                end select
+            case ('"')
+                call cursor%next()
+                exit
+            case default
+                the_string = the_string // next_character
+            end select
+            call cursor%next()
+        end do
+        call create_json_string_unsafe(json, the_string)
     end subroutine
 
     function parse_json_from_string(string) result(fallible_json)
