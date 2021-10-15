@@ -5,7 +5,9 @@ module rojff_parser_m
     use rojff_fallible_json_value_m, only: &
             fallible_json_value_t, move_into_fallible_json
     use rojff_json_bool_m, only: create_json_bool
+    use rojff_json_integer_m, only: create_json_integer
     use rojff_json_null_m, only: create_json_null
+    use rojff_json_number_m, only: create_json_number
     use rojff_json_value_m, only: json_value_t
     use rojff_string_cursor_m, only: string_cursor_t
     use strff, only: to_string
@@ -73,6 +75,8 @@ contains
             call parse_json_true(cursor, json, errors)
         case ("f")
             call parse_json_false(cursor, json, errors)
+        case ("+", "-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+            call parse_json_number(cursor, json, errors)
         case default
             errors = error_list_t(fatal_t( &
                     INVALID_INPUT, &
@@ -178,6 +182,72 @@ contains
                     // " and column " // to_string(starting_column) &
                     // " found " // false_string(1:min(i, 4)) &
                     // ', but expected false'))
+        end if
+    end subroutine
+
+    subroutine parse_json_number(cursor, json, errors)
+        class(cursor_t), intent(inout) :: cursor
+        class(json_value_t), allocatable, intent(out) :: json
+        type(error_list_t), intent(out) :: errors
+
+        character(len=*), parameter :: NUMBER_SYMBOLS = "0123456789+-.eE"
+        character(len=*), parameter :: PROCEDURE_NAME = "parse_json_number"
+        character(len=1) :: next_character
+        character(len=:), allocatable :: number_string
+        integer :: starting_line, starting_column, stat, number_i, precision, exponent_location
+        double precision :: number_d
+
+        starting_line = cursor%current_line()
+        starting_column = cursor%current_column()
+
+        number_string = ""
+        do while (.not. cursor%finished())
+            next_character = cursor%peek()
+            if (index(NUMBER_SYMBOLS, next_character) /= 0) then
+                number_string = number_string // next_character
+                call cursor%next()
+            else
+                exit
+            end if
+        end do
+        if ( &
+                index(number_string, "e") == 0 &
+                .and. index(number_string, "E") == 0 &
+                .and. index(number_string, ".") == 0) then
+            read(number_string, *, iostat=stat) number_i
+            if (stat == 0) then
+                call create_json_integer(json, number_i)
+            else
+                errors = error_list_t(fatal_t( &
+                        INVALID_INPUT, &
+                        module_t(MODULE_NAME), &
+                        procedure_t(PROCEDURE_NAME), &
+                        "At line " // to_string(starting_line) &
+                        // " and column " // to_string(starting_column) &
+                        // " unable to parse " // number_string &
+                        // " as an integer"))
+            end if
+        else
+            read(number_string, *, iostat=stat) number_d
+            if (stat == 0) then
+                exponent_location = index(number_string, "e")
+                if (exponent_location == 0) exponent_location = index(number_string, "E")
+                if (exponent_location == 0) then
+                    precision = len_trim(number_string) - 1
+                else
+                    precision = exponent_location - merge(1, 2, index(number_string, ".") == 0)
+                end if
+                call create_json_number(json, number_d, precision)
+            else
+                errors = error_list_t(fatal_t( &
+                        INVALID_INPUT, &
+                        module_t(MODULE_NAME), &
+                        procedure_t(PROCEDURE_NAME), &
+                        "At line " // to_string(starting_line) &
+                        // " and column " // to_string(starting_column) &
+                        // " unable to parse " // number_string &
+                        // " as a number"))
+            end if
         end if
     end subroutine
 
