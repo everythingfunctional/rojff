@@ -1,6 +1,7 @@
 module rojff_json_bool_m
     use iso_varying_string, only: varying_string, assignment(=)
     use rojff_json_value_m, only: json_value_t
+    use rojff_string_sink_m, only: string_sink_t
 
     implicit none
     private
@@ -11,6 +12,7 @@ module rojff_json_bool_m
     contains
         procedure :: equals
         procedure :: to_compact_string => to_string
+        procedure :: write_to_compactly => write_to
     end type
 
     interface json_bool_t
@@ -48,7 +50,7 @@ contains
         end select
     end function
 
-    elemental function to_string(self) result(string)
+    pure function to_string(self) result(string)
         class(json_bool_t), intent(in) :: self
         type(varying_string) :: string
 
@@ -58,4 +60,15 @@ contains
             string = "false"
         end if
     end function
+
+    subroutine write_to(self, sink)
+        class(json_bool_t), intent(in) :: self
+        class(string_sink_t), intent(inout) :: sink
+
+        if (self%bool) then
+            call sink%append("true")
+        else
+            call sink%append("false")
+        end if
+    end subroutine
 end module

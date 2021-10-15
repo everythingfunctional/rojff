@@ -1,6 +1,7 @@
 module rojff_json_member_m
     use iso_varying_string, only: varying_string, operator(//)
     use rojff_json_value_m, only: json_value_t
+    use rojff_string_sink_m, only: string_sink_t
 
     implicit none
     private
@@ -13,6 +14,7 @@ module rojff_json_member_m
         procedure :: equals
         generic :: operator(==) => equals
         procedure :: to_compact_string
+        procedure :: write_to_compactly
     end type
 contains
     impure elemental function json_member_unsafe(key, value_) result(json_member)
@@ -41,10 +43,20 @@ contains
         equals = lhs%key == rhs%key .and. lhs%value_ == rhs%value_
     end function
 
-    elemental recursive function to_compact_string(self) result(string)
+    recursive function to_compact_string(self) result(string)
         class(json_member_t), intent(in) :: self
         type(varying_string) :: string
 
         string = '"' // self%key // '":' // self%value_%to_compact_string()
     end function
+
+    subroutine write_to_compactly(self, sink)
+        class(json_member_t), intent(in) :: self
+        class(string_sink_t), intent(inout) :: sink
+
+        call sink%append('"')
+        call sink%append(self%key)
+        call sink%append('":')
+        call self%value_%write_to_compactly(sink)
+    end subroutine
 end module
