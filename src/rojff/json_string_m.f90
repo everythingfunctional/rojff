@@ -31,7 +31,7 @@ contains
         type(varying_string), intent(in) :: string
         type(json_string_t) :: json_string
 
-        json_string%string = string
+        json_string%string = char(string)
     end function
 
     subroutine create_json_string_unsafe(json, string)
