@@ -11,6 +11,10 @@ module rojff_file_sink_m
     contains
         procedure :: append
     end type
+
+    interface file_sink_t
+        module procedure constructor
+    end interface
 contains
     function constructor(unit) result(file_sink)
         integer, intent(in) :: unit !! This must be (and remain) associated with an open file
