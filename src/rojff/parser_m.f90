@@ -3,7 +3,8 @@ module rojff_parser_m
     use iso_varying_string, only: operator(//)
     use rojff_cursor_m, only: cursor_t
     use rojff_fallible_json_value_m, only: &
-            fallible_json_value_t, move_into_fallible_json
+        fallible_json_value_t, move_into_fallible_json
+    use rojff_file_cursor_m, only: file_cursor_t
     use rojff_json_array_m, only: move_into_array
     use rojff_json_bool_m, only: create_json_bool
     use rojff_json_element_m, only: json_element_t
@@ -21,7 +22,7 @@ module rojff_parser_m
 
     implicit none
     private
-    public :: parse_json_from_string
+    public :: parse_json_from_file, parse_json_from_string
 
     type(message_type_t), parameter :: INVALID_INPUT = message_type_t( &
             "Invalid Input")
@@ -532,6 +533,29 @@ contains
         call parsed%move_into_members(members)
         call move_into_object(json, members)
     end subroutine
+
+    function parse_json_from_file(filename) result(fallible_json)
+        character(len=*), intent(in) :: filename
+        type(fallible_json_value_t) :: fallible_json
+
+        type(file_cursor_t) :: cursor
+        class(json_value_t), allocatable :: json
+        type(error_list_t) :: errors
+        integer :: unit
+
+        open(newunit = unit, file = filename, status = "OLD", action = "READ")
+        cursor = file_cursor_t(unit)
+        call parse_json(cursor, json, errors)
+        close(unit)
+        if (errors%has_any()) then
+            fallible_json = fallible_json_value_t(error_list_t( &
+                    errors, &
+                    module_t(MODULE_NAME), &
+                    procedure_t("parse_json_from_string")))
+        else
+            call move_into_fallible_json(fallible_json, json)
+        end if
+    end function
 
     function parse_json_from_string(string) result(fallible_json)
         character(len=*), intent(in) :: string

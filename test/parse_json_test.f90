@@ -1,6 +1,6 @@
 module parse_json_test
     use integer_input_m, only: integer_input_t
-    use iso_varying_string, only: operator(//)
+    use iso_varying_string, only: operator(//), put_line
     use json_assertion, only: assert_equals
     use number_input_m, only: number_input_t
     use rojff, only: &
@@ -13,9 +13,19 @@ module parse_json_test
             json_null_t, &
             json_number_t, &
             json_object_t, &
+            json_value_t, &
+            create_json_integer, &
+            create_json_number, &
+            create_json_string_unsafe, &
             json_member_unsafe, &
             json_string_unsafe, &
+            move_into_array, &
+            move_into_element, &
+            move_into_member_unsafe, &
+            move_into_object, &
+            parse_json_from_file, &
             parse_json_from_string
+    use strff, only: NEWLINE
     use vegetables, only: &
             example_t, &
             input_t, &
@@ -71,6 +81,7 @@ contains
                 , it("can parse an empty object", check_parse_empty_object) &
                 , it("can parse an object with a single member", check_parse_single_object) &
                 , it("can parse an object with multiple members", check_parse_multi_object) &
+                , it("can parse data from a file", check_parse_from_file) &
                 ])
     end function
 
@@ -289,5 +300,107 @@ contains
                             ]), &
                     json%json)
         end if
+    end function
+
+    function check_parse_from_file() result(result_)
+        type(result_t) :: result_
+
+        character(len=*), parameter :: TEMP_FILE_NAME = "temp_file.json"
+        class(json_value_t), allocatable :: example
+        integer :: file_unit
+        type(fallible_json_value_t) :: parsed
+
+        example = complex_example()
+        call example%save_compactly_to(TEMP_FILE_NAME, status = "REPLACE")
+
+        parsed = parse_json_from_file(TEMP_FILE_NAME)
+
+        open(newunit = file_unit, file = TEMP_FILE_NAME)
+        close(file_unit, status = "DELETE")
+
+        result_ = assert_not(parsed%errors%has_any(), parsed%errors%to_string())
+        if (result_%passed()) then
+            result_ = assert_equals(example, parsed%json)
+        end if
+    end function
+
+    function complex_example()
+        class(json_value_t), allocatable :: complex_example
+! {
+!     "glossary" : {
+!         "title" : "example glossary",
+!         "GlossDiv" : {
+!             "title" : "S",
+!             "GlossList" : {
+!                 "GlossEntry" : {
+!                     "ID" : 101,
+!                     "SortAs" : "SGML",
+!                     "GlossTerm" : "Standard Generalized Markup Language",
+!                     "Acronym" : "SGML",
+!                     "Abbrev" : "ISO 8879:1986",
+!                     "GlossDef" : {
+!                         "para" : "A meta-markup language, used to create markup languages such as DocBook.",
+!                         "GlossSeeAlso" : [
+!                             "GML",
+!                             "XML"
+!                         ]
+!                     },
+!                     "GlossSee" : 123.456
+!                 }
+!             }
+!         }
+!     }
+! }
+!
+! It should really be possible to construct this in the functional style
+! (i.e. in a single expression), but for some reason gfortran crashes.
+! So for now, we doing it the long and complicated way
+        type(json_member_t), allocatable :: members(:)
+        type(json_element_t), allocatable :: elements(:)
+
+        allocate(elements(2))
+        call create_json_string_unsafe(complex_example, "GML")
+        call move_into_element(elements(1), complex_example)
+        call create_json_string_unsafe(complex_example, "XML")
+        call move_into_element(elements(2), complex_example)
+        call move_into_array(complex_example, elements)
+        allocate(members(2))
+        call move_into_member_unsafe(members(2), "GlossSeeAlso", complex_example)
+        call create_json_string_unsafe( &
+                complex_example, &
+                "A meta-markup language, used to create markup languages such as DocBook.")
+        call move_into_member_unsafe(members(1), "para", complex_example)
+        call move_into_object(complex_example, members)
+        allocate(members(7))
+        call move_into_member_unsafe(members(6), "GlossDef", complex_example)
+        call create_json_integer(complex_example, 101)
+        call move_into_member_unsafe(members(1), "ID", complex_example)
+        call create_json_string_unsafe(complex_example, "SGML")
+        call move_into_member_unsafe(members(2), "SortAs", complex_example)
+        call create_json_string_unsafe(complex_example, "Standard Generalized Markup Language")
+        call move_into_member_unsafe(members(3), "GlossTerm", complex_example)
+        call create_json_string_unsafe(complex_example, "SGML")
+        call move_into_member_unsafe(members(4), "Acronym", complex_example)
+        call create_json_string_unsafe(complex_example, "ISO 8879:1986")
+        call move_into_member_unsafe(members(5), "Abbrev", complex_example)
+        call create_json_number(complex_example, 123.456d0, 6)
+        call move_into_member_unsafe(members(7), "GlossSee", complex_example)
+        call move_into_object(complex_example, members)
+        allocate(members(1))
+        call move_into_member_unsafe(members(1), "GlossEntry", complex_example)
+        call move_into_object(complex_example, members)
+        allocate(members(2))
+        call move_into_member_unsafe(members(2), "GlossList", complex_example)
+        call create_json_string_unsafe(complex_example, "S")
+        call move_into_member_unsafe(members(1), "title", complex_example)
+        call move_into_object(complex_example, members)
+        allocate(members(2))
+        call move_into_member_unsafe(members(2), "GlossDiv", complex_example)
+        call create_json_string_unsafe(complex_example, "example glossary")
+        call move_into_member_unsafe(members(1), "title", complex_example)
+        call move_into_object(complex_example, members)
+        allocate(members(1))
+        call move_into_member_unsafe(members(1), "glossary", complex_example)
+        call move_into_object(complex_example, members)
     end function
 end module
