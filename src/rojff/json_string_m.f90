@@ -12,6 +12,7 @@ module rojff_json_string_m
     contains
         procedure :: equals
         procedure :: write_to_compactly
+        procedure :: write_to_expanded
     end type
 
     interface json_string_unsafe
@@ -62,6 +63,15 @@ contains
         class(json_string_t), intent(in) :: self
         class(string_sink_t), intent(inout) :: sink
 
+        call sink%append('"' // self%string // '"')
+    end subroutine
+
+    subroutine write_to_expanded(self, indentation_level, sink)
+        class(json_string_t), intent(in) :: self
+        integer, intent(in) :: indentation_level
+        class(string_sink_t), intent(inout) :: sink
+
+        associate(unused => indentation_level); end associate
         call sink%append('"' // self%string // '"')
     end subroutine
 end module

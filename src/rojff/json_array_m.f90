@@ -1,4 +1,5 @@
 module rojff_json_array_m
+    use rojff_constants_m, only: INDENTATION, NEWLINE
     use rojff_json_element_m, only: json_element_t
     use rojff_json_value_m, only: json_value_t
     use rojff_string_sink_m, only: string_sink_t
@@ -13,6 +14,7 @@ module rojff_json_array_m
     contains
         procedure :: equals
         procedure :: write_to_compactly
+        procedure :: write_to_expanded
     end type
 contains
     function constructor(elements) result(json_array)
@@ -61,5 +63,30 @@ contains
             call self%elements(size(self%elements))%write_to_compactly(sink)
         end if
         call sink%append("]")
+    end subroutine
+
+    recursive subroutine write_to_expanded(self, indentation_level, sink)
+        class(json_array_t), intent(in) :: self
+        integer, intent(in) :: indentation_level
+        class(string_sink_t), intent(inout) :: sink
+
+        integer :: i
+        integer :: my_indentation_level
+
+        if (size(self%elements) > 0) then
+            call sink%append("[" // NEWLINE)
+            my_indentation_level = indentation_level + 1
+            do i = 1, size(self%elements) - 1
+                call sink%append(repeat(" ", my_indentation_level * INDENTATION))
+                call self%elements(i)%write_to_expanded(my_indentation_level, sink)
+                call sink%append("," // NEWLINE)
+            end do
+            call sink%append(repeat(" ", my_indentation_level * INDENTATION))
+            call self%elements(i)%write_to_expanded(my_indentation_level, sink)
+            call sink%append(NEWLINE)
+            call sink%append(repeat(" ", indentation_level * INDENTATION) // "]")
+        else
+            call sink%append("[]")
+        end if
     end subroutine
 end module

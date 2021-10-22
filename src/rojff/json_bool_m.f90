@@ -11,6 +11,7 @@ module rojff_json_bool_m
     contains
         procedure :: equals
         procedure :: write_to_compactly
+        procedure :: write_to_expanded
     end type
 
     interface json_bool_t
@@ -52,6 +53,19 @@ contains
         class(json_bool_t), intent(in) :: self
         class(string_sink_t), intent(inout) :: sink
 
+        if (self%bool) then
+            call sink%append("true")
+        else
+            call sink%append("false")
+        end if
+    end subroutine
+
+    subroutine write_to_expanded(self, indentation_level, sink)
+        class(json_bool_t), intent(in) :: self
+        integer, intent(in) :: indentation_level
+        class(string_sink_t), intent(inout) :: sink
+
+        associate(unused => indentation_level); end associate
         if (self%bool) then
             call sink%append("true")
         else

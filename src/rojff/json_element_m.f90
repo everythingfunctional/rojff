@@ -12,6 +12,7 @@ module rojff_json_element_m
         procedure :: equals
         generic :: operator(==) => equals
         procedure :: write_to_compactly
+        procedure :: write_to_expanded
     end type
 
     interface json_element_t
@@ -45,5 +46,13 @@ contains
         class(string_sink_t), intent(inout) :: sink
 
         call self%json%write_to_compactly(sink)
+    end subroutine
+
+    recursive subroutine write_to_expanded(self, indentation_level, sink)
+        class(json_element_t), intent(in) :: self
+        integer, intent(in) :: indentation_level
+        class(string_sink_t), intent(inout) :: sink
+
+        call self%json%write_to_expanded(indentation_level, sink)
     end subroutine
 end module

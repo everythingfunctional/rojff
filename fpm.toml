@@ -17,3 +17,8 @@ vegetables = { git = "https://gitlab.com/everythingfunctional/vegetables", tag =
 name="compactor"
 source-dir="example/compactor"
 main="main.f90"
+
+[[example]]
+name="expander"
+source-dir="example/expander"
+main="main.f90"

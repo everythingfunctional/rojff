@@ -13,6 +13,7 @@ module rojff_json_member_m
         procedure :: equals
         generic :: operator(==) => equals
         procedure :: write_to_compactly
+        procedure :: write_to_expanded
     end type
 contains
     impure elemental function json_member_unsafe(key, value_) result(json_member)
@@ -41,7 +42,7 @@ contains
         equals = lhs%key == rhs%key .and. lhs%value_ == rhs%value_
     end function
 
-    subroutine write_to_compactly(self, sink)
+    recursive subroutine write_to_compactly(self, sink)
         class(json_member_t), intent(in) :: self
         class(string_sink_t), intent(inout) :: sink
 
@@ -49,5 +50,14 @@ contains
         call sink%append(self%key)
         call sink%append('":')
         call self%value_%write_to_compactly(sink)
+    end subroutine
+
+    recursive subroutine write_to_expanded(self, indentation_level, sink)
+        class(json_member_t), intent(in) :: self
+        integer, intent(in) :: indentation_level
+        class(string_sink_t), intent(inout) :: sink
+
+        call sink%append('"' // self%key // '" : ')
+        call self%value_%write_to_expanded(indentation_level, sink)
     end subroutine
 end module

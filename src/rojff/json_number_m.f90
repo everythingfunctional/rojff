@@ -15,6 +15,7 @@ module rojff_json_number_m
     contains
         procedure :: equals
         procedure :: write_to_compactly
+        procedure :: write_to_expanded
     end type
 
     interface json_number_t
@@ -71,6 +72,19 @@ contains
         class(json_number_t), intent(in) :: self
         class(string_sink_t), intent(inout) :: sink
 
+        if (self%precision_provided) then
+            call sink%append(char(to_string(self%number, self%precision)))
+        else
+            call sink%append(char(to_string(self%number)))
+        end if
+    end subroutine
+
+    subroutine write_to_expanded(self, indentation_level, sink)
+        class(json_number_t), intent(in) :: self
+        integer, intent(in) :: indentation_level
+        class(string_sink_t), intent(inout) :: sink
+
+        associate(unused => indentation_level); end associate
         if (self%precision_provided) then
             call sink%append(char(to_string(self%number, self%precision)))
         else
