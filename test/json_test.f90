@@ -51,6 +51,7 @@ contains
                         "false has the correct string representation", &
                         check_false_to_string) &
                 , it("a string can be converted back", check_string_to_string) &
+                , it("a character can be converted back to a string", check_character_to_string) &
                 , it( &
                         "a number has the correct string representation", &
                         check_number_to_string) &
@@ -123,6 +124,16 @@ contains
         result_ = &
                 assert_equals('"Hello"', copied%to_compact_string(), "copied") &
                 .and.assert_equals('"Hello"', created%to_compact_string(), "created")
+    end function
+
+    function check_character_to_string() result(result_)
+        type(result_t) :: result_
+
+        character(len=*), parameter :: test_string = "Hello world"
+        type(json_string_t) :: created
+
+        created = json_string_t(test_string)
+        result_ = assert_equals('"Hello world"', created%to_compact_string())
     end function
 
     function check_number_to_string() result(result_)

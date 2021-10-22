@@ -1,7 +1,7 @@
 module rojff_json_string_m
     use rojff_json_value_m, only: json_value_t
     use rojff_string_sink_m, only: string_sink_t
-    use iso_varying_string, only: varying_string, assignment(=)
+    use iso_varying_string, only: varying_string, char
 
     implicit none
     private
