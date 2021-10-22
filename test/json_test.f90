@@ -66,6 +66,9 @@ contains
                 , it( &
                         "an object has the correct string representation", &
                         check_object_to_string) &
+                , it( &
+                        "a complex object has the correct string representation", &
+                        check_complex_object_to_string) &
                 ])
     end function
 
@@ -229,5 +232,43 @@ contains
                 .and.assert_includes("}", created_string, "created") &
                 .and.assert_includes(",", copied_string, "copied") &
                 .and.assert_includes(",", created_string, "created")
+    end function
+
+    function check_complex_object_to_string() result(result_)
+        type(result_t) :: result_
+
+        character(len=*), parameter :: EXPECTED = &
+                '{"Hello":[null,{"World":1.0},true]}'
+        type(json_object_t) :: copied
+        class(json_value_t), allocatable :: created
+        type(json_element_t), allocatable :: elements(:)
+        type(json_member_t), allocatable :: members(:)
+
+        copied = json_object_t( &
+                [ json_member_unsafe("Hello", json_array_t( &
+                        [ json_element_t(json_null_t()) &
+                        , json_element_t(json_object_t([json_member_unsafe("World", json_number_t(1.0d0))])) &
+                        , json_element_t(json_bool_t(.true.)) &
+                        ])) &
+                ])
+
+        allocate(elements(3))
+        call create_json_null(created)
+        call move_into_element(elements(1), created)
+        allocate(members(1))
+        call create_json_number(created, 1.0d0, 2)
+        call move_into_member_unsafe(members(1), "World", created)
+        call move_into_object(created, members)
+        call move_into_element(elements(2), created)
+        call create_json_bool(created, .true.)
+        call move_into_element(elements(3), created)
+        call move_into_array(created, elements)
+        allocate(members(1))
+        call move_into_member_unsafe(members(1), "Hello", created)
+        call move_into_object(created, members)
+
+        result_ = &
+                assert_equals(EXPECTED, copied%to_compact_string(), "copied") &
+                .and.assert_equals(EXPECTED, created%to_compact_string(), "created")
     end function
 end module
