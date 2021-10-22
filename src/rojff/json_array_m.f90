@@ -1,9 +1,12 @@
 module rojff_json_array_m
+    use erloff, only: error_list_t, fatal_t, module_t, procedure_t, OUT_OF_BOUNDS
+    use iso_varying_string, only: operator(//)
     use rojff_constants_m, only: INDENTATION, NEWLINE
+    use rojff_fallible_json_value_m, only: fallible_json_value_t
     use rojff_json_element_m, only: json_element_t
     use rojff_json_value_m, only: json_value_t
     use rojff_string_sink_m, only: string_sink_t
-    use strff, only: join
+    use strff, only: to_string
 
     implicit none
     private
@@ -13,9 +16,12 @@ module rojff_json_array_m
         type(json_element_t), allocatable :: elements(:)
     contains
         procedure :: equals
+        procedure :: get
         procedure :: write_to_compactly
         procedure :: write_to_expanded
     end type
+
+    character(len=*), parameter :: MODULE_NAME = "rojff_json_array_m"
 contains
     function constructor(elements) result(json_array)
         type(json_element_t), intent(in) :: elements(:)
@@ -46,6 +52,24 @@ contains
         class default
             equals = .false.
         end select
+    end function
+
+    impure elemental function get(self, position) result(element)
+        class(json_array_t), intent(in) :: self
+        integer, intent(in) :: position
+        type(fallible_json_value_t) :: element
+
+        if (position <= 0 .or. position > size(self%elements)) then
+            element = fallible_json_value_t(error_list_t(fatal_t( &
+                    OUT_OF_BOUNDS, &
+                    module_t(MODULE_NAME), &
+                    procedure_t("get"), &
+                    "Attempted to access element " // to_string(position) &
+                        // " from an array with only " // to_string(size(self%elements)) &
+                        // " elements")))
+        else
+            element = fallible_json_value_t(self%elements(position)%json)
+        end if
     end function
 
     recursive subroutine write_to_compactly(self, sink)

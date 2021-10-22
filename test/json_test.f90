@@ -1,5 +1,7 @@
 module json_test
+    use erloff, only: OUT_OF_BOUNDS
     use rojff, only: &
+            fallible_json_value_t, &
             json_array_t, &
             json_bool_t, &
             json_element_t, &
@@ -76,6 +78,14 @@ contains
                 , it( &
                         "can be generated in an expaned, easier to read form", &
                         check_pretty_printing) &
+                , it("can extract a value from an array", get_value_from_array) &
+                , it( &
+                        "the elements of an array accessed via get match accessing them directly", &
+                        get_array_elements) &
+                , it( &
+                        "extracting a value from an array with a position greater" &
+                        // " than the number of elements in the array is an error", &
+                        get_value_from_array_failure) &
                 ])
     end function
 
@@ -140,8 +150,8 @@ contains
 
         character(len=*), parameter :: test_string = "Hello world"
         type(json_string_t) :: string_char, string_var
-        type(varying_string) :: var_string 
-        
+        type(varying_string) :: var_string
+
         var_string = test_string
         string_char = json_string_unsafe(test_string)
         string_var = json_string_unsafe(var_string)
@@ -337,5 +347,66 @@ contains
         result_ = &
                 assert_equals(EXPECTED, copied%to_expanded_string(), "copied") &
                 .and.assert_equals(EXPECTED, created%to_expanded_string(), "created")
+    end function
+
+    function get_value_from_array() result(result_)
+        type(result_t) :: result_
+
+        type(json_array_t) :: array
+        type(fallible_json_value_t) :: retrieved
+
+        array = json_array_t(json_element_t( &
+                [ json_string_unsafe("first") &
+                , json_string_unsafe("second") &
+                , json_string_unsafe("third") &
+                ]))
+
+        retrieved = array%get(3)
+
+        result_ = assert_not(retrieved%errors%has_any(), retrieved%errors%to_string())
+        if (result_%passed()) then
+            result_ = assert_equals(json_string_unsafe("third"), retrieved%json)
+        end if
+    end function
+
+    function get_array_elements() result(result_)
+        type(result_t) :: result_
+
+        type(json_array_t) :: array
+        integer :: i
+        type(fallible_json_value_t) :: maybe_item
+
+        array = json_array_t(json_element_t( &
+                [ json_string_unsafe("first") &
+                , json_string_unsafe("second") &
+                , json_string_unsafe("third") &
+                ]))
+
+        do i = 1, size(array%elements)
+            maybe_item = array%get(i)
+            if (maybe_item%failed()) then
+                result_ = result_.and.fail(maybe_item%errors%to_string())
+            else
+                result_ = result_.and.assert_equals(array%elements(i)%json, maybe_item%json)
+            end if
+        end do
+    end function
+
+    function get_value_from_array_failure() result(result_)
+        type(result_t) :: result_
+
+        type(json_array_t) :: array
+        type(fallible_json_value_t) :: retrieved
+
+        array = json_array_t(json_element_t( &
+                [ json_string_unsafe("first") &
+                , json_string_unsafe("second") &
+                , json_string_unsafe("third") &
+                ]))
+
+        retrieved = array%get(4)
+
+        result_ = assert_that( &
+                retrieved%errors.hasType.OUT_OF_BOUNDS, retrieved%errors%to_string())
     end function
 end module

@@ -20,10 +20,10 @@ module rojff_fallible_json_value_m
     end interface
 contains
     function from_value(json) result(fallible_json)
-        class(json_value_t), allocatable, intent(inout) :: json
+        class(json_value_t), intent(in) :: json
         type(fallible_json_value_t) :: fallible_json
 
-        call move_alloc(json, fallible_json%json)
+        fallible_json%json = json
     end function
 
     function from_errors(errors) result(fallible_json)
