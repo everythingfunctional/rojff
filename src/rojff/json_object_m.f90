@@ -1,9 +1,13 @@
 module rojff_json_object_m
+    use erloff, only: error_list_t, fatal_t, module_t, procedure_t, NOT_FOUND
+    use iso_varying_string, only: &
+            varying_string, assignment(=), operator(//), operator(==), len
     use rojff_constants_m, only: INDENTATION, NEWLINE
+    use rojff_fallible_json_value_m, only: fallible_json_value_t
+    use rojff_json_element_m, only: json_element_t
     use rojff_json_member_m, only: json_member_t
     use rojff_json_value_m, only: json_value_t
     use rojff_string_sink_m, only: string_sink_t
-    use strff, only: join
 
     implicit none
     private
@@ -13,6 +17,10 @@ module rojff_json_object_m
         type(json_member_t), allocatable :: members(:)
     contains
         procedure :: equals
+        procedure, private :: get_c, get_s
+        generic :: get => get_c, get_s
+        procedure :: keys
+        procedure :: values
         procedure :: write_to_compactly
         procedure :: write_to_expanded
     end type
@@ -20,6 +28,8 @@ module rojff_json_object_m
     interface json_object_t
         module procedure constructor
     end interface
+
+    character(len=*), parameter :: MODULE_NAME = "rojff_json_object_m"
 contains
     function constructor(members) result(json_object)
         type(json_member_t), intent(in) :: members(:)
@@ -57,6 +67,67 @@ contains
         class default
             equals = .false.
         end select
+    end function
+
+    function get_c(self, key) result(element)
+        class(json_object_t), intent(in) :: self
+        character(len=*), intent(in) :: key
+        type(fallible_json_value_t) :: element
+
+        integer :: i
+
+        do i = 1, size(self%members)
+            if (key == self%members(i)%key .and. len(key) == len(self%members(i)%key)) then
+                element = fallible_json_value_t(self%members(i)%value_)
+                return
+            end if
+        end do
+        element = fallible_json_value_t(error_list_t(fatal_t( &
+                NOT_FOUND, &
+                module_t(MODULE_NAME), &
+                procedure_t("get_c"), &
+                '"' // key // '" not found in ' // self%to_compact_string())))
+    end function
+
+    impure elemental function get_s(self, key) result(element)
+        class(json_object_t), intent(in) :: self
+        type(varying_string), intent(in) :: key
+        type(fallible_json_value_t) :: element
+
+        integer :: i
+
+        do i = 1, size(self%members)
+            if (key == self%members(i)%key .and. len(key) == len(self%members(i)%key)) then
+                element = fallible_json_value_t(self%members(i)%value_)
+                return
+            end if
+        end do
+        element = fallible_json_value_t(error_list_t(fatal_t( &
+                NOT_FOUND, &
+                module_t(MODULE_NAME), &
+                procedure_t("get_s"), &
+                '"' // key // '" not found in ' // self%to_compact_string())))
+    end function
+
+    function keys(self)
+        class(json_object_t), intent(in) :: self
+        type(varying_string), allocatable :: keys(:)
+
+        integer :: i
+
+        allocate(keys(size(self%members)))
+        do i = 1, size(self%members)
+            keys(i) = self%members(i)%key
+        end do
+    end function
+
+    function values(self)
+        class(json_object_t), intent(in) :: self
+        type(json_element_t), allocatable :: values(:)
+
+        integer :: i
+
+        values = [(json_element_t(self%members(i)%value_), i = 1, size(self%members))]
     end function
 
     recursive subroutine write_to_compactly(self, sink)

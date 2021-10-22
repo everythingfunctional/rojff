@@ -1,5 +1,5 @@
 module json_test
-    use erloff, only: OUT_OF_BOUNDS
+    use erloff, only: NOT_FOUND, OUT_OF_BOUNDS
     use rojff, only: &
             fallible_json_value_t, &
             json_array_t, &
@@ -86,6 +86,13 @@ contains
                         "extracting a value from an array with a position greater" &
                         // " than the number of elements in the array is an error", &
                         get_value_from_array_failure) &
+                , it("can extract a value from an object", get_value_from_object) &
+                , it( &
+                        "the keys and values of an object are returned in a consistent order", &
+                        get_keys_and_values) &
+                , it( &
+                        "extracting a value from an object with a key it doesn't have is an error", &
+                        get_value_from_object_failure) &
                 ])
     end function
 
@@ -408,5 +415,67 @@ contains
 
         result_ = assert_that( &
                 retrieved%errors.hasType.OUT_OF_BOUNDS, retrieved%errors%to_string())
+    end function
+
+    function get_value_from_object() result(result_)
+        type(result_t) :: result_
+
+        type(json_object_t) :: object
+        type(fallible_json_value_t) :: retrieved
+
+        object = json_object_t( &
+                [ json_member_unsafe("first", json_string_unsafe("hello")) &
+                , json_member_unsafe("second", json_string_unsafe("goodbye")) &
+                ])
+
+        retrieved = object%get("first")
+
+        result_ = assert_not(retrieved%errors%has_any(), retrieved%errors%to_string())
+        if (result_%passed()) then
+            result_ = assert_equals(json_string_unsafe("hello"), retrieved%json)
+        end if
+    end function
+
+    function get_keys_and_values() result(result_)
+        type(result_t) :: result_
+
+        type(varying_string), allocatable :: keys(:)
+        integer :: i
+        type(fallible_json_value_t) :: maybe_value
+        type(json_object_t) :: object
+        type(json_element_t), allocatable :: values(:)
+
+        object = json_object_t( &
+                [ json_member_unsafe("first", json_string_unsafe("hello")) &
+                , json_member_unsafe("second", json_string_unsafe("world")) &
+                , json_member_unsafe("third", json_string_unsafe("goodbye")) &
+                ])
+        keys = object%keys()
+        values = object%values()
+        result_ = assert_equals(size(keys), size(values), "number of members")
+        do i = 1, size(keys)
+            maybe_value = object%get(keys(i))
+            if (maybe_value%failed()) then
+                result_ = result_.and.fail(maybe_value%errors%to_string())
+            else
+                result_ = result_.and.assert_equals(values(i)%json, maybe_value%json)
+            end if
+        end do
+    end function
+
+    function get_value_from_object_failure() result(result_)
+        type(result_t) :: result_
+
+        type(json_object_t) :: object
+        type(fallible_json_value_t) :: retrieved
+
+        object = json_object_t( &
+                [ json_member_unsafe("first", json_string_unsafe("hello")) &
+                , json_member_unsafe("second", json_string_unsafe("goodbye")) &
+                ])
+
+        retrieved = object%get("third")
+
+        result_ = assert_that(retrieved%errors.hasType.NOT_FOUND, retrieved%errors%to_string())
     end function
 end module
