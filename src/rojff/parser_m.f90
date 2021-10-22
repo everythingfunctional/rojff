@@ -22,7 +22,7 @@ module rojff_parser_m
 
     implicit none
     private
-    public :: parse_json_from_file, parse_json_from_string
+    public :: parse_json_from_file, parse_json_from_string, INVALID_INPUT
 
     type(message_type_t), parameter :: INVALID_INPUT = message_type_t( &
             "Invalid Input")

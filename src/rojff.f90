@@ -14,6 +14,7 @@ module rojff
     use rojff_json_string_m, only: &
             json_string_t, create_json_string_unsafe, json_string_unsafe
     use rojff_json_value_m, only: json_value_t
-    use rojff_parser_m, only: parse_json_from_file, parse_json_from_string
+    use rojff_parser_m, only: &
+            parse_json_from_file, parse_json_from_string, INVALID_INPUT
     use rojff_string_cursor_m, only: string_cursor_t
 end module

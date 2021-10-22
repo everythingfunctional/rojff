@@ -24,7 +24,8 @@ module parse_json_test
             move_into_member_unsafe, &
             move_into_object, &
             parse_json_from_file, &
-            parse_json_from_string
+            parse_json_from_string, &
+            INVALID_INPUT
     use strff, only: NEWLINE
     use vegetables, only: &
             example_t, &
@@ -82,6 +83,7 @@ contains
                 , it("can parse an object with a single member", check_parse_single_object) &
                 , it("can parse an object with multiple members", check_parse_multi_object) &
                 , it("can parse data from a file", check_parse_from_file) &
+                , it("fails if there is trailing content", check_trailing_content) &
                 ])
     end function
 
@@ -322,6 +324,16 @@ contains
         if (result_%passed()) then
             result_ = assert_equals(example, parsed%json)
         end if
+    end function
+
+    function check_trailing_content() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string("null # with trailing content")
+
+        result_ = assert_that(json%errors.hasType.INVALID_INPUT, json%errors%to_string())
     end function
 
     function complex_example()
