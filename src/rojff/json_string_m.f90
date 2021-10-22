@@ -1,6 +1,7 @@
 module rojff_json_string_m
     use rojff_json_value_m, only: json_value_t
     use rojff_string_sink_m, only: string_sink_t
+    use iso_varying_string, only: varying_string, char
 
     implicit none
     private
@@ -12,12 +13,25 @@ module rojff_json_string_m
         procedure :: equals
         procedure :: write_to_compactly
     end type
+
+    interface json_string_unsafe
+        module procedure json_string_unsafe_c
+        module procedure json_string_unsafe_s
+    end interface
+
 contains
-    function json_string_unsafe(string) result(json_string)
+    function json_string_unsafe_c(string) result(json_string)
         character(len=*), intent(in) :: string
         type(json_string_t) :: json_string
 
         json_string%string = string
+    end function
+
+    elemental function json_string_unsafe_s(string) result(json_string)
+        type(varying_string), intent(in) :: string
+        type(json_string_t) :: json_string
+
+        json_string%string = char(string)
     end function
 
     subroutine create_json_string_unsafe(json, string)

@@ -31,7 +31,8 @@ module json_test
             describe, &
             fail, &
             it
-
+    use json_assertion, only: assert_equals
+    use iso_varying_string, only: varying_string, assignment(=)
     implicit none
     private
     public :: test_json
@@ -51,6 +52,8 @@ contains
                         "false has the correct string representation", &
                         check_false_to_string) &
                 , it("a string can be converted back", check_string_to_string) &
+                , it("a string contructed with varing string is the same as one constructed with character", &
+                        check_character_string_constructors) &
                 , it( &
                         "a number has the correct string representation", &
                         check_number_to_string) &
@@ -126,6 +129,20 @@ contains
         result_ = &
                 assert_equals('"Hello"', copied%to_compact_string(), "copied") &
                 .and.assert_equals('"Hello"', created%to_compact_string(), "created")
+    end function
+
+    function check_character_string_constructors() result(result_)
+        type(result_t) :: result_
+
+        character(len=*), parameter :: test_string = "Hello world"
+        type(json_string_t) :: string_char, string_var
+        type(varying_string) :: var_string 
+        
+        var_string = test_string
+        string_char = json_string_unsafe(test_string)
+        string_var = json_string_unsafe(var_string)
+        result_ = &
+                assert_equals(string_char,string_var)
     end function
 
     function check_number_to_string() result(result_)
