@@ -31,6 +31,7 @@ module json_test
             describe, &
             fail, &
             it
+    use json_assertion, only: assert_equals
     use iso_varying_string, only: varying_string, assignment(=)
     implicit none
     private
@@ -138,7 +139,7 @@ contains
         string_char = json_string_unsafe(test_string)
         string_var = json_string_unsafe(var_string)
         result_ = &
-                assert_equals(string_char%to_compact_string(),string_var%to_compact_string())
+                assert_equals(string_char,string_var)
     end function
 
     function check_number_to_string() result(result_)
