@@ -51,7 +51,8 @@ contains
                         "false has the correct string representation", &
                         check_false_to_string) &
                 , it("a string can be converted back", check_string_to_string) &
-                , it("a character and string has correct representation", check_character_string_constructors) &
+                , it("a string contructed with varing string is the same as one constructed with character", &
+                        check_character_string_constructors) &
                 , it( &
                         "a number has the correct string representation", &
                         check_number_to_string) &
@@ -137,8 +138,7 @@ contains
         string_char = json_string_unsafe(test_string)
         string_var = json_string_unsafe(var_string)
         result_ = &
-                assert_equals('"Hello world"', string_char%to_compact_string()) &
-                .and.assert_equals('"Hello world"', string_var%to_compact_string())
+                assert_equals(string_char%to_compact_string(),string_var%to_compact_string())
     end function
 
     function check_number_to_string() result(result_)
