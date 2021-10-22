@@ -22,7 +22,11 @@ module rojff_parser_m
 
     implicit none
     private
-    public :: parse_json_from_file, parse_json_from_string, INVALID_INPUT
+    public :: &
+            parse_json_string, &
+            parse_json_from_file, &
+            parse_json_from_string, &
+            INVALID_INPUT
 
     type(message_type_t), parameter :: INVALID_INPUT = message_type_t( &
             "Invalid Input")
@@ -293,6 +297,14 @@ contains
             case ('\')
                 the_string = the_string // next_character
                 call cursor%next()
+                if (cursor%finished()) then
+                    errors = error_list_t(fatal_t( &
+                            INVALID_INPUT, &
+                            module_t(MODULE_NAME), &
+                            procedure_t(PROCEDURE_NAME), &
+                            "Unexpected end of input after escape character"))
+                    return
+                end if
                 next_character = cursor%peek()
                 select case (next_character)
                 case ('"', '\', '/', 'b', 'f', 'n', 'r', 't')

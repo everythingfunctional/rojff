@@ -1,5 +1,6 @@
 module rojff
     use rojff_cursor_m, only: cursor_t
+    use rojff_fallible_json_string_m, only: fallible_json_string_t
     use rojff_fallible_json_value_m, only: &
             fallible_json_value_t, move_into_fallible_json
     use rojff_json_array_m, only: json_array_t, move_into_array

@@ -1,6 +1,7 @@
 module json_test
     use erloff, only: NOT_FOUND, OUT_OF_BOUNDS
     use rojff, only: &
+            fallible_json_string_t, &
             fallible_json_value_t, &
             json_array_t, &
             json_bool_t, &
@@ -22,7 +23,8 @@ module json_test
             move_into_array, &
             move_into_element, &
             move_into_member_unsafe, &
-            move_into_object
+            move_into_object, &
+            INVALID_INPUT
     use rojff_constants_m, only: NEWLINE
     use vegetables, only: &
             result_t, &
@@ -93,6 +95,9 @@ contains
                 , it( &
                         "extracting a value from an object with a key it doesn't have is an error", &
                         get_value_from_object_failure) &
+                , it( &
+                        "trying to create an invalid string is an error", &
+                        check_string_error) &
                 ])
     end function
 
@@ -477,5 +482,15 @@ contains
         retrieved = object%get("third")
 
         result_ = assert_that(retrieved%errors.hasType.NOT_FOUND, retrieved%errors%to_string())
+    end function
+
+    function check_string_error() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_string_t) :: string
+
+        string = fallible_json_string_t("\invalid")
+
+        result_ = assert_that(string%errors.hasType.INVALID_INPUT, string%errors%to_string())
     end function
 end module
