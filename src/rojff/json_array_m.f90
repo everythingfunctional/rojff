@@ -1,12 +1,11 @@
 module rojff_json_array_m
     use erloff, only: error_list_t, fatal_t, module_t, procedure_t, OUT_OF_BOUNDS
-    use iso_varying_string, only: operator(//)
     use rojff_constants_m, only: INDENTATION, NEWLINE
     use rojff_fallible_json_value_m, only: fallible_json_value_t
     use rojff_json_element_m, only: json_element_t
     use rojff_json_value_m, only: json_value_t
     use rojff_string_sink_m, only: string_sink_t
-    use strff, only: to_string
+    use rojff_utils_m, only: to_string
 
     implicit none
     private

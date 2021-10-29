@@ -1,6 +1,5 @@
 module rojff_parser_m
     use erloff, only: error_list_t, fatal_t, message_type_t, module_t, procedure_t
-    use iso_varying_string, only: operator(//)
     use rojff_cursor_m, only: cursor_t
     use rojff_fallible_json_value_m, only: &
         fallible_json_value_t, move_into_fallible_json
@@ -18,7 +17,7 @@ module rojff_parser_m
     use rojff_json_value_m, only: json_value_t
     use rojff_member_linked_list_m, only: member_linked_list_t
     use rojff_string_cursor_m, only: string_cursor_t
-    use strff, only: to_string
+    use rojff_utils_m, only: to_string
 
     implicit none
     private
