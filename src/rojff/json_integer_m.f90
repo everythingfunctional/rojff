@@ -1,8 +1,6 @@
 module rojff_json_integer_m
-    use iso_varying_string, only: char
     use rojff_json_value_m, only: json_value_t
     use rojff_string_sink_m, only: string_sink_t
-    use strff, only: to_string
 
     implicit none
     private
@@ -55,7 +53,10 @@ contains
         class(json_integer_t), intent(in) :: self
         class(string_sink_t), intent(inout) :: sink
 
-        call sink%append(char(to_string(self%number)))
+        character(len=11) :: temp
+
+        write(temp, '(I0)') self%number
+        call sink%append(trim(temp))
     end subroutine
 
     subroutine write_to_expanded(self, indentation_level, sink)
@@ -64,6 +65,6 @@ contains
         class(string_sink_t), intent(inout) :: sink
 
         associate(unused => indentation_level); end associate
-        call sink%append(char(to_string(self%number)))
+        call self%write_to_compactly(sink)
     end subroutine
 end module
