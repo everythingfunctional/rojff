@@ -9,6 +9,7 @@ program expander
     type(fallible_json_value_t) :: json
     character(len=:), allocatable :: input_file, output_file
     integer :: narg
+    integer :: start, finish, count_rate
 
     narg = command_argument_count()
     if (narg /= 2) then
@@ -18,11 +19,17 @@ program expander
     call get_argument(1, input_file)
     call get_argument(2, output_file)
 
+    call system_clock(start, count_rate)
     json = parse_json_from_file(input_file)
+    call system_clock(finish)
     if (json%failed()) then
         call put_line(error_unit, json%errors%to_string())
     else
+        print *, "Parsed in ", (finish-start)/real(count_rate), " seconds"
+        call system_clock(start)
         call json%json%save_expanded_to(output_file, status="REPLACE")
+        call system_clock(finish)
+        print *, "Saved in ", (finish-start)/real(count_rate), " seconds"
     end if
 
 contains
