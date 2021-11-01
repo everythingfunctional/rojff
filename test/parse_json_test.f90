@@ -214,12 +214,13 @@ contains
         type(result_t) :: result_
 
         type(fallible_json_value_t) :: json
+        type(json_element_t) :: empty_elements(0)
 
         json = parse_json_from_string("[ ]")
 
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_array_t([json_element_t::]), json%json)
+            result_ = assert_equals(json_array_t(empty_elements), json%json)
         end if
     end function
 
@@ -261,12 +262,13 @@ contains
         type(result_t) :: result_
 
         type(fallible_json_value_t) :: json
+        type(json_member_t) :: empty_members(0)
 
         json = parse_json_from_string("{ }")
 
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_object_t([json_member_t::]), json%json)
+            result_ = assert_equals(json_object_t(empty_members), json%json)
         end if
     end function
 
