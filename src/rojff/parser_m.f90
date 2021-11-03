@@ -288,7 +288,9 @@ contains
                         INVALID_INPUT, &
                         module_t(MODULE_NAME), &
                         procedure_t(PROCEDURE_NAME), &
-                        "Unexpected end of input while parsing string"))
+                        "Unexpected end of input while parsing string " &
+                        // "At line " // to_string(cursor%current_line()) &
+                        // " and column " // to_string(cursor%current_column())))
                 return
             end if
             next_character = cursor%peek()
@@ -301,7 +303,9 @@ contains
                             INVALID_INPUT, &
                             module_t(MODULE_NAME), &
                             procedure_t(PROCEDURE_NAME), &
-                            "Unexpected end of input after escape character"))
+                            "Unexpected end of input after escape character " &
+                            // "At line " // to_string(cursor%current_line()) &
+                            // " and column " // to_string(cursor%current_column())))
                     return
                 end if
                 next_character = cursor%peek()
@@ -317,7 +321,9 @@ contains
                                     INVALID_INPUT, &
                                     module_t(MODULE_NAME), &
                                     procedure_t(PROCEDURE_NAME), &
-                                    "Unexpected end of input while parsing escaped unicode string"))
+                                    "Unexpected end of input while parsing escaped unicode string " &
+                                    // "At line " // to_string(cursor%current_line()) &
+                                    // " and column " // to_string(cursor%current_column())))
                             return
                         end if
                         next_character = cursor%peek()
@@ -371,7 +377,9 @@ contains
                     INVALID_INPUT, &
                     module_t(MODULE_NAME), &
                     procedure_t(PROCEDURE_NAME), &
-                    "Unexpected end of input while parsing array"))
+                    "Unexpected end of input while parsing array " &
+                    // "At line " // to_string(cursor%current_line()) &
+                    // " and column " // to_string(cursor%current_column())))
             return
         end if
         if (cursor%peek() == ']') then
@@ -386,7 +394,9 @@ contains
                         INVALID_INPUT, &
                         module_t(MODULE_NAME), &
                         procedure_t(PROCEDURE_NAME), &
-                        "Unexpected end of input while parsing array"))
+                        "Unexpected end of input while parsing array " &
+                        // "At line " // to_string(cursor%current_line()) &
+                        // " and column " // to_string(cursor%current_column())))
                 return
             end if
             call parse_json_value(cursor, json, errors)
@@ -401,7 +411,9 @@ contains
                         INVALID_INPUT, &
                         module_t(MODULE_NAME), &
                         procedure_t(PROCEDURE_NAME), &
-                        "Unexpected end of input while parsing array"))
+                        "Unexpected end of input while parsing array " &
+                        // "At line " // to_string(cursor%current_line()) &
+                        // " and column " // to_string(cursor%current_column())))
                 return
             end if
             select case (cursor%peek())
@@ -443,7 +455,9 @@ contains
                     INVALID_INPUT, &
                     module_t(MODULE_NAME), &
                     procedure_t(PROCEDURE_NAME), &
-                    "Unexpected end of input while parsing object"))
+                    "Unexpected end of input while parsing object " &
+                    // "At line " // to_string(cursor%current_line()) &
+                    // " and column " // to_string(cursor%current_column())))
             return
         end if
         if (cursor%peek() == '}') then
@@ -458,7 +472,9 @@ contains
                         INVALID_INPUT, &
                         module_t(MODULE_NAME), &
                         procedure_t(PROCEDURE_NAME), &
-                        "Unexpected end of input while parsing object"))
+                        "Unexpected end of input while parsing object " &
+                        // "At line " // to_string(cursor%current_line()) &
+                        // " and column " // to_string(cursor%current_column())))
                 return
             end if
             if (cursor%peek() /= '"') then
@@ -499,7 +515,9 @@ contains
                         INVALID_INPUT, &
                         module_t(MODULE_NAME), &
                         procedure_t(PROCEDURE_NAME), &
-                        "Unexpected end of input while parsing object"))
+                        "Unexpected end of input while parsing object " &
+                        // "At line " // to_string(cursor%current_line()) &
+                        // " and column " // to_string(cursor%current_column())))
                 return
             end if
             call parse_json_value(cursor, json, errors)
@@ -518,7 +536,9 @@ contains
                         INVALID_INPUT, &
                         module_t(MODULE_NAME), &
                         procedure_t(PROCEDURE_NAME), &
-                        "Unexpected end of input while parsing object"))
+                        "Unexpected end of input while parsing object " &
+                        // "At line " // to_string(cursor%current_line()) &
+                        // " and column " // to_string(cursor%current_column())))
                 return
             end if
             call skip_whitespace(cursor)
