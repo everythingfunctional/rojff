@@ -34,7 +34,7 @@ contains
         call move_alloc(value_, member%value_)
     end subroutine
 
-    elemental function equals(lhs, rhs)
+    recursive elemental function equals(lhs, rhs)
         class(json_member_t), intent(in) :: lhs
         type(json_member_t), intent(in) :: rhs
         logical :: equals

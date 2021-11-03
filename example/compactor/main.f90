@@ -1,18 +1,16 @@
 program compactor
     !! parse json from first file, and write it without whitespace to the second
-    use erloff, only: error_list_t
-    use, intrinsic :: iso_fortran_env, only: error_unit
+    use, intrinsic :: iso_fortran_env, only: error_unit, int64, real64
     use iso_varying_string, only: put_line
     use rojff, only: parse_json_from_file, fallible_json_value_t
 
     implicit none
 
-    integer, parameter :: ik = selected_int_kind(20)
     type(fallible_json_value_t) :: json
     character(len=:), allocatable :: input_file, output_file
     integer :: narg
-    integer(ik) :: start, finish
-    real(kind(0.0d0)) :: count_rate
+    integer(int64) :: start, finish
+    real(real64) :: count_rate
 
     narg = command_argument_count()
     if (narg /= 2) then

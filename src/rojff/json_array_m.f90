@@ -40,7 +40,7 @@ contains
         call move_alloc(local, json)
     end subroutine
 
-    elemental function equals(lhs, rhs)
+    recursive elemental function equals(lhs, rhs)
         class(json_array_t), intent(in) :: lhs
         class(json_value_t), intent(in) :: rhs
         logical :: equals
