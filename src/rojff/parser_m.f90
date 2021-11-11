@@ -592,7 +592,13 @@ contains
         type(error_list_t) :: errors
         integer :: unit
 
-        open(newunit = unit, file = filename, status = "OLD", action = "READ")
+        open( &
+                newunit = unit, &
+                file = filename, &
+                status="OLD", &
+                action="READ", &
+                access="STREAM", &
+                form="FORMATTED")
         cursor = file_cursor_t(unit)
         call parse_json(cursor, json, errors)
         close(unit)
