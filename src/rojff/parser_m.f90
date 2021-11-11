@@ -1,5 +1,6 @@
 module rojff_parser_m
     use erloff, only: error_list_t, fatal_t, message_type_t, module_t, procedure_t
+    use iso_c_binding, only: c_char, c_double, c_ptr, c_null_char, c_null_ptr
     use rojff_cursor_m, only: cursor_t
     use rojff_fallible_json_value_m, only: &
         fallible_json_value_t, move_into_fallible_json
@@ -210,12 +211,23 @@ contains
         class(json_value_t), allocatable, intent(out) :: json
         type(error_list_t), intent(out) :: errors
 
+        interface
+            function strtod( str, endptr ) result(d) bind(C, name="strtod" )
+                ! <stdlib.h> :: double strtod(const char *str, char **endptr)
+                import
+                character(kind=c_char,len=1),dimension(*),intent(in) :: str
+                type(c_ptr), intent(inout) :: endptr
+                real(c_double) :: d
+            end function strtod
+        end interface
+
         character(len=*), parameter :: NUMBER_SYMBOLS = "0123456789+-.eE"
         character(len=*), parameter :: PROCEDURE_NAME = "parse_json_number"
         character(len=1) :: next_character
         character(len=:), allocatable :: number_string
         integer :: starting_line, starting_column, stat, number_i, precision, exponent_location
         double precision :: number_d
+        type(c_ptr) :: endptr
 
         starting_line = cursor%current_line()
         starting_column = cursor%current_column()
@@ -248,7 +260,13 @@ contains
                         // " as an integer"))
             end if
         else
-            read(number_string, *, iostat=stat) number_d
+            endptr = c_null_ptr
+            number_d = strtod(number_string // c_null_char, endptr)
+            if ((.not. number_d < 0.0d0) .and. (.not. number_d > 0.0d0)) then
+                read(number_string, *, iostat=stat) number_d  ! not efficient - might really be 0.0
+            else
+                stat = 0
+            end if
             if (stat == 0) then
                 exponent_location = index(number_string, "e")
                 if (exponent_location == 0) exponent_location = index(number_string, "E")
