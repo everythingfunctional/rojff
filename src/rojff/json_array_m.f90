@@ -47,7 +47,21 @@ contains
 
         select type (rhs)
         type is (json_array_t)
-            equals = size(lhs%elements) == size(rhs%elements) .and. all(lhs%elements == rhs%elements)
+            if (allocated(lhs%elements)) then
+                if (allocated(rhs%elements)) then
+                    equals = &
+                            size(lhs%elements) == size(rhs%elements) &
+                            .and. all(lhs%elements == rhs%elements)
+                else
+                    equals = size(lhs%elements) == 0
+                end if
+            else
+                if (allocated(rhs%elements)) then
+                    equals = size(rhs%elements) == 0
+                else
+                    equals = .true.
+                end if
+            end if
         class default
             equals = .false.
         end select
@@ -58,16 +72,25 @@ contains
         integer, intent(in) :: position
         type(fallible_json_value_t) :: element
 
-        if (position <= 0 .or. position > size(self%elements)) then
+        if (allocated(self%elements)) then
+            if (position <= 0 .or. position > size(self%elements)) then
+                element = fallible_json_value_t(error_list_t(fatal_t( &
+                        OUT_OF_BOUNDS, &
+                        module_t(MODULE_NAME), &
+                        procedure_t("get"), &
+                        "Attempted to access element " // to_string(position) &
+                            // " from an array with only " // to_string(size(self%elements)) &
+                            // " elements")))
+            else
+                element = fallible_json_value_t(self%elements(position)%json)
+            end if
+        else
             element = fallible_json_value_t(error_list_t(fatal_t( &
                     OUT_OF_BOUNDS, &
                     module_t(MODULE_NAME), &
                     procedure_t("get"), &
                     "Attempted to access element " // to_string(position) &
-                        // " from an array with only " // to_string(size(self%elements)) &
-                        // " elements")))
-        else
-            element = fallible_json_value_t(self%elements(position)%json)
+                        // " from an unallocated array.")))
         end if
     end function
 
@@ -78,12 +101,14 @@ contains
         integer :: i
 
         call sink%append("[")
-        do i = 1, size(self%elements) - 1
-            call self%elements(i)%write_to_compactly(sink)
-            call sink%append(",")
-        end do
-        if (size(self%elements) > 0) then
-            call self%elements(size(self%elements))%write_to_compactly(sink)
+        if (allocated(self%elements)) then
+            do i = 1, size(self%elements) - 1
+                call self%elements(i)%write_to_compactly(sink)
+                call sink%append(",")
+            end do
+            if (size(self%elements) > 0) then
+                call self%elements(size(self%elements))%write_to_compactly(sink)
+            end if
         end if
         call sink%append("]")
     end subroutine
@@ -96,18 +121,22 @@ contains
         integer :: i
         integer :: my_indentation_level
 
-        if (size(self%elements) > 0) then
-            call sink%append("[" // NEWLINE)
-            my_indentation_level = indentation_level + 1
-            do i = 1, size(self%elements) - 1
+        if (allocated(self%elements)) then
+            if (size(self%elements) > 0) then
+                call sink%append("[" // NEWLINE)
+                my_indentation_level = indentation_level + 1
+                do i = 1, size(self%elements) - 1
+                    call sink%append(repeat(" ", my_indentation_level * INDENTATION))
+                    call self%elements(i)%write_to_expanded(my_indentation_level, sink)
+                    call sink%append("," // NEWLINE)
+                end do
                 call sink%append(repeat(" ", my_indentation_level * INDENTATION))
                 call self%elements(i)%write_to_expanded(my_indentation_level, sink)
-                call sink%append("," // NEWLINE)
-            end do
-            call sink%append(repeat(" ", my_indentation_level * INDENTATION))
-            call self%elements(i)%write_to_expanded(my_indentation_level, sink)
-            call sink%append(NEWLINE)
-            call sink%append(repeat(" ", indentation_level * INDENTATION) // "]")
+                call sink%append(NEWLINE)
+                call sink%append(repeat(" ", indentation_level * INDENTATION) // "]")
+            else
+                call sink%append("[]")
+            end if
         else
             call sink%append("[]")
         end if
