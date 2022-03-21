@@ -31,6 +31,7 @@ contains
             json_number%precision = precision
             json_number%precision_provided = .true.
         else
+            json_number%precision = 0
             json_number%precision_provided = .false.
         end if
     end function

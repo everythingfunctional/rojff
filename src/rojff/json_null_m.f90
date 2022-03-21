@@ -12,15 +12,7 @@ module rojff_json_null_m
         procedure :: write_to_compactly
         procedure :: write_to_expanded
     end type
-
-    interface json_null_t
-        module procedure constructor
-    end interface
 contains
-    function constructor() result(json_null)
-        type(json_null_t) :: json_null
-    end function
-
     subroutine create_json_null(json)
         class(json_value_t), allocatable, intent(out) :: json
 

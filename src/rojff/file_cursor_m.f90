@@ -45,6 +45,8 @@ contains
 
         if (.not.self%finished()) then
             next_char = self%buffer(self%buffer_position:self%buffer_position)
+        else
+            next_char = " "
         end if
     end function
 

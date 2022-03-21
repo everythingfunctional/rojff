@@ -21,7 +21,7 @@ module rojff_json_string_m
     end interface
 
 contains
-    function json_string_unsafe_c(string) result(json_string)
+    pure function json_string_unsafe_c(string) result(json_string)
         character(len=*), intent(in) :: string
         type(json_string_t) :: json_string
 
@@ -32,7 +32,7 @@ contains
         type(varying_string), intent(in) :: string
         type(json_string_t) :: json_string
 
-        json_string%string = char(string)
+        json_string = json_string_unsafe(char(string))
     end function
 
     subroutine create_json_string_unsafe(json, string)

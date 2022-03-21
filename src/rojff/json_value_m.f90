@@ -54,9 +54,11 @@ contains
         character(len=:), allocatable :: string
 
         type(string_builder_t) :: sink
+        character(len=:), allocatable :: string_
 
         call self%write_to_compactly(sink)
-        call sink%move_into(string)
+        call sink%move_into(string_)
+        call move_alloc(string_, string)
     end function
 
     subroutine save_compactly_to(self, file, status, iostat, iomsg)
@@ -160,9 +162,11 @@ contains
         character(len=:), allocatable :: string
 
         type(string_builder_t) :: sink
+        character(len=:), allocatable :: string_
 
         call self%write_to_expanded(0, sink)
-        call sink%move_into(string)
+        call sink%move_into(string_)
+        call move_alloc(string_, string)
     end function
 
     subroutine save_expanded_to(self, file, status, iostat, iomsg)
