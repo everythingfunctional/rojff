@@ -11,7 +11,8 @@ program main
 
     type(fallible_triangle_t) :: maybe_triangle
 
-    maybe_triangle = fallible_triangle_t(parse_json_from_file("example/custom_types/input.json"))
+    maybe_triangle = fallible_triangle_t( &
+            parse_json_from_file("example/custom_types/input.json"))
     if (maybe_triangle%failed()) then
         block
             type(error_list_t) :: errors
@@ -22,7 +23,9 @@ program main
         block
             type(triangle_t) :: triangle
             triangle = maybe_triangle%triangle()
-            call put_line(output_unit, "The area of the triangle is: " // to_string(triangle%area()))
+            call put_line( &
+                    output_unit, &
+                    "The area of the triangle is: " // to_string(triangle%area()))
         end block
     end if
 end program
