@@ -82,3 +82,11 @@ Both procedures return a `fallible_json_value_t`, as it would be possible to ask
 Additionally, one can access the whole array of values from a json array as an array of `json_element_t` objects via `%elements`.
 One can get arrays of keys (as `varying_string`s) and values (as `json_element_t`s) from an object,
 which are guaranteed to be returned in matching order, via `get_keys` and `get_values`.
+
+### Real World Usage For Inputs
+
+In most cases, you're going to have inputs in JSON format corresponding to derived types in your program.
+The example in `example/custom_types` illustrates how this might be done for a triangle area calculator.
+It allows for easy composition and reuse, while still handling all the possible errors that might occur with regards to erroneous input.
+Any errors that occur trying to access a component of the JSON are propagated through.
+Any mismatches in the expected types of the data are able to generate meaningful errors.
