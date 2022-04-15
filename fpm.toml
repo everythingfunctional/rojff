@@ -6,12 +6,12 @@ maintainer = "everythingfunctional@protonmail.com"
 copyright = "Copyright 2021, Brad Richardson"
 
 [dependencies]
-erloff = { git = "https://gitlab.com/everythingfunctional/erloff.git", tag = "v2.1.0" }
-iso_varying_string = { git = "https://gitlab.com/everythingfunctional/iso_varying_string", tag = "v2.1.0" }
-strff = { git = "https://gitlab.com/everythingfunctional/strff", tag = "v2.1.0" }
+erloff = { git = "https://gitlab.com/everythingfunctional/erloff.git", tag = "v2.1.2" }
+iso_varying_string = { git = "https://gitlab.com/everythingfunctional/iso_varying_string", tag = "v3.0.1" }
+strff = { git = "https://gitlab.com/everythingfunctional/strff", tag = "v3.0.3" }
 
 [dev-dependencies]
-vegetables = { git = "https://gitlab.com/everythingfunctional/vegetables", tag = "v7.2.2" }
+veggies = { git = "https://gitlab.com/everythingfunctional/veggies", tag = "v1.0.1" }
 
 [[example]]
 name="compactor"

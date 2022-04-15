@@ -1,6 +1,6 @@
 module parse_json_test
     use integer_input_m, only: integer_input_t
-    use iso_varying_string, only: operator(//), put_line
+    use iso_varying_string, only: operator(//)
     use json_assertion, only: assert_equals
     use number_input_m, only: number_input_t
     use rojff, only: &
@@ -26,8 +26,7 @@ module parse_json_test
             parse_json_from_file, &
             parse_json_from_string, &
             INVALID_INPUT
-    use strff, only: NEWLINE
-    use vegetables, only: &
+    use veggies, only: &
             example_t, &
             input_t, &
             result_t, &

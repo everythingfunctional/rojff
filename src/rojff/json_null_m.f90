@@ -24,6 +24,7 @@ contains
         class(json_value_t), intent(in) :: rhs
         logical :: equals
 
+        associate(unused => lhs); end associate
         select type (rhs)
         type is (json_null_t)
             equals = .true.
@@ -36,6 +37,7 @@ contains
         class(json_null_t), intent(in) :: self
         class(string_sink_t), intent(inout) :: sink
 
+        associate(unused => self); end associate
         call sink%append("null")
     end subroutine
 
@@ -45,6 +47,7 @@ contains
         class(string_sink_t), intent(inout) :: sink
 
         associate(unused => indentation_level); end associate
+        associate(unused => self); end associate
         call sink%append("null")
     end subroutine
 end module

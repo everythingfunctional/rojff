@@ -95,14 +95,7 @@ contains
                 end if
             else
                 if (present(iomsg)) then
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            status=status, &
-                            iomsg=iomsg, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
+                    error stop "IOMSG= has no effect without IOSTAT="
                 else
                     open( &
                             newunit=unit, &
@@ -135,13 +128,7 @@ contains
                 end if
             else
                 if (present(iomsg)) then
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            iomsg=iomsg, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
+                    error stop "IOMSG= has no effect without IOSTAT="
                 else
                     open( &
                             newunit=unit, &
@@ -188,7 +175,7 @@ contains
                 end if
             else
                 if (present(iomsg)) then
-                    open(newunit = unit, file = file, status=status, iomsg=iomsg, action="WRITE")
+                    error stop "IOMSG= has no effect without IOSTAT="
                 else
                     open(newunit = unit, file = file, status=status, action="WRITE")
                 end if
@@ -202,7 +189,7 @@ contains
                 end if
             else
                 if (present(iomsg)) then
-                    open(newunit = unit, file = file, iomsg=iomsg, action="WRITE")
+                    error stop "IOMSG= has no effect without IOSTAT="
                 else
                     open(newunit = unit, file = file, action="WRITE")
                 end if

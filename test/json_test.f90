@@ -26,7 +26,7 @@ module json_test
             move_into_object, &
             INVALID_INPUT
     use rojff_constants_m, only: NEWLINE
-    use vegetables, only: &
+    use veggies, only: &
             result_t, &
             test_item_t, &
             assert_equals, &
