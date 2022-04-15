@@ -54,9 +54,11 @@ contains
         character(len=:), allocatable :: string
 
         type(string_builder_t) :: sink
+        character(len=:), allocatable :: string_
 
         call self%write_to_compactly(sink)
-        call sink%move_into(string)
+        call sink%move_into(string_)
+        call move_alloc(string_, string)
     end function
 
     subroutine save_compactly_to(self, file, status, iostat, iomsg)
@@ -93,14 +95,7 @@ contains
                 end if
             else
                 if (present(iomsg)) then
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            status=status, &
-                            iomsg=iomsg, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
+                    error stop "IOMSG= has no effect without IOSTAT="
                 else
                     open( &
                             newunit=unit, &
@@ -133,13 +128,7 @@ contains
                 end if
             else
                 if (present(iomsg)) then
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            iomsg=iomsg, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
+                    error stop "IOMSG= has no effect without IOSTAT="
                 else
                     open( &
                             newunit=unit, &
@@ -160,9 +149,11 @@ contains
         character(len=:), allocatable :: string
 
         type(string_builder_t) :: sink
+        character(len=:), allocatable :: string_
 
         call self%write_to_expanded(0, sink)
-        call sink%move_into(string)
+        call sink%move_into(string_)
+        call move_alloc(string_, string)
     end function
 
     subroutine save_expanded_to(self, file, status, iostat, iomsg)
@@ -178,29 +169,68 @@ contains
         if (present(status)) then
             if (present(iostat)) then
                 if (present(iomsg)) then
-                    open(newunit = unit, file = file, status=status, iostat=iostat, iomsg=iomsg, action="WRITE")
+                    open( &
+                            newunit=unit, &
+                            file=file, &
+                            status=status, &
+                            iostat=iostat, &
+                            iomsg=iomsg, &
+                            action="WRITE", &
+                            access="STREAM", &
+                            form="FORMATTED")
                 else
-                    open(newunit = unit, file = file, status=status, iostat=iostat, action="WRITE")
+                    open( &
+                            newunit=unit, &
+                            file=file, &
+                            status=status, &
+                            iostat=iostat, &
+                            action="WRITE", &
+                            access="STREAM", &
+                            form="FORMATTED")
                 end if
             else
                 if (present(iomsg)) then
-                    open(newunit = unit, file = file, status=status, iomsg=iomsg, action="WRITE")
+                    error stop "IOMSG= has no effect without IOSTAT="
                 else
-                    open(newunit = unit, file = file, status=status, action="WRITE")
+                    open( &
+                            newunit=unit, &
+                            file=file, &
+                            status=status, &
+                            action="WRITE", &
+                            access="STREAM", &
+                            form="FORMATTED")
                 end if
             end if
         else
             if (present(iostat)) then
                 if (present(iomsg)) then
-                    open(newunit = unit, file = file, iostat=iostat, iomsg=iomsg, action="WRITE")
+                    open( &
+                            newunit=unit, &
+                            file=file, &
+                            iostat=iostat, &
+                            iomsg=iomsg, &
+                            action="WRITE", &
+                            access="STREAM", &
+                            form="FORMATTED")
                 else
-                    open(newunit = unit, file = file, iostat=iostat, action="WRITE")
+                    open( &
+                            newunit=unit, &
+                            file=file, &
+                            iostat=iostat, &
+                            action="WRITE", &
+                            access="STREAM", &
+                            form="FORMATTED")
                 end if
             else
                 if (present(iomsg)) then
-                    open(newunit = unit, file = file, iomsg=iomsg, action="WRITE")
+                    error stop "IOMSG= has no effect without IOSTAT="
                 else
-                    open(newunit = unit, file = file, action="WRITE")
+                    open( &
+                            newunit=unit, &
+                            file=file, &
+                            action="WRITE", &
+                            access="STREAM", &
+                            form="FORMATTED")
                 end if
             end if
         end if

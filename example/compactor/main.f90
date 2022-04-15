@@ -1,6 +1,6 @@
 program compactor
     !! parse json from first file, and write it without whitespace to the second
-    use, intrinsic :: iso_fortran_env, only: error_unit, int64, real64
+    use, intrinsic :: iso_fortran_env, only: error_unit, int64
     use iso_varying_string, only: put_line
     use rojff, only: parse_json_from_file, fallible_json_value_t
 
@@ -9,8 +9,7 @@ program compactor
     type(fallible_json_value_t) :: json
     character(len=:), allocatable :: input_file, output_file
     integer :: narg
-    integer(int64) :: start, finish
-    real(real64) :: count_rate
+    integer(int64) :: start, finish, count_rate
 
     narg = command_argument_count()
     if (narg /= 2) then

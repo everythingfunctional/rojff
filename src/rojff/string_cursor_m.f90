@@ -36,6 +36,8 @@ contains
 
         if (.not.self%finished()) then
             next_char = self%whole_string(self%current_character:self%current_character)
+        else
+            next_char = " "
         end if
     end function
 

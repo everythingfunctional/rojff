@@ -12,15 +12,7 @@ module rojff_json_null_m
         procedure :: write_to_compactly
         procedure :: write_to_expanded
     end type
-
-    interface json_null_t
-        module procedure constructor
-    end interface
 contains
-    function constructor() result(json_null)
-        type(json_null_t) :: json_null
-    end function
-
     subroutine create_json_null(json)
         class(json_value_t), allocatable, intent(out) :: json
 
@@ -32,6 +24,7 @@ contains
         class(json_value_t), intent(in) :: rhs
         logical :: equals
 
+        associate(unused => lhs); end associate
         select type (rhs)
         type is (json_null_t)
             equals = .true.
@@ -44,6 +37,7 @@ contains
         class(json_null_t), intent(in) :: self
         class(string_sink_t), intent(inout) :: sink
 
+        associate(unused => self); end associate
         call sink%append("null")
     end subroutine
 
@@ -53,6 +47,7 @@ contains
         class(string_sink_t), intent(inout) :: sink
 
         associate(unused => indentation_level); end associate
+        associate(unused => self); end associate
         call sink%append("null")
     end subroutine
 end module

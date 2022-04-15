@@ -1,6 +1,6 @@
 module parse_json_test
     use integer_input_m, only: integer_input_t
-    use iso_varying_string, only: operator(//), put_line
+    use iso_varying_string, only: operator(//)
     use json_assertion, only: assert_equals
     use number_input_m, only: number_input_t
     use rojff, only: &
@@ -26,8 +26,7 @@ module parse_json_test
             parse_json_from_file, &
             parse_json_from_string, &
             INVALID_INPUT
-    use strff, only: NEWLINE
-    use vegetables, only: &
+    use veggies, only: &
             example_t, &
             input_t, &
             result_t, &
@@ -338,8 +337,9 @@ contains
         result_ = assert_that(json%errors.hasType.INVALID_INPUT, json%errors%to_string())
     end function
 
-    function complex_example()
-        class(json_value_t), allocatable :: complex_example
+    function complex_example() result(example)
+        class(json_value_t), allocatable :: example
+        class(json_value_t), allocatable :: complex_example_
 ! {
 !     "glossary" : {
 !         "title" : "example glossary",
@@ -373,48 +373,49 @@ contains
         type(json_element_t), allocatable :: elements(:)
 
         allocate(elements(2))
-        call create_json_string_unsafe(complex_example, "GML")
-        call move_into_element(elements(1), complex_example)
-        call create_json_string_unsafe(complex_example, "XML")
-        call move_into_element(elements(2), complex_example)
-        call move_into_array(complex_example, elements)
+        call create_json_string_unsafe(complex_example_, "GML")
+        call move_into_element(elements(1), complex_example_)
+        call create_json_string_unsafe(complex_example_, "XML")
+        call move_into_element(elements(2), complex_example_)
+        call move_into_array(complex_example_, elements)
         allocate(members(2))
-        call move_into_member_unsafe(members(2), "GlossSeeAlso", complex_example)
+        call move_into_member_unsafe(members(2), "GlossSeeAlso", complex_example_)
         call create_json_string_unsafe( &
-                complex_example, &
+                complex_example_, &
                 "A meta-markup language, used to create markup languages such as DocBook.")
-        call move_into_member_unsafe(members(1), "para", complex_example)
-        call move_into_object(complex_example, members)
+        call move_into_member_unsafe(members(1), "para", complex_example_)
+        call move_into_object(complex_example_, members)
         allocate(members(7))
-        call move_into_member_unsafe(members(6), "GlossDef", complex_example)
-        call create_json_integer(complex_example, 101)
-        call move_into_member_unsafe(members(1), "ID", complex_example)
-        call create_json_string_unsafe(complex_example, "SGML")
-        call move_into_member_unsafe(members(2), "SortAs", complex_example)
-        call create_json_string_unsafe(complex_example, "Standard Generalized Markup Language")
-        call move_into_member_unsafe(members(3), "GlossTerm", complex_example)
-        call create_json_string_unsafe(complex_example, "SGML")
-        call move_into_member_unsafe(members(4), "Acronym", complex_example)
-        call create_json_string_unsafe(complex_example, "ISO 8879:1986")
-        call move_into_member_unsafe(members(5), "Abbrev", complex_example)
-        call create_json_number(complex_example, 123.456d0, 6)
-        call move_into_member_unsafe(members(7), "GlossSee", complex_example)
-        call move_into_object(complex_example, members)
+        call move_into_member_unsafe(members(6), "GlossDef", complex_example_)
+        call create_json_integer(complex_example_, 101)
+        call move_into_member_unsafe(members(1), "ID", complex_example_)
+        call create_json_string_unsafe(complex_example_, "SGML")
+        call move_into_member_unsafe(members(2), "SortAs", complex_example_)
+        call create_json_string_unsafe(complex_example_, "Standard Generalized Markup Language")
+        call move_into_member_unsafe(members(3), "GlossTerm", complex_example_)
+        call create_json_string_unsafe(complex_example_, "SGML")
+        call move_into_member_unsafe(members(4), "Acronym", complex_example_)
+        call create_json_string_unsafe(complex_example_, "ISO 8879:1986")
+        call move_into_member_unsafe(members(5), "Abbrev", complex_example_)
+        call create_json_number(complex_example_, 123.456d0, 6)
+        call move_into_member_unsafe(members(7), "GlossSee", complex_example_)
+        call move_into_object(complex_example_, members)
         allocate(members(1))
-        call move_into_member_unsafe(members(1), "GlossEntry", complex_example)
-        call move_into_object(complex_example, members)
+        call move_into_member_unsafe(members(1), "GlossEntry", complex_example_)
+        call move_into_object(complex_example_, members)
         allocate(members(2))
-        call move_into_member_unsafe(members(2), "GlossList", complex_example)
-        call create_json_string_unsafe(complex_example, "S")
-        call move_into_member_unsafe(members(1), "title", complex_example)
-        call move_into_object(complex_example, members)
+        call move_into_member_unsafe(members(2), "GlossList", complex_example_)
+        call create_json_string_unsafe(complex_example_, "S")
+        call move_into_member_unsafe(members(1), "title", complex_example_)
+        call move_into_object(complex_example_, members)
         allocate(members(2))
-        call move_into_member_unsafe(members(2), "GlossDiv", complex_example)
-        call create_json_string_unsafe(complex_example, "example glossary")
-        call move_into_member_unsafe(members(1), "title", complex_example)
-        call move_into_object(complex_example, members)
+        call move_into_member_unsafe(members(2), "GlossDiv", complex_example_)
+        call create_json_string_unsafe(complex_example_, "example glossary")
+        call move_into_member_unsafe(members(1), "title", complex_example_)
+        call move_into_object(complex_example_, members)
         allocate(members(1))
-        call move_into_member_unsafe(members(1), "glossary", complex_example)
-        call move_into_object(complex_example, members)
+        call move_into_member_unsafe(members(1), "glossary", complex_example_)
+        call move_into_object(complex_example_, members)
+        call move_alloc(complex_example_, example)
     end function
 end module

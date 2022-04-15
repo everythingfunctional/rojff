@@ -1,6 +1,6 @@
 module json_assertion
     use rojff, only: json_value_t
-    use vegetables, only: &
+    use veggies, only: &
             result_t, &
             fail, &
             make_equals_failure_message, &
