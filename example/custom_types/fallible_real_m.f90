@@ -2,7 +2,6 @@ module fallible_real_m
   use erloff, only: error_list_t, fatal_t, module_t, procedure_t
   use rojff, only: &
       fallible_json_value_t, &
-      json_element_t, &
       json_integer_t, &
       json_number_t, &
       json_value_t

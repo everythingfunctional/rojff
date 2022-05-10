@@ -261,8 +261,8 @@ contains
         call move_into_member_unsafe(members(2), "aNumber", created)
         call move_into_object(created, members)
 
-        copied_string = copied%to_compact_string()
-        created_string = created%to_compact_string()
+        allocate(copied_string, source = copied%to_compact_string())
+        allocate(created_string, source = created%to_compact_string())
 
         result_ = &
                 assert_includes('"sayHello":true', copied_string, "copied") &

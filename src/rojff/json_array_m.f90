@@ -20,13 +20,17 @@ module rojff_json_array_m
         procedure :: write_to_expanded
     end type
 
+    interface json_array_t
+        module procedure constructor
+    end interface
+
     character(len=*), parameter :: MODULE_NAME = "rojff_json_array_m"
 contains
     function constructor(elements) result(json_array)
         type(json_element_t), intent(in) :: elements(:)
         type(json_array_t) :: json_array
 
-        json_array%elements = elements
+        allocate(json_array%elements, source = elements)
     end function
 
     subroutine move_into_array(json, elements)

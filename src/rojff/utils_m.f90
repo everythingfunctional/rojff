@@ -55,34 +55,34 @@ contains
             write(floating_part, format_string) &
                     abs_num * 1.0D1**(-scale_)
             write(exponent_part, '(A,I0)') 'e', scale_
-            intermediate = &
+            allocate(intermediate, source = &
                     cover_empty_decimal( &
                             remove_trailing_zeros(trim(floating_part))) &
-                    // trim(exponent_part)
+                    // trim(exponent_part))
         else
             write(format_string, '(A,I0,A)') &
                     "(f0.", significant_digits-1, ")"
             write(floating_part, format_string) abs_num / 1.0D1**scale_
             write(exponent_part, '(A,I0)') 'e', scale_
-            intermediate_scientific = &
+            allocate(intermediate_scientific, source = &
                     cover_empty_decimal( &
                             remove_trailing_zeros(trim(floating_part))) &
-                    // trim(exponent_part)
+                    // trim(exponent_part))
 
             if (scale_ < significant_digits) then
                 write(format_string, '(A,I0,A)') &
                         "(f0.", significant_digits-scale_-1, ")"
                 write(floating_part, format_string) abs_num
-                intermediate_basic = cover_empty_decimal( &
-                        remove_trailing_zeros(trim(floating_part)))
+                allocate(intermediate_basic, source = cover_empty_decimal( &
+                        remove_trailing_zeros(trim(floating_part))))
 
                 if (len(intermediate_scientific) < len(intermediate_basic)) then
-                    intermediate = intermediate_scientific
+                    allocate(intermediate, source = intermediate_scientific)
                 else
-                    intermediate = intermediate_basic
+                    allocate(intermediate, source = intermediate_basic)
                 end if
             else
-                intermediate = intermediate_scientific
+                allocate(intermediate, source = intermediate_scientific)
             end if
         end if
         if (number < 0.0D0) then

@@ -25,11 +25,11 @@ program compactor
     if (json%failed()) then
         call put_line(error_unit, json%errors%to_string())
     else
-        print *, "Parsed in ", (finish-start)/real(count_rate), " seconds"
+        print *, "Parsed in ", real(finish-start)/real(count_rate), " seconds"
         call system_clock(start)
         call json%json%save_compactly_to(output_file, status="REPLACE")
         call system_clock(finish)
-        print *, "Saved in ", (finish-start)/real(count_rate), " seconds"
+        print *, "Saved in ", real(finish-start)/real(count_rate), " seconds"
     end if
 
 contains

@@ -56,7 +56,7 @@ contains
         if (.not.cursor%finished()) then
             block
                 character(len=:), allocatable :: trailing_content
-                trailing_content = ""
+                allocate(character(len=0) :: trailing_content)
                 do while (.not. cursor%finished())
                     trailing_content = trailing_content // cursor%peek()
                     call cursor%next()
@@ -232,7 +232,7 @@ contains
         starting_line = cursor%current_line()
         starting_column = cursor%current_column()
 
-        number_string = ""
+        allocate(character(len=0) :: number_string)
         do while (.not. cursor%finished())
             next_character = cursor%peek()
             if (index(NUMBER_SYMBOLS, next_character) /= 0) then
@@ -299,7 +299,7 @@ contains
         character(len=1) :: next_character
         integer :: i
 
-        the_string = ""
+        allocate(character(len=0) :: the_string)
         do
             if (cursor%finished()) then
                 errors = error_list_t(fatal_t( &

@@ -35,7 +35,7 @@ contains
         type(json_member_t), intent(in) :: members(:)
         type(json_object_t) :: json_object
 
-        json_object%members = members
+        allocate(json_object%members, source = members)
     end function
 
     subroutine move_into_object(json, members)
