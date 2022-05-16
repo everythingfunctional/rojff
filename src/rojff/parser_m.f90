@@ -606,7 +606,7 @@ contains
             fallible_json = fallible_json_value_t(error_list_t( &
                     errors, &
                     module_t(MODULE_NAME), &
-                    procedure_t("parse_json_from_string")))
+                    procedure_t("parse_json_from_file")))
         else
             call move_into_fallible_json(fallible_json, json)
         end if
