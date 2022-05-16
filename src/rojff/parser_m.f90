@@ -574,8 +574,8 @@ contains
                         procedure_t(PROCEDURE_NAME), &
                         "At line " // to_string(cursor%current_line()) &
                         // " and column " // to_string(cursor%current_column()) &
-                        // " unexpected character in array: found " // cursor%peek() &
-                        // ', but expected one of ",", or "]"'))
+                        // " unexpected character in object: found " // cursor%peek() &
+                        // ', but expected one of ",", or "}"'))
                 return
             end select
         end do
