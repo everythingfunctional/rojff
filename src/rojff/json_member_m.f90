@@ -1,4 +1,5 @@
 module rojff_json_member_m
+    use iso_varying_string, only: varying_string, char
     use rojff_json_value_m, only: json_value_t
     use rojff_string_sink_m, only: string_sink_t
 
@@ -15,14 +16,27 @@ module rojff_json_member_m
         procedure :: write_to_compactly
         procedure :: write_to_expanded
     end type
+
+    interface json_member_unsafe
+        module procedure json_member_unsafe_c
+        module procedure json_member_unsafe_s
+    end interface
 contains
-    impure elemental function json_member_unsafe(key, value_) result(json_member)
+    function json_member_unsafe_c(key, value_) result(json_member)
         character(len=*), intent(in) :: key
         class(json_value_t), intent(in) :: value_
         type(json_member_t) :: json_member
 
         json_member%key = key
         json_member%value_ = value_
+    end function
+
+    impure elemental function json_member_unsafe_s(key, value_) result(json_member)
+        type(varying_string), intent(in) :: key
+        class(json_value_t), intent(in) :: value_
+        type(json_member_t) :: json_member
+
+        json_member = json_member_unsafe(char(key), value_)
     end function
 
     subroutine move_into_member_unsafe(member, key, value_)
