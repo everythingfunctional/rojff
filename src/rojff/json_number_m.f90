@@ -1,7 +1,7 @@
 module rojff_json_number_m
     use rojff_json_value_m, only: json_value_t
     use rojff_string_sink_m, only: string_sink_t
-    use rojff_utils_m, only: to_string
+    use rojff_utils_m, only: is_nan, to_string
 
     implicit none
     private
@@ -61,8 +61,16 @@ contains
 
         select type (rhs)
         type is (json_number_t)
-            ! avoids warnings about comparing floating point numbers
-            equals = (.not. (lhs%number < rhs%number)) .and. (.not. (lhs%number > rhs%number))
+            if (is_nan(lhs%number) .and. is_nan(rhs%number)) then
+                equals = .true.
+            else if (is_nan(lhs%number)) then
+                equals = .false.
+            else if (is_nan(rhs%number)) then
+                equals = .true.
+            else
+                ! avoids warnings about comparing floating point numbers
+                equals = (.not. (lhs%number < rhs%number)) .and. (.not. (lhs%number > rhs%number))
+            end if
         class default
             equals = .false.
         end select

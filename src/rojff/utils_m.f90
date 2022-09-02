@@ -1,7 +1,7 @@
 module rojff_utils_m
     implicit none
     private
-    public :: to_string
+    public :: is_nan, to_string
 
     interface to_string
         module procedure integer_to_string
