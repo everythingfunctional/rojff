@@ -45,6 +45,27 @@ contains
     function test_parse_json() result(tests)
         type(test_item_t) :: tests
 
+        character(len=:), allocatable :: nan_str
+        character(len=:), allocatable :: neg_nan_str
+        character(len=:), allocatable :: pos_nan_str
+        character(len=:), allocatable :: inf_str
+        character(len=:), allocatable :: neg_inf_str
+        character(len=:), allocatable :: pos_inf_str
+        double precision :: nan, neg_nan, pos_nan, inf, neg_inf, pos_inf
+
+        nan_str = "NaN"
+        neg_nan_str = "-NaN"
+        pos_nan_str = "+NaN"
+        inf_str = "Inf"
+        neg_inf_str = "-Inf"
+        pos_inf_str = "+Inf"
+        read(nan_str, *) nan
+        read(neg_nan_str, *) neg_nan
+        read(pos_nan_str, *) pos_nan
+        read(inf_str, *) inf
+        read(neg_inf_str, *) neg_inf
+        read(pos_inf_str, *) pos_inf
+
         tests = describe( &
                 "parse_json", &
                 [ it("parsing an empty string returns an error", check_parse_empty) &
@@ -62,6 +83,12 @@ contains
                         , example_t(number_input_t("1.2E+3", 1.2d3)) &
                         , example_t(number_input_t("1.2e-3", 1.2d-3)) &
                         , example_t(number_input_t("20e1", 20.0d1)) &
+                        , example_t(number_input_t(nan_str, nan)) &
+                        , example_t(number_input_t(neg_nan_str, neg_nan)) &
+                        , example_t(number_input_t(pos_nan_str, pos_nan)) &
+                        , example_t(number_input_t(inf_str, inf)) &
+                        , example_t(number_input_t(neg_inf_str, neg_inf)) &
+                        , example_t(number_input_t(pos_inf_str, pos_inf)) &
                         ], &
                         check_parse_number) &
                 , it( &

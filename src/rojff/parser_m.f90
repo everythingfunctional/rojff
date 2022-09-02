@@ -87,7 +87,7 @@ contains
             call parse_json_true(cursor, json, errors)
         case ("f")
             call parse_json_false(cursor, json, errors)
-        case ("+", "-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+        case ("+", "-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "N", "I")
             call parse_json_number(cursor, json, errors)
         case ('"')
             call cursor%next()
@@ -221,7 +221,7 @@ contains
             end function strtod
         end interface
 
-        character(len=*), parameter :: NUMBER_SYMBOLS = "0123456789+-.eE"
+        character(len=*), parameter :: NUMBER_SYMBOLS = "0123456789+-.eENaInf"
         character(len=*), parameter :: PROCEDURE_NAME = "parse_json_number"
         character(len=1) :: next_character
         character(len=:), allocatable :: number_string
@@ -243,6 +243,26 @@ contains
             end if
         end do
         if ( &
+                number_string == "NaN" &
+                .or. number_string == "+NaN" &
+                .or. number_string == "-NaN" &
+                .or. number_string == "Inf" &
+                .or. number_string == "+Inf" &
+                .or. number_string == "-Inf") then
+            read(number_string, *, iostat=stat) number_d
+            if (stat == 0) then
+                call create_json_number(json, number_d)
+            else
+                errors = error_list_t(fatal_t( &
+                        INVALID_INPUT, &
+                        module_t(MODULE_NAME), &
+                        procedure_t(PROCEDURE_NAME), &
+                        "At line " // to_string(starting_line) &
+                        // " and column " // to_string(starting_column) &
+                        // " unable to parse " // number_string &
+                        // " as a number"))
+            end if
+        else if ( &
                 index(number_string, "e") == 0 &
                 .and. index(number_string, "E") == 0 &
                 .and. index(number_string, ".") == 0) then

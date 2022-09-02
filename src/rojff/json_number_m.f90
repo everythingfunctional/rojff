@@ -85,10 +85,6 @@ contains
         class(string_sink_t), intent(inout) :: sink
 
         associate(unused => indentation_level); end associate
-        if (self%precision_provided) then
-            call sink%append(to_string(self%number, self%precision))
-        else
-            call sink%append(to_string(self%number))
-        end if
+        call self%write_to_compactly(sink)
     end subroutine
 end module
