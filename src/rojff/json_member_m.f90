@@ -91,7 +91,7 @@ contains
 
     subroutine move_into_member(member, key, value_)
         type(json_member_t), intent(out) :: member
-        type(json_string_t), intent(in) :: key
+        type(json_string_t), intent(inout) :: key
         class(json_value_t), allocatable, intent(inout) :: value_
 
         call move_alloc(key%string, member%key)
