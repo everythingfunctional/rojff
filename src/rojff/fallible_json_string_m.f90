@@ -1,5 +1,6 @@
 module rojff_fallible_json_string_m
     use erloff, only: error_list_t, fatal_t, module_t, procedure_t
+    use iso_varying_string, only: varying_string, char
     use rojff_json_string_m, only: json_string_t, json_string_unsafe
     use rojff_json_value_m, only: json_value_t
     use rojff_parser_m, only: parse_json_string, INVALID_INPUT
@@ -17,16 +18,18 @@ module rojff_fallible_json_string_m
     end type
 
     interface fallible_json_string_t
-        module procedure constructor
+        module procedure from_character
+        module procedure from_string
+        module procedure from_fallible_string
     end interface
 
     character (len=*), parameter :: MODULE_NAME = "rojff_fallible_json_string_m"
 contains
-    function constructor(string) result(fallible_string)
+    function from_character(string) result(fallible_string)
         character(len=*), intent(in) :: string
         type(fallible_json_string_t) :: fallible_string
 
-        character(len=*), parameter :: PROCEDURE_NAME = "constructor"
+        character(len=*), parameter :: PROCEDURE_NAME = "from_character"
         type(string_cursor_t) :: cursor
         class(json_value_t), allocatable :: json
 
@@ -45,6 +48,31 @@ contains
                     "Unescaped quote in string: '" // string // "'"))
         else
             fallible_string%string = json_string_unsafe(string)
+        end if
+    end function
+
+    function from_string(string) result(fallible_string)
+        type(varying_string), intent(in) :: string
+        type(fallible_json_string_t) :: fallible_string
+
+        fallible_string = fallible_json_string_t( &
+                fallible_json_string_t(char(string)), &
+                module_t(MODULE_NAME), &
+                procedure_t("from_string"))
+    end function
+
+    function from_fallible_string( &
+            maybe_string, module_, procedure_) result(fallible_string)
+        type(fallible_json_string_t), intent(in) :: maybe_string
+        type(module_t), intent(in) :: module_
+        type(procedure_t), intent(in) :: procedure_
+        type(fallible_json_string_t) :: fallible_string
+
+        if (maybe_string%failed()) then
+            fallible_string%errors = error_list_t( &
+                    maybe_string%errors, module_, procedure_)
+        else
+            fallible_string%string = maybe_string%string
         end if
     end function
 

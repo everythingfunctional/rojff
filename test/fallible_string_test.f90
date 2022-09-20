@@ -1,5 +1,6 @@
 module fallible_string_test
     use erloff, only: module_t
+    use iso_varying_string, only: var_str
     use json_assertion, only: assert_equals
     use rojff, only: fallible_json_string_t, json_string_unsafe
     use veggies, only: result_t, test_item_t, assert_that, describe, fail, it
@@ -36,11 +37,17 @@ contains
         type(result_t) :: result_
 
         character(len=*), parameter :: invalid_string = 'thi"ng'
-        type(fallible_json_string_t) :: maybe_string
+        type(fallible_json_string_t) :: maybe_from_character
+        type(fallible_json_string_t) :: maybe_from_string
 
-        maybe_string = fallible_json_string_t(invalid_string)
-        result_ = assert_that( &
-                maybe_string%errors.hasAnyFrom.module_t("rojff_fallible_json_string_m"), &
-                maybe_string%errors%to_string())
+        maybe_from_character = fallible_json_string_t(invalid_string)
+        maybe_from_string = fallible_json_string_t(var_str(invalid_string))
+        result_ = &
+            assert_that( &
+                maybe_from_character%errors.hasAnyFrom.module_t("rojff_fallible_json_string_m"), &
+                maybe_from_character%errors%to_string()) &
+            .and.assert_that( &
+                maybe_from_string%errors.hasAnyFrom.module_t("rojff_fallible_json_string_m"), &
+                maybe_from_string%errors%to_string())
     end function
 end module
