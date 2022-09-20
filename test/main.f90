@@ -5,6 +5,9 @@ program main
     if (.not.run()) stop 1
 contains
     function run() result(passed)
+        use fallible_member_test, only: &
+                fallible_member_fallible_member => &
+                    test_fallible_member
         use fallible_string_test, only: &
                 fallible_string_fallible_string => &
                     test_fallible_string
@@ -21,11 +24,12 @@ contains
         logical :: passed
 
         type(test_item_t) :: tests
-        type(test_item_t) :: individual_tests(3)
+        type(test_item_t) :: individual_tests(4)
 
-        individual_tests(1) = fallible_string_fallible_string()
-        individual_tests(2) = json_json()
-        individual_tests(3) = parse_json_parse_json()
+        individual_tests(1) = fallible_member_fallible_member()
+        individual_tests(2) = fallible_string_fallible_string()
+        individual_tests(3) = json_json()
+        individual_tests(4) = parse_json_parse_json()
         tests = test_that(individual_tests)
 
 

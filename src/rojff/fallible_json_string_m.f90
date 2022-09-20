@@ -20,6 +20,7 @@ module rojff_fallible_json_string_m
     interface fallible_json_string_t
         module procedure from_character
         module procedure from_string
+        module procedure from_json_string
         module procedure from_fallible_string
     end interface
 
@@ -59,6 +60,13 @@ contains
                 fallible_json_string_t(char(string)), &
                 module_t(MODULE_NAME), &
                 procedure_t("from_string"))
+    end function
+
+    function from_json_string(string) result(fallible_string)
+        type(json_string_t), intent(in) :: string
+        type(fallible_json_string_t) :: fallible_string
+
+        fallible_string%string = string
     end function
 
     function from_fallible_string( &
