@@ -57,7 +57,7 @@ contains
                         "false has the correct string representation", &
                         check_false_to_string) &
                 , it("a string can be converted back", check_string_to_string) &
-                , it("a string contructed with varing string is the same as one constructed with character", &
+                , it("a string constructed with varying string is the same as one constructed with character", &
                         check_character_string_constructors) &
                 , it( &
                         "a number has the correct string representation", &
@@ -78,7 +78,7 @@ contains
                         "a complex object has the correct string representation", &
                         check_complex_object_to_string) &
                 , it( &
-                        "can be generated in an expaned, easier to read form", &
+                        "can be generated in an expanded, easier to read form", &
                         check_pretty_printing) &
                 , it("can extract a value from an array", get_value_from_array) &
                 , it( &
