@@ -1,8 +1,8 @@
 module rojff_fallible_json_string_m
-    use erloff, only: error_list_t, module_t, procedure_t
+    use erloff, only: error_list_t, fatal_t, module_t, procedure_t
     use rojff_json_string_m, only: json_string_t, json_string_unsafe
     use rojff_json_value_m, only: json_value_t
-    use rojff_parser_m, only: parse_json_string
+    use rojff_parser_m, only: parse_json_string, INVALID_INPUT
     use rojff_string_cursor_m, only: string_cursor_t
 
     implicit none
@@ -26,6 +26,7 @@ contains
         character(len=*), intent(in) :: string
         type(fallible_json_string_t) :: fallible_string
 
+        character(len=*), parameter :: PROCEDURE_NAME = "constructor"
         type(string_cursor_t) :: cursor
         class(json_value_t), allocatable :: json
 
@@ -35,7 +36,13 @@ contains
             fallible_string%errors = error_list_t( &
                     fallible_string%errors, &
                     module_t(MODULE_NAME), &
-                    procedure_t("constructor"))
+                    procedure_t(PROCEDURE_NAME))
+        else if (.not.cursor%finished()) then
+            fallible_string%errors = error_list_t(fatal_t( &
+                    INVALID_INPUT, &
+                    module_t(MODULE_NAME), &
+                    procedure_t(PROCEDURE_NAME), &
+                    "Unescaped quote in string: '" // string // "'"))
         else
             fallible_string%string = json_string_unsafe(string)
         end if
