@@ -7,10 +7,10 @@ copyright = "Copyright 2021, Brad Richardson"
 
 [dependencies]
 erloff = { git = "https://gitlab.com/everythingfunctional/erloff.git", tag = "v2.1.3" }
-iso_varying_string = { git = "https://gitlab.com/everythingfunctional/iso_varying_string", tag = "v4.0.0" }
+iso_varying_string = { git = "https://gitlab.com/everythingfunctional/iso_varying_string", tag = "v3.0.3" }
 
 [dev-dependencies]
-veggies = { git = "https://gitlab.com/everythingfunctional/veggies", tag = "v1.0.3" }
+veggies = { git = "https://gitlab.com/everythingfunctional/veggies", tag = "v1.0.5" }
 
 [[example]]
 name="compactor"
