@@ -16,43 +16,39 @@ module rojff_json_element_m
     end type
 
     interface json_element_t
-        module procedure constructor
+        impure elemental module function constructor(json) result(element)
+            implicit none
+            class(json_value_t), intent(in) :: json
+            type(json_element_t) :: element
+        end function
     end interface
-contains
-    impure elemental function constructor(json) result(element)
-        class(json_value_t), intent(in) :: json
-        type(json_element_t) :: element
 
-        element%json = json
-    end function
+    interface
+        module subroutine move_into_element(element, json)
+            implicit none
+            type(json_element_t), intent(out) :: element
+            class(json_value_t), allocatable, intent(inout) :: json
+        end subroutine
 
-    subroutine move_into_element(element, json)
-        type(json_element_t), intent(out) :: element
-        class(json_value_t), allocatable, intent(inout) :: json
+        recursive elemental module function equals(lhs, rhs)
+            implicit none
+            class(json_element_t), intent(in) :: lhs
+            type(json_element_t), intent(in) :: rhs
+            logical :: equals
+        end function
 
-        call move_alloc(json, element%json)
-    end subroutine
+        recursive module subroutine write_to_compactly(self, sink)
+            implicit none
+            class(json_element_t), intent(in) :: self
+            class(string_sink_t), intent(inout) :: sink
+        end subroutine
 
-    recursive elemental function equals(lhs, rhs)
-        class(json_element_t), intent(in) :: lhs
-        type(json_element_t), intent(in) :: rhs
-        logical :: equals
-
-        equals = lhs%json == rhs%json
-    end function
-
-    recursive subroutine write_to_compactly(self, sink)
-        class(json_element_t), intent(in) :: self
-        class(string_sink_t), intent(inout) :: sink
-
-        call self%json%write_to_compactly(sink)
-    end subroutine
-
-    recursive subroutine write_to_expanded(self, indentation_level, sink)
-        class(json_element_t), intent(in) :: self
-        integer, intent(in) :: indentation_level
-        class(string_sink_t), intent(inout) :: sink
-
-        call self%json%write_to_expanded(indentation_level, sink)
-    end subroutine
+        recursive module subroutine write_to_expanded( &
+                self, indentation_level, sink)
+            implicit none
+            class(json_element_t), intent(in) :: self
+            integer, intent(in) :: indentation_level
+            class(string_sink_t), intent(inout) :: sink
+        end subroutine
+    end interface
 end module
