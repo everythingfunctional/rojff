@@ -110,6 +110,7 @@ contains
                 , it("can parse an object with multiple members", check_parse_multi_object) &
                 , it("can parse data from a file", check_parse_from_file) &
                 , it("fails if there is trailing content", check_trailing_content) &
+                , it("fails if there are duplicate keys", check_duplicate_keys) &
                 ])
     end function
 
@@ -360,6 +361,16 @@ contains
         type(fallible_json_value_t) :: json
 
         json = parse_json_from_string("null # with trailing content")
+
+        result_ = assert_that(json%errors.hasType.INVALID_INPUT, json%errors%to_string())
+    end function
+
+    function check_duplicate_keys() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string('{"1" : 1, "1" : 2}')
 
         result_ = assert_that(json%errors.hasType.INVALID_INPUT, json%errors%to_string())
     end function

@@ -483,6 +483,8 @@ contains
         type(json_member_t), allocatable :: members(:)
         type(member_linked_list_t) :: parsed
         class(json_value_t), allocatable :: key
+        logical :: has_duplicates
+        integer :: i, j
 
         call skip_whitespace(cursor)
         if (cursor%finished()) then
@@ -597,7 +599,26 @@ contains
             end select
         end do
         call parsed%move_into_members(members)
-        call move_into_object(json, members)
+
+        has_duplicates = .false.
+        unique_search: do i = 2, size(members)
+            do j = 1, i-1
+                if (members(i)%key == members(j)%key) then
+                    has_duplicates = .true.
+                    exit unique_search
+                end if
+            end do
+        end do unique_search
+
+        if (has_duplicates) then
+            errors = error_list_t(fatal_t( &
+                    INVALID_INPUT, &
+                    module_t(MODULE_NAME), &
+                    procedure_t(PROCEDURE_NAME), &
+                    'Duplicate key found: "' // members(i)%key // '"'))
+        else
+            call move_into_object(json, members)
+        end if
     end subroutine
 
     function parse_json_from_file(filename) result(fallible_json)
