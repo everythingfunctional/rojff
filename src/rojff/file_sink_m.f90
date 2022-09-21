@@ -13,20 +13,18 @@ module rojff_file_sink_m
     end type
 
     interface file_sink_t
-        module procedure constructor
+        module function constructor(unit) result(file_sink)
+            implicit none
+            integer, intent(in) :: unit !! This must be (and remain) associated with an open file
+            type(file_sink_t) :: file_sink
+        end function
     end interface
-contains
-    function constructor(unit) result(file_sink)
-        integer, intent(in) :: unit !! This must be (and remain) associated with an open file
-        type(file_sink_t) :: file_sink
 
-        file_sink%unit = unit
-    end function
-
-    subroutine append(self, part)
-        class(file_sink_t), intent(inout) :: self
-        character(len=*), intent(in) :: part
-
-        write(self%unit, '(A)', advance='NO') part
-    end subroutine
+    interface
+        module subroutine append(self, part)
+            implicit none
+            class(file_sink_t), intent(inout) :: self
+            character(len=*), intent(in) :: part
+        end subroutine
+    end interface
 end module
