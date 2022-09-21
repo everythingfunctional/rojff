@@ -11,7 +11,7 @@ module rojff_json_object_m
 
     implicit none
     private
-    public :: json_object_t, move_into_object
+    public :: json_object_t, json_object_unsafe, move_into_object
 
     type, extends(json_value_t) :: json_object_t
         type(json_member_t), allocatable :: members(:)
@@ -26,6 +26,10 @@ module rojff_json_object_m
     end type
 
     interface json_object_t
+        module procedure constructor
+    end interface
+
+    interface json_object_unsafe
         module procedure constructor
     end interface
 

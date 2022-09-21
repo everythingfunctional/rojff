@@ -1,5 +1,5 @@
 module rojff_parser_m
-    use erloff, only: error_list_t, fatal_t, message_type_t, module_t, procedure_t
+    use erloff, only: error_list_t, fatal_t, module_t, procedure_t
     use iso_c_binding, only: c_char, c_double, c_ptr, c_null_char, c_null_ptr
     use rojff_cursor_m, only: cursor_t
     use rojff_fallible_json_value_m, only: &
@@ -18,18 +18,15 @@ module rojff_parser_m
     use rojff_json_value_m, only: json_value_t
     use rojff_member_linked_list_m, only: member_linked_list_t
     use rojff_string_cursor_m, only: string_cursor_t
-    use rojff_utils_m, only: to_string
+    use rojff_utils_m, only: to_string, INVALID_INPUT
 
     implicit none
     private
     public :: &
             parse_json_string, &
             parse_json_from_file, &
-            parse_json_from_string, &
-            INVALID_INPUT
+            parse_json_from_string
 
-    type(message_type_t), parameter :: INVALID_INPUT = message_type_t( &
-            "Invalid Input")
     character(len=*), parameter :: MODULE_NAME = "rojff_parser_m"
 contains
     subroutine parse_json(cursor, json, errors)

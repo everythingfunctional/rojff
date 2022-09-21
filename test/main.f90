@@ -8,6 +8,9 @@ contains
         use fallible_member_test, only: &
                 fallible_member_fallible_member => &
                     test_fallible_member
+        use fallible_object_test, only: &
+                fallible_object_fallible_object => &
+                    test_fallible_object
         use fallible_string_test, only: &
                 fallible_string_fallible_string => &
                     test_fallible_string
@@ -24,12 +27,13 @@ contains
         logical :: passed
 
         type(test_item_t) :: tests
-        type(test_item_t) :: individual_tests(4)
+        type(test_item_t) :: individual_tests(5)
 
         individual_tests(1) = fallible_member_fallible_member()
-        individual_tests(2) = fallible_string_fallible_string()
-        individual_tests(3) = json_json()
-        individual_tests(4) = parse_json_parse_json()
+        individual_tests(2) = fallible_object_fallible_object()
+        individual_tests(3) = fallible_string_fallible_string()
+        individual_tests(4) = json_json()
+        individual_tests(5) = parse_json_parse_json()
         tests = test_that(individual_tests)
 
 
