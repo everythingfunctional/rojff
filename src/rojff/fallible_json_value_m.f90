@@ -14,49 +14,39 @@ module rojff_fallible_json_value_m
     end type
 
     interface fallible_json_value_t
-        module procedure from_value
-        module procedure from_errors
-        module procedure from_fallible_json
+        module function from_value(json) result(fallible_json)
+            implicit none
+            class(json_value_t), intent(in) :: json
+            type(fallible_json_value_t) :: fallible_json
+        end function
+
+        module function from_errors(errors) result(fallible_json)
+            implicit none
+            type(error_list_t), intent(in) :: errors
+            type(fallible_json_value_t) :: fallible_json
+        end function
+
+        module function from_fallible_json( &
+                original, module_, procedure_) result(new)
+            implicit none
+            type(fallible_json_value_t), intent(in) :: original
+            type(module_t), intent(in) :: module_
+            type(procedure_t), intent(in) :: procedure_
+            type(fallible_json_value_t) :: new
+        end function
     end interface
-contains
-    function from_value(json) result(fallible_json)
-        class(json_value_t), intent(in) :: json
-        type(fallible_json_value_t) :: fallible_json
 
-        fallible_json%json = json
-    end function
+    interface
+        module subroutine move_into_fallible_json(fallible_json, json)
+            implicit none
+            type(fallible_json_value_t), intent(out) :: fallible_json
+            class(json_value_t), allocatable, intent(inout) :: json
+        end subroutine
 
-    function from_errors(errors) result(fallible_json)
-        type(error_list_t), intent(in) :: errors
-        type(fallible_json_value_t) :: fallible_json
-
-        fallible_json%errors = errors
-    end function
-
-    function from_fallible_json(original, module_, procedure_) result(new)
-        type(fallible_json_value_t), intent(in) :: original
-        type(module_t), intent(in) :: module_
-        type(procedure_t), intent(in) :: procedure_
-        type(fallible_json_value_t) :: new
-
-        if (original%failed()) then
-            new%errors = error_list_t(original%errors, module_, procedure_)
-        else
-            new%json = original%json
-        end if
-    end function
-
-    subroutine move_into_fallible_json(fallible_json, json)
-        type(fallible_json_value_t), intent(out) :: fallible_json
-        class(json_value_t), allocatable, intent(inout) :: json
-
-        call move_alloc(json, fallible_json%json)
-    end subroutine
-
-    elemental function failed(self)
-        class(fallible_json_value_t), intent(in) :: self
-        logical :: failed
-
-        failed = self%errors%has_any()
-    end function
+        elemental module function failed(self)
+            implicit none
+            class(fallible_json_value_t), intent(in) :: self
+            logical :: failed
+        end function
+    end interface
 end module
