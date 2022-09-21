@@ -1,5 +1,4 @@
 module rojff_file_cursor_m
-    use iso_fortran_env, only: iostat_end, iostat_eor
     use rojff_cursor_m, only: cursor_t
 
     implicit none
@@ -28,96 +27,52 @@ module rojff_file_cursor_m
     end type
 
     interface file_cursor_t
-        module procedure constructor
+        module function constructor(unit) result(cursor)
+            implicit none
+            integer, intent(in) :: unit !! This must be (and remain) associated with an open file
+            type(file_cursor_t) :: cursor
+        end function
     end interface
-contains
-    function constructor(unit) result(cursor)
-        integer, intent(in) :: unit !! This must be (and remain) associated with an open file
-        type(file_cursor_t) :: cursor
 
-        cursor%unit = unit
-        call cursor%read_into_buffer()
-    end function
+    interface
+        pure module function peek(self) result(next_char)
+            implicit none
+            class(file_cursor_t), intent(in) :: self
+            character(len=1) :: next_char
+        end function
 
-    pure function peek(self) result(next_char)
-        class(file_cursor_t), intent(in) :: self
-        character(len=1) :: next_char
+        module subroutine next(self)
+            implicit none
+            class(file_cursor_t), intent(inout) :: self
+        end subroutine
 
-        if (.not.self%finished()) then
-            next_char = self%buffer(self%buffer_position:self%buffer_position)
-        else
-            next_char = " "
-        end if
-    end function
+        pure module function finished(self)
+            implicit none
+            class(file_cursor_t), intent(in) :: self
+            logical :: finished
+        end function
 
-    subroutine next(self)
-        class(file_cursor_t), intent(inout) :: self
+        pure module function current_line(self)
+            implicit none
+            class(file_cursor_t), intent(in) :: self
+            integer :: current_line
+        end function
 
-        if (self%buffer_position < self%actual_buffer_length) then
-            call self%increment_position(self%peek())
-            self%buffer_position = self%buffer_position + 1
-        else
-            call self%increment_position(self%peek())
-            if (self%reached_end) then
-                self%buffer_position = self%buffer_position + 1
-            else
-                call self%read_into_buffer()
-                self%buffer_position = 1
-            end if
-        end if
-    end subroutine
+        pure module function current_column(self)
+            implicit none
+            class(file_cursor_t), intent(in) :: self
+            integer :: current_column
+        end function
 
-    pure function finished(self)
-        class(file_cursor_t), intent(in) :: self
-        logical :: finished
+        module subroutine increment_position(self, current_char)
+            implicit none
+            class(file_cursor_t), intent(inout) :: self
+            character(len=1), intent(in) :: current_char
+        end subroutine
 
-        finished = self%reached_end .and. self%buffer_position > self%actual_buffer_length
-    end function
-
-    pure function current_line(self)
-        class(file_cursor_t), intent(in) :: self
-        integer :: current_line
-
-        current_line = self%current_line_
-    end function
-
-    pure function current_column(self)
-        class(file_cursor_t), intent(in) :: self
-        integer :: current_column
-
-        current_column = self%current_column_
-    end function
-
-    subroutine increment_position(self, current_char)
-        class(file_cursor_t), intent(inout) :: self
-        character(len=1), intent(in) :: current_char
-
-        character(len=1), parameter :: TAB = char(9)
-        character(len=1), parameter :: NEWLINE = char(10)
-
-        if (current_char == NEWLINE) then
-            self%current_line_ = self%current_line_ + 1
-            self%current_column_ = 1
-        else if (current_char == TAB) then
-            self%current_column_ = self%current_column_ + 8 - mod(self%current_column_ - 1, 8)
-        else
-            self%current_column_ = self%current_column_ + 1
-        end if
-    end subroutine
-
-    subroutine read_into_buffer(self)
-        class(file_cursor_t), intent(inout) :: self
-
-        integer :: stat
-
-        read(self%unit, fmt='(A)', advance="NO", iostat=stat, size=self%actual_buffer_length) self%buffer(1:buffer_length-1)
-        if (stat == iostat_end) then
-            self%reached_end = .true.
-        else if (stat == iostat_eor) then
-            self%buffer = self%buffer(1:self%actual_buffer_length) // new_line('a')
-            self%actual_buffer_length = self%actual_buffer_length + 1
-        else if (stat /= 0) then
-            read(self%unit, *)
-        end if
-    end subroutine
+        module subroutine read_into_buffer(self)
+            implicit none
+            class(file_cursor_t), intent(inout) :: self
+        end subroutine
+    end interface
 end module
