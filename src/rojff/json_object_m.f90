@@ -11,7 +11,7 @@ module rojff_json_object_m
 
     implicit none
     private
-    public :: json_object_t, json_object_unsafe, move_into_object
+    public :: json_object_t, json_object_unsafe, move_into_object, move_into_object_unsafe
 
     type, extends(json_value_t) :: json_object_t
         type(json_member_t), allocatable :: members(:)
@@ -51,6 +51,14 @@ contains
         allocate(local)
         call move_alloc(members, local%members)
         call move_alloc(local, json)
+    end subroutine
+
+    subroutine move_into_object_unsafe(object, members)
+        type(json_object_t), allocatable, intent(out) :: object
+        type(json_member_t), allocatable, intent(inout) :: members(:)
+
+        allocate(object)
+        call move_alloc(members, object%members)
     end subroutine
 
     recursive elemental function equals(lhs, rhs)
