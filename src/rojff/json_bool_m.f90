@@ -15,61 +15,38 @@ module rojff_json_bool_m
     end type
 
     interface json_bool_t
-        module procedure constructor
+        elemental module function constructor(bool) result(json_bool)
+            implicit none
+            type(json_bool_t) :: json_bool
+            logical, intent(in) :: bool
+        end function
     end interface
-contains
-    elemental function constructor(bool) result(json_bool)
-        type(json_bool_t) :: json_bool
-        logical, intent(in) :: bool
 
-        json_bool%bool = bool
-    end function
+    interface
+        module subroutine create_json_bool(json, bool)
+            implicit none
+            class(json_value_t), allocatable, intent(out) :: json
+            logical, intent(in) :: bool
+        end subroutine
 
-    subroutine create_json_bool(json, bool)
-        class(json_value_t), allocatable, intent(out) :: json
-        logical, intent(in) :: bool
+        elemental module function equals(lhs, rhs)
+            implicit none
+            class(json_bool_t), intent(in) :: lhs
+            class(json_value_t), intent(in) :: rhs
+            logical :: equals
+        end function
 
-        type(json_bool_t), allocatable :: local
+        module subroutine write_to_compactly(self, sink)
+            implicit none
+            class(json_bool_t), intent(in) :: self
+            class(string_sink_t), intent(inout) :: sink
+        end subroutine
 
-        allocate(local)
-        local%bool = bool
-        call move_alloc(local, json)
-    end subroutine
-
-    elemental function equals(lhs, rhs)
-        class(json_bool_t), intent(in) :: lhs
-        class(json_value_t), intent(in) :: rhs
-        logical :: equals
-
-        select type (rhs)
-        type is (json_bool_t)
-            equals = lhs%bool .eqv. rhs%bool
-        class default
-            equals = .false.
-        end select
-    end function
-
-    subroutine write_to_compactly(self, sink)
-        class(json_bool_t), intent(in) :: self
-        class(string_sink_t), intent(inout) :: sink
-
-        if (self%bool) then
-            call sink%append("true")
-        else
-            call sink%append("false")
-        end if
-    end subroutine
-
-    subroutine write_to_expanded(self, indentation_level, sink)
-        class(json_bool_t), intent(in) :: self
-        integer, intent(in) :: indentation_level
-        class(string_sink_t), intent(inout) :: sink
-
-        associate(unused => indentation_level); end associate
-        if (self%bool) then
-            call sink%append("true")
-        else
-            call sink%append("false")
-        end if
-    end subroutine
+        module subroutine write_to_expanded(self, indentation_level, sink)
+            implicit none
+            class(json_bool_t), intent(in) :: self
+            integer, intent(in) :: indentation_level
+            class(string_sink_t), intent(inout) :: sink
+        end subroutine
+    end interface
 end module
