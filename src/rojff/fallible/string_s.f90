@@ -3,7 +3,6 @@ submodule(rojff_fallible_json_string_m) rojff_fallible_json_string_s
     use iso_varying_string, only: char
     use rojff_constants_m, only: INVALID_INPUT
     use rojff_json_string_m, only: json_string_unsafe
-    use rojff_json_value_m, only: json_value_t
     use rojff_parser_m, only: parse_json_string
     use rojff_string_cursor_m, only: string_cursor_t
 
@@ -14,7 +13,7 @@ contains
     module procedure from_character
         character(len=*), parameter :: PROCEDURE_NAME = "from_character"
         type(string_cursor_t) :: cursor
-        class(json_value_t), allocatable :: json
+        type(json_string_t), allocatable :: json
 
         cursor = string_cursor_t(string // '"')
         call parse_json_string(cursor, json, fallible_string%errors)

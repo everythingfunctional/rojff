@@ -12,6 +12,7 @@ module parse_json_test
             json_member_t, &
             json_null_t, &
             json_number_t, &
+            json_string_t, &
             json_object_t, &
             json_value_t, &
             create_json_integer, &
@@ -45,26 +46,26 @@ contains
     function test_parse_json() result(tests)
         type(test_item_t) :: tests
 
-        character(len=:), allocatable :: nan_str
-        character(len=:), allocatable :: neg_nan_str
-        character(len=:), allocatable :: pos_nan_str
-        character(len=:), allocatable :: inf_str
-        character(len=:), allocatable :: neg_inf_str
-        character(len=:), allocatable :: pos_inf_str
-        double precision :: nan, neg_nan, pos_nan, inf, neg_inf, pos_inf
+        ! character(len=:), allocatable :: nan_str
+        ! character(len=:), allocatable :: neg_nan_str
+        ! character(len=:), allocatable :: pos_nan_str
+        ! character(len=:), allocatable :: inf_str
+        ! character(len=:), allocatable :: neg_inf_str
+        ! character(len=:), allocatable :: pos_inf_str
+        ! double precision :: nan, neg_nan, pos_nan, inf, neg_inf, pos_inf
 
-        nan_str = "NaN"
-        neg_nan_str = "-NaN"
-        pos_nan_str = "+NaN"
-        inf_str = "Inf"
-        neg_inf_str = "-Inf"
-        pos_inf_str = "+Inf"
-        read(nan_str, *) nan
-        read(neg_nan_str, *) neg_nan
-        read(pos_nan_str, *) pos_nan
-        read(inf_str, *) inf
-        read(neg_inf_str, *) neg_inf
-        read(pos_inf_str, *) pos_inf
+        ! nan_str = "NaN"
+        ! neg_nan_str = "-NaN"
+        ! pos_nan_str = "+NaN"
+        ! inf_str = "Inf"
+        ! neg_inf_str = "-Inf"
+        ! pos_inf_str = "+Inf"
+        ! read(nan_str, *) nan
+        ! read(neg_nan_str, *) neg_nan
+        ! read(pos_nan_str, *) pos_nan
+        ! read(inf_str, *) inf
+        ! read(neg_inf_str, *) neg_inf
+        ! read(pos_inf_str, *) pos_inf
 
         tests = describe( &
                 "parse_json", &
@@ -107,6 +108,7 @@ contains
                         ], &
                         check_parse_integer) &
                 , it("can parse a string", check_parse_string) &
+                , it("parsing an invalid string fails", check_fail_string) &
                 , it("can parse an empty array", check_parse_empty_array) &
                 , it("can parse an array with a single element", check_parse_single_array) &
                 , it("can parse an array with multiple elements", check_parse_multi_array) &
@@ -270,6 +272,16 @@ contains
         if (result_%passed()) then
             result_ = assert_equals(json_string_unsafe(THE_STRING(2:len(THE_STRING)-1)), json%json)
         end if
+    end function
+
+    function check_fail_string() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string('"invalid \escape"')
+
+        result_ = assert_that(json%errors%has_any(), json%errors%to_string())
     end function
 
     function check_parse_empty_array() result(result_)
@@ -444,31 +456,39 @@ contains
 ! So for now, we doing it the long and complicated way
         type(json_member_t), allocatable :: members(:)
         type(json_element_t), allocatable :: elements(:)
+        type(json_string_t), allocatable :: string_val
 
         allocate(elements(2))
-        call create_json_string_unsafe(complex_example_, "GML")
+        call create_json_string_unsafe(string_val, "GML")
+        call move_alloc(string_val, complex_example_)
         call move_into_element(elements(1), complex_example_)
-        call create_json_string_unsafe(complex_example_, "XML")
+        call create_json_string_unsafe(string_val, "XML")
+        call move_alloc(string_val, complex_example_)
         call move_into_element(elements(2), complex_example_)
         call move_into_array(complex_example_, elements)
         allocate(members(2))
         call move_into_member_unsafe(members(2), "GlossSeeAlso", complex_example_)
         call create_json_string_unsafe( &
-                complex_example_, &
+                string_val, &
                 "A meta-markup language, used to create markup languages such as DocBook.")
+        call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(1), "para", complex_example_)
         call move_into_object(complex_example_, members)
         allocate(members(7))
         call move_into_member_unsafe(members(6), "GlossDef", complex_example_)
         call create_json_integer(complex_example_, 101)
         call move_into_member_unsafe(members(1), "ID", complex_example_)
-        call create_json_string_unsafe(complex_example_, "SGML")
+        call create_json_string_unsafe(string_val, "SGML")
+        call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(2), "SortAs", complex_example_)
-        call create_json_string_unsafe(complex_example_, "Standard Generalized Markup Language")
+        call create_json_string_unsafe(string_val, "Standard Generalized Markup Language")
+        call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(3), "GlossTerm", complex_example_)
-        call create_json_string_unsafe(complex_example_, "SGML")
+        call create_json_string_unsafe(string_val, "SGML")
+        call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(4), "Acronym", complex_example_)
-        call create_json_string_unsafe(complex_example_, "ISO 8879:1986")
+        call create_json_string_unsafe(string_val, "ISO 8879:1986")
+        call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(5), "Abbrev", complex_example_)
         call create_json_number(complex_example_, 123.456d0, 6)
         call move_into_member_unsafe(members(7), "GlossSee", complex_example_)
@@ -478,12 +498,14 @@ contains
         call move_into_object(complex_example_, members)
         allocate(members(2))
         call move_into_member_unsafe(members(2), "GlossList", complex_example_)
-        call create_json_string_unsafe(complex_example_, "S")
+        call create_json_string_unsafe(string_val, "S")
+        call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(1), "title", complex_example_)
         call move_into_object(complex_example_, members)
         allocate(members(2))
         call move_into_member_unsafe(members(2), "GlossDiv", complex_example_)
-        call create_json_string_unsafe(complex_example_, "example glossary")
+        call create_json_string_unsafe(string_val, "example glossary")
+        call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(1), "title", complex_example_)
         call move_into_object(complex_example_, members)
         allocate(members(1))

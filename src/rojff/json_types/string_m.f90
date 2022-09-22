@@ -5,7 +5,11 @@ module rojff_json_string_m
 
     implicit none
     private
-    public :: json_string_t, create_json_string_unsafe, json_string_unsafe
+    public :: &
+            json_string_t, &
+            create_json_string_unsafe, &
+            json_string_unsafe, &
+            move_into_json_string_unsafe
 
     type, extends(json_value_t) :: json_string_t
         character(len=:), allocatable :: string
@@ -29,11 +33,25 @@ module rojff_json_string_m
         end function
     end interface
 
-    interface
-        module subroutine create_json_string_unsafe(json, string)
+    interface create_json_string_unsafe
+        module subroutine create_json_string_unsafe_c(json, string)
             implicit none
-            class(json_value_t), allocatable, intent(out) :: json
+            type(json_string_t), allocatable, intent(out) :: json
             character(len=*), intent(in) :: string
+        end subroutine
+
+        module subroutine create_json_string_unsafe_s(json, string)
+            implicit none
+            type(json_string_t), allocatable, intent(out) :: json
+            type(varying_string), intent(in) :: string
+        end subroutine
+    end interface
+
+    interface
+        module subroutine move_into_json_string_unsafe(json, string)
+            implicit none
+            type(json_string_t), allocatable, intent(out) :: json
+            character(len=:), allocatable, intent(inout) :: string
         end subroutine
 
         elemental module function equals(lhs, rhs)

@@ -2,7 +2,7 @@ module rojff_parser_m
     use erloff, only: error_list_t
     use rojff_cursor_m, only: cursor_t
     use rojff_fallible_json_value_m, only: fallible_json_value_t
-    use rojff_json_value_m, only: json_value_t
+    use rojff_json_string_m, only: json_string_t
 
     implicit none
     private
@@ -24,7 +24,7 @@ module rojff_parser_m
         module subroutine parse_json_string(cursor, json, errors)
             implicit none
             class(cursor_t), intent(inout) :: cursor
-            class(json_value_t), allocatable, intent(out) :: json
+            type(json_string_t), allocatable, intent(out) :: json
             type(error_list_t), intent(out) :: errors
         end subroutine
     end interface

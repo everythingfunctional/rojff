@@ -11,12 +11,18 @@ contains
         json_string = json_string_unsafe(char(string))
     end procedure
 
-    module procedure create_json_string_unsafe
-        type(json_string_t), allocatable :: local
+    module procedure create_json_string_unsafe_c
+        allocate(json)
+        json%string = string
+    end procedure
 
-        allocate(local)
-        local%string = string
-        call move_alloc(local, json)
+    module procedure create_json_string_unsafe_s
+        call create_json_string_unsafe(json, char(string))
+    end procedure
+
+    module procedure move_into_json_string_unsafe
+        allocate(json)
+        call move_alloc(string, json%string)
     end procedure
 
     module procedure equals

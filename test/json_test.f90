@@ -147,7 +147,7 @@ contains
         type(result_t) :: result_
 
         type(json_string_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_string_t), allocatable :: created
 
         copied = json_string_unsafe("Hello")
         call create_json_string_unsafe(created, "Hello")
@@ -220,6 +220,7 @@ contains
         class(json_value_t), allocatable :: created
         type(json_element_t), allocatable :: elements(:)
         type(json_null_t), allocatable :: null_val
+        type(json_string_t), allocatable :: string_val
 
         copied = json_array_t( &
                 [ json_element_t(json_null_t()) &
@@ -231,7 +232,8 @@ contains
         call create_json_null(null_val)
         call move_alloc(null_val, created)
         call move_into_element(elements(1), created)
-        call create_json_string_unsafe(created, "Hello")
+        call create_json_string_unsafe(string_val, "Hello")
+        call move_alloc(string_val, created)
         call move_into_element(elements(2), created)
         call create_json_number(created, 2.0d0)
         call move_into_element(elements(3), created)

@@ -13,7 +13,8 @@ submodule(rojff_parser_m) rojff_parser_s
     use rojff_json_null_m, only: json_null_t, create_json_null
     use rojff_json_number_m, only: create_json_number
     use rojff_json_object_m, only: move_into_object
-    use rojff_json_string_m, only: json_string_t, create_json_string_unsafe
+    use rojff_json_string_m, only: move_into_json_string_unsafe
+    use rojff_json_value_m, only: json_value_t
     use rojff_member_linked_list_m, only: member_linked_list_t
     use rojff_string_cursor_m, only: string_cursor_t
     use rojff_utils_m, only: to_string
@@ -149,7 +150,7 @@ contains
             end select
             call cursor%next()
         end do
-        call create_json_string_unsafe(json, the_string)
+        call move_into_json_string_unsafe(json, the_string)
     end procedure
 
     subroutine parse_json(cursor, json, errors)
@@ -199,6 +200,7 @@ contains
         character(len=1) :: next_character
         type(json_null_t), allocatable :: null_val
         type(json_bool_t), allocatable :: bool_val
+        type(json_string_t), allocatable :: string_val
 
         next_character = cursor%peek()
 
@@ -216,7 +218,8 @@ contains
             call parse_json_number(cursor, json, errors)
         case ('"')
             call cursor%next()
-            call parse_json_string(cursor, json, errors)
+            call parse_json_string(cursor, string_val, errors)
+            call move_alloc(string_val, json)
         case ('[')
             call cursor%next()
             call parse_json_array(cursor, json, errors)
@@ -519,7 +522,7 @@ contains
         character(len=*), parameter :: PROCEDURE_NAME = "parse_json_object"
         type(json_member_t), allocatable :: members(:)
         type(member_linked_list_t) :: parsed
-        class(json_value_t), allocatable :: key
+        type(json_string_t), allocatable :: key
         logical :: has_duplicates
         integer :: i, j
 
@@ -564,7 +567,7 @@ contains
             else
                 call cursor%next()
             end if
-            call parse_json_string(cursor, key, errors)
+            call parse_json_string(cursor, key, errors) ! nagfor is failing to deallocate key automatically here
             if (errors%has_any()) then
                 errors = error_list_t(errors, module_t(MODULE_NAME), procedure_t(PROCEDURE_NAME))
                 return
@@ -599,12 +602,8 @@ contains
                 errors = error_list_t(errors, module_t(MODULE_NAME), procedure_t(PROCEDURE_NAME))
                 return
             end if
-            select type (key)
-            type is (json_string_t)
-                call parsed%append(key%string, json)
-            class default
-                error stop "somehow parsing a string didn't produce a string?"
-            end select
+            call parsed%append(key%string, json)
+            deallocate(key) ! This is needed because nagfor is failing to deallocate it automatically at the call above
             if (cursor%finished()) then
                 errors = error_list_t(fatal_t( &
                         INVALID_INPUT, &
