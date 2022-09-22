@@ -1,7 +1,7 @@
 module rojff_json_string_m
     use rojff_json_value_m, only: json_value_t
     use rojff_string_sink_m, only: string_sink_t
-    use iso_varying_string, only: varying_string, char
+    use iso_varying_string, only: varying_string
 
     implicit none
     private
@@ -16,62 +16,44 @@ module rojff_json_string_m
     end type
 
     interface json_string_unsafe
-        module procedure json_string_unsafe_c
-        module procedure json_string_unsafe_s
+        pure module function json_string_unsafe_c(string) result(json_string)
+            implicit none
+            character(len=*), intent(in) :: string
+            type(json_string_t) :: json_string
+        end function
+
+        elemental module function json_string_unsafe_s(string) result(json_string)
+            implicit none
+            type(varying_string), intent(in) :: string
+            type(json_string_t) :: json_string
+        end function
     end interface
 
-contains
-    pure function json_string_unsafe_c(string) result(json_string)
-        character(len=*), intent(in) :: string
-        type(json_string_t) :: json_string
+    interface
+        module subroutine create_json_string_unsafe(json, string)
+            implicit none
+            class(json_value_t), allocatable, intent(out) :: json
+            character(len=*), intent(in) :: string
+        end subroutine
 
-        json_string%string = string
-    end function
+        elemental module function equals(lhs, rhs)
+            implicit none
+            class(json_string_t), intent(in) :: lhs
+            class(json_value_t), intent(in) :: rhs
+            logical :: equals
+        end function
 
-    elemental function json_string_unsafe_s(string) result(json_string)
-        type(varying_string), intent(in) :: string
-        type(json_string_t) :: json_string
+        module subroutine write_to_compactly(self, sink)
+            implicit none
+            class(json_string_t), intent(in) :: self
+            class(string_sink_t), intent(inout) :: sink
+        end subroutine
 
-        json_string = json_string_unsafe(char(string))
-    end function
-
-    subroutine create_json_string_unsafe(json, string)
-        class(json_value_t), allocatable, intent(out) :: json
-        character(len=*), intent(in) :: string
-
-        type(json_string_t), allocatable :: local
-
-        allocate(local)
-        local%string = string
-        call move_alloc(local, json)
-    end subroutine
-
-    elemental function equals(lhs, rhs)
-        class(json_string_t), intent(in) :: lhs
-        class(json_value_t), intent(in) :: rhs
-        logical :: equals
-
-        select type (rhs)
-        type is (json_string_t)
-            equals = lhs%string == rhs%string
-        class default
-            equals = .false.
-        end select
-    end function
-
-    subroutine write_to_compactly(self, sink)
-        class(json_string_t), intent(in) :: self
-        class(string_sink_t), intent(inout) :: sink
-
-        call sink%append('"' // self%string // '"')
-    end subroutine
-
-    subroutine write_to_expanded(self, indentation_level, sink)
-        class(json_string_t), intent(in) :: self
-        integer, intent(in) :: indentation_level
-        class(string_sink_t), intent(inout) :: sink
-
-        associate(unused => indentation_level); end associate
-        call sink%append('"' // self%string // '"')
-    end subroutine
+        module subroutine write_to_expanded(self, indentation_level, sink)
+            implicit none
+            class(json_string_t), intent(in) :: self
+            integer, intent(in) :: indentation_level
+            class(string_sink_t), intent(inout) :: sink
+        end subroutine
+    end interface
 end module
