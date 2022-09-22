@@ -19,6 +19,7 @@ module json_test
             create_json_number, &
             create_json_string_unsafe, &
             json_member_unsafe, &
+            json_object_unsafe, &
             json_string_unsafe, &
             move_into_array, &
             move_into_element, &
@@ -258,7 +259,7 @@ contains
         type(json_member_t), allocatable :: members(:)
         type(json_number_t), allocatable :: num_val
 
-        copied = json_object_t( &
+        copied = json_object_unsafe( &
                 [ json_member_unsafe("sayHello", json_bool_t(.true.)) &
                 , json_member_unsafe("aNumber", json_number_t(3.0d0)) &
                 ])
@@ -302,10 +303,10 @@ contains
         type(json_null_t), allocatable :: null_val
         type(json_number_t), allocatable :: num_val
 
-        copied = json_object_t( &
+        copied = json_object_unsafe( &
                 [ json_member_unsafe("Hello", json_array_t( &
                         [ json_element_t(json_null_t()) &
-                        , json_element_t(json_object_t([json_member_unsafe("World", json_number_t(1.0d0))])) &
+                        , json_element_t(json_object_unsafe([json_member_unsafe("World", json_number_t(1.0d0))])) &
                         , json_element_t(json_bool_t(.true.)) &
                         ])) &
                 ])
@@ -356,10 +357,10 @@ contains
         type(json_null_t), allocatable :: null_val
         type(json_number_t), allocatable :: num_val
 
-        copied = json_object_t( &
+        copied = json_object_unsafe( &
                 [ json_member_unsafe("Hello", json_array_t( &
                         [ json_element_t(json_null_t()) &
-                        , json_element_t(json_object_t([json_member_unsafe("World", json_number_t(1.0d0))])) &
+                        , json_element_t(json_object_unsafe([json_member_unsafe("World", json_number_t(1.0d0))])) &
                         , json_element_t(json_bool_t(.true.)) &
                         ])) &
                 ])
@@ -455,7 +456,7 @@ contains
         type(json_object_t) :: object
         type(fallible_json_value_t) :: retrieved
 
-        object = json_object_t( &
+        object = json_object_unsafe( &
                 [ json_member_unsafe("first", json_string_unsafe("hello")) &
                 , json_member_unsafe("second", json_string_unsafe("goodbye")) &
                 ])
@@ -477,7 +478,7 @@ contains
         type(json_object_t) :: object
         type(json_element_t), allocatable :: values(:)
 
-        object = json_object_t( &
+        object = json_object_unsafe( &
                 [ json_member_unsafe("first", json_string_unsafe("hello")) &
                 , json_member_unsafe("second", json_string_unsafe("world")) &
                 , json_member_unsafe("third", json_string_unsafe("goodbye")) &
@@ -501,7 +502,7 @@ contains
         type(json_object_t) :: object
         type(fallible_json_value_t) :: retrieved
 
-        object = json_object_t( &
+        object = json_object_unsafe( &
                 [ json_member_unsafe("first", json_string_unsafe("hello")) &
                 , json_member_unsafe("second", json_string_unsafe("goodbye")) &
                 ])

@@ -3,6 +3,12 @@ submodule(rojff_json_member_m) rojff_json_member_s
 
     implicit none
 contains
+    module procedure deleted
+        associate(unused => key); end associate
+        associate(unused => value_); end associate
+        error stop "Do not use the intrinsic structure constructor!"
+    end procedure
+
     module procedure construct_v
         json_member%key = key%string
         json_member%value_ = value_

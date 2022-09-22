@@ -23,15 +23,19 @@ module rojff_json_object_m
     end type
 
     interface json_object_t
+        module function deleted(members)
+            implicit none
+            type(json_member_t), intent(in) :: members(:)
+            type(json_object_t) :: deleted
+        end function
+    end interface
+
+    interface json_object_unsafe
         module function constructor(members) result(json_object)
             implicit none
             type(json_member_t), intent(in) :: members(:)
             type(json_object_t) :: json_object
         end function
-    end interface
-
-    interface json_object_unsafe
-        module procedure constructor
     end interface
 
     interface

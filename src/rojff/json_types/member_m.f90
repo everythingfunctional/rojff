@@ -24,6 +24,13 @@ module rojff_json_member_m
     end type
 
     interface json_member_t
+        module function deleted(key, value_)
+            implicit none
+            character(len=*), intent(in) :: key
+            class(json_value_t), intent(in) :: value_
+            type(json_member_t) :: deleted
+        end function
+
         impure elemental module function construct_v( &
                 key, value_) result(json_member)
             implicit none

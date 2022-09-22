@@ -19,6 +19,14 @@ module rojff_json_string_m
         procedure :: write_to_expanded
     end type
 
+    interface json_string_t
+        module function deleted(string)
+            implicit none
+            character(len=*), intent(in) :: string
+            type(json_string_t) :: deleted
+        end function
+    end interface
+
     interface json_string_unsafe
         pure module function json_string_unsafe_c(string) result(json_string)
             implicit none

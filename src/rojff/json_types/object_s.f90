@@ -7,6 +7,11 @@ submodule(rojff_json_object_m) rojff_json_object_s
 
     character(len=*), parameter :: MODULE_NAME = "rojff_json_object_m"
 contains
+    module procedure deleted
+        associate(unused => members); end associate
+        error stop "Do not use the intrinsic structure constructor!"
+    end procedure
+
     module procedure constructor
         allocate(json_object%members, source = members)
     end procedure

@@ -3,6 +3,11 @@ submodule(rojff_json_string_m) rojff_json_string_s
 
     implicit none
 contains
+    module procedure deleted
+        associate(unused => string); end associate
+        error stop "Do not use the intrinsic structure constructor!"
+    end procedure
+
     module procedure json_string_unsafe_c
         json_string%string = string
     end procedure

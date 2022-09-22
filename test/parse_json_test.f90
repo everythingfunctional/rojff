@@ -19,6 +19,7 @@ module parse_json_test
             create_json_number, &
             create_json_string_unsafe, &
             json_member_unsafe, &
+            json_object_unsafe, &
             json_string_unsafe, &
             move_into_array, &
             move_into_element, &
@@ -364,7 +365,7 @@ contains
 
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_object_t(empty_members), json%json)
+            result_ = assert_equals(json_object_unsafe(empty_members), json%json)
         end if
     end function
 
@@ -378,7 +379,7 @@ contains
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
             result_ = assert_equals( &
-                    json_object_t([json_member_unsafe("first", json_null_t())]), &
+                    json_object_unsafe([json_member_unsafe("first", json_null_t())]), &
                     json%json)
         end if
     end function
@@ -393,7 +394,7 @@ contains
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
             result_ = assert_equals( &
-                    json_object_t( &
+                    json_object_unsafe( &
                             [ json_member_unsafe("first", json_null_t()) &
                             , json_member_unsafe("second", json_null_t()) &
                             , json_member_unsafe("third", json_null_t()) &
