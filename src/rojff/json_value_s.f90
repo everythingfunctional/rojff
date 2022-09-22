@@ -1,11 +1,11 @@
 submodule(rojff_json_value_m) rojff_json_value_s
     use rojff_file_sink_m, only: file_sink_t
-    use rojff_string_builder_m, only: string_builder_t
+    use rojff_string_sink_m, only: string_sink_t
 
     implicit none
 contains
     module procedure to_compact_string
-        type(string_builder_t) :: sink
+        type(string_sink_t) :: sink
 
         call self%write_to_compactly(sink)
         call sink%move_into(string)
@@ -89,7 +89,7 @@ contains
     end procedure
 
     module procedure to_expanded_string
-        type(string_builder_t) :: sink
+        type(string_sink_t) :: sink
 
         call self%write_to_expanded(0, sink)
         call sink%move_into(string)

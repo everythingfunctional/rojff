@@ -1,4 +1,4 @@
-submodule(rojff_string_builder_m) rojff_string_builder_s
+submodule(rojff_string_sink_m) rojff_string_sink_s
     implicit none
 contains
     module procedure append
