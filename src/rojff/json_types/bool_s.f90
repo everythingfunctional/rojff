@@ -6,11 +6,8 @@ contains
     end procedure
 
     module procedure create_json_bool
-        type(json_bool_t), allocatable :: local
-
-        allocate(local)
-        local%bool = bool
-        call move_alloc(local, json)
+        allocate(json)
+        json%bool = bool
     end procedure
 
     module procedure equals

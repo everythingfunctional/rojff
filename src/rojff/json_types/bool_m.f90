@@ -25,7 +25,7 @@ module rojff_json_bool_m
     interface
         module subroutine create_json_bool(json, bool)
             implicit none
-            class(json_value_t), allocatable, intent(out) :: json
+            type(json_bool_t), allocatable, intent(out) :: json
             logical, intent(in) :: bool
         end subroutine
 

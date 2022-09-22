@@ -5,7 +5,7 @@ submodule(rojff_parser_m) rojff_parser_s
     use rojff_fallible_json_value_m, only: move_into_fallible_json
     use rojff_file_cursor_m, only: file_cursor_t
     use rojff_json_array_m, only: move_into_array
-    use rojff_json_bool_m, only: create_json_bool
+    use rojff_json_bool_m, only: json_bool_t, create_json_bool
     use rojff_json_element_m, only: json_element_t
     use rojff_json_integer_m, only: create_json_integer
     use rojff_json_linked_list_m, only: json_linked_list_t
@@ -198,6 +198,7 @@ contains
         character(len=*), parameter :: PROCEDURE_NAME = "parse_json_value"
         character(len=1) :: next_character
         type(json_null_t), allocatable :: null_val
+        type(json_bool_t), allocatable :: bool_val
 
         next_character = cursor%peek()
 
@@ -206,9 +207,11 @@ contains
             call parse_json_null(cursor, null_val, errors)
             call move_alloc(null_val, json)
         case ("t")
-            call parse_json_true(cursor, json, errors)
+            call parse_json_true(cursor, bool_val, errors)
+            call move_alloc(bool_val, json)
         case ("f")
-            call parse_json_false(cursor, json, errors)
+            call parse_json_false(cursor, bool_val, errors)
+            call move_alloc(bool_val, json)
         case ("+", "-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "N", "I")
             call parse_json_number(cursor, json, errors)
         case ('"')
@@ -244,7 +247,6 @@ contains
         type(error_list_t), intent(out) :: errors
 
         character(len=4) :: null_string
-        type(json_null_t), allocatable :: null_val
         integer :: starting_line, starting_column, i
 
         starting_line = cursor%current_line()
@@ -271,7 +273,7 @@ contains
 
     subroutine parse_json_true(cursor, json, errors)
         class(cursor_t), intent(inout) :: cursor
-        class(json_value_t), allocatable, intent(out) :: json
+        type(json_bool_t), allocatable, intent(out) :: json
         type(error_list_t), intent(out) :: errors
 
         character(len=4) :: true_string
@@ -301,7 +303,7 @@ contains
 
     subroutine parse_json_false(cursor, json, errors)
         class(cursor_t), intent(inout) :: cursor
-        class(json_value_t), allocatable, intent(out) :: json
+        type(json_bool_t), allocatable, intent(out) :: json
         type(error_list_t), intent(out) :: errors
 
         character(len=5) :: false_string

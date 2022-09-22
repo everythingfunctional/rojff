@@ -119,7 +119,7 @@ contains
         type(result_t) :: result_
 
         type(json_bool_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_bool_t), allocatable :: created
 
         copied = json_bool_t(.true.)
         call create_json_bool(created, .true.)
@@ -133,7 +133,7 @@ contains
         type(result_t) :: result_
 
         type(json_bool_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_bool_t), allocatable :: created
 
         copied = json_bool_t(.false.)
         call create_json_bool(created, .false.)
@@ -246,6 +246,7 @@ contains
         type(result_t) :: result_
 
         type(json_object_t) :: copied
+        type(json_bool_t), allocatable :: bool_val
         character(len=:), allocatable :: copied_string
         class(json_value_t), allocatable :: created
         character(len=:), allocatable :: created_string
@@ -257,7 +258,8 @@ contains
                 ])
 
         allocate(members(2))
-        call create_json_bool(created, .true.)
+        call create_json_bool(bool_val, .true.)
+        call move_alloc(bool_val, created)
         call move_into_member_unsafe(members(1), "sayHello", created)
         call create_json_number(created, 3.0d0)
         call move_into_member_unsafe(members(2), "aNumber", created)
@@ -285,6 +287,7 @@ contains
         character(len=*), parameter :: EXPECTED = &
                 '{"Hello":[null,{"World":1.0},true]}'
         type(json_object_t) :: copied
+        type(json_bool_t), allocatable :: bool_val
         class(json_value_t), allocatable :: created
         type(json_element_t), allocatable :: elements(:)
         type(json_member_t), allocatable :: members(:)
@@ -307,7 +310,8 @@ contains
         call move_into_member_unsafe(members(1), "World", created)
         call move_into_object(created, members)
         call move_into_element(elements(2), created)
-        call create_json_bool(created, .true.)
+        call create_json_bool(bool_val, .true.)
+        call move_alloc(bool_val, created)
         call move_into_element(elements(3), created)
         call move_into_array(created, elements)
         allocate(members(1))
@@ -333,6 +337,7 @@ contains
 // '    ]' // NEWLINE &
 // '}'
         type(json_object_t) :: copied
+        type(json_bool_t), allocatable :: bool_val
         class(json_value_t), allocatable :: created
         type(json_element_t), allocatable :: elements(:)
         type(json_member_t), allocatable :: members(:)
@@ -355,7 +360,8 @@ contains
         call move_into_member_unsafe(members(1), "World", created)
         call move_into_object(created, members)
         call move_into_element(elements(2), created)
-        call create_json_bool(created, .true.)
+        call create_json_bool(bool_val, .true.)
+        call move_alloc(bool_val, created)
         call move_into_element(elements(3), created)
         call move_into_array(created, elements)
         allocate(members(1))
