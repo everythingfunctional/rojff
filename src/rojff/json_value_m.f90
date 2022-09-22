@@ -1,6 +1,4 @@
 module rojff_json_value_m
-    use rojff_file_sink_m, only: file_sink_t
-    use rojff_string_builder_m, only: string_builder_t
     use rojff_string_sink_m, only: string_sink_t
 
     implicit none
@@ -48,194 +46,36 @@ module rojff_json_value_m
             class(string_sink_t), intent(inout) :: sink
         end subroutine
     end interface
-contains
-    function to_compact_string(self) result(string)
-        class(json_value_t), intent(in) :: self
-        character(len=:), allocatable :: string
 
-        type(string_builder_t) :: sink
-        character(len=:), allocatable :: string_
+    interface
+        module function to_compact_string(self) result(string)
+            implicit none
+            class(json_value_t), intent(in) :: self
+            character(len=:), allocatable :: string
+        end function
 
-        call self%write_to_compactly(sink)
-        call sink%move_into(string_)
-        call move_alloc(string_, string)
-    end function
+        module subroutine save_compactly_to(self, file, status, iostat, iomsg)
+            implicit none
+            class(json_value_t), intent(in) :: self
+            character(len=*), intent(in) :: file
+            character(len=*), optional, intent(in) :: status
+            integer, optional, intent(out) :: iostat
+            character(len=:), allocatable, optional, intent(out) :: iomsg
+        end subroutine
 
-    subroutine save_compactly_to(self, file, status, iostat, iomsg)
-        class(json_value_t), intent(in) :: self
-        character(len=*), intent(in) :: file
-        character(len=*), optional, intent(in) :: status
-        integer, optional, intent(out) :: iostat
-        character(len=:), allocatable, optional, intent(out) :: iomsg
+        module function to_expanded_string(self) result(string)
+            implicit none
+            class(json_value_t), intent(in) :: self
+            character(len=:), allocatable :: string
+        end function
 
-        type(file_sink_t) :: sink
-        integer :: unit
-
-        if (present(status)) then
-            if (present(iostat)) then
-                if (present(iomsg)) then
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            status=status, &
-                            iostat=iostat, &
-                            iomsg=iomsg, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
-                else
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            status=status, &
-                            iostat=iostat, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
-                end if
-            else
-                if (present(iomsg)) then
-                    error stop "IOMSG= has no effect without IOSTAT="
-                else
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            status=status, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
-                end if
-            end if
-        else
-            if (present(iostat)) then
-                if (present(iomsg)) then
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            iostat=iostat, &
-                            iomsg=iomsg, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
-                else
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            iostat=iostat, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
-                end if
-            else
-                if (present(iomsg)) then
-                    error stop "IOMSG= has no effect without IOSTAT="
-                else
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
-                end if
-            end if
-        end if
-        sink = file_sink_t(unit)
-        call self%write_to_compactly(sink)
-        close(unit, status="KEEP")
-    end subroutine
-
-    function to_expanded_string(self) result(string)
-        class(json_value_t), intent(in) :: self
-        character(len=:), allocatable :: string
-
-        type(string_builder_t) :: sink
-        character(len=:), allocatable :: string_
-
-        call self%write_to_expanded(0, sink)
-        call sink%move_into(string_)
-        call move_alloc(string_, string)
-    end function
-
-    subroutine save_expanded_to(self, file, status, iostat, iomsg)
-        class(json_value_t), intent(in) :: self
-        character(len=*), intent(in) :: file
-        character(len=*), optional, intent(in) :: status
-        integer, optional, intent(out) :: iostat
-        character(len=:), allocatable, optional, intent(out) :: iomsg
-
-        type(file_sink_t) :: sink
-        integer :: unit
-
-        if (present(status)) then
-            if (present(iostat)) then
-                if (present(iomsg)) then
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            status=status, &
-                            iostat=iostat, &
-                            iomsg=iomsg, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
-                else
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            status=status, &
-                            iostat=iostat, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
-                end if
-            else
-                if (present(iomsg)) then
-                    error stop "IOMSG= has no effect without IOSTAT="
-                else
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            status=status, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
-                end if
-            end if
-        else
-            if (present(iostat)) then
-                if (present(iomsg)) then
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            iostat=iostat, &
-                            iomsg=iomsg, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
-                else
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            iostat=iostat, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
-                end if
-            else
-                if (present(iomsg)) then
-                    error stop "IOMSG= has no effect without IOSTAT="
-                else
-                    open( &
-                            newunit=unit, &
-                            file=file, &
-                            action="WRITE", &
-                            access="STREAM", &
-                            form="FORMATTED")
-                end if
-            end if
-        end if
-        sink = file_sink_t(unit)
-        call self%write_to_expanded(0, sink)
-        close(unit, status="KEEP")
-    end subroutine
+        module subroutine save_expanded_to(self, file, status, iostat, iomsg)
+            implicit none
+            class(json_value_t), intent(in) :: self
+            character(len=*), intent(in) :: file
+            character(len=*), optional, intent(in) :: status
+            integer, optional, intent(out) :: iostat
+            character(len=:), allocatable, optional, intent(out) :: iomsg
+        end subroutine
+    end interface
 end module
