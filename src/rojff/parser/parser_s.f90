@@ -1,6 +1,7 @@
 submodule(rojff_parser_m) rojff_parser_s
     use erloff, only: fatal_t, module_t, procedure_t
     use iso_c_binding, only: c_char, c_double, c_ptr, c_null_char, c_null_ptr
+    use rojff_constants_m, only: INVALID_INPUT
     use rojff_fallible_json_value_m, only: move_into_fallible_json
     use rojff_file_cursor_m, only: file_cursor_t
     use rojff_json_array_m, only: move_into_array
@@ -15,7 +16,7 @@ submodule(rojff_parser_m) rojff_parser_s
     use rojff_json_string_m, only: json_string_t, create_json_string_unsafe
     use rojff_member_linked_list_m, only: member_linked_list_t
     use rojff_string_cursor_m, only: string_cursor_t
-    use rojff_utils_m, only: to_string, INVALID_INPUT
+    use rojff_utils_m, only: to_string
 
     implicit none
 

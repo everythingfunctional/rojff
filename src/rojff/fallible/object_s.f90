@@ -1,7 +1,7 @@
 submodule(rojff_fallible_json_object_m) rojff_fallible_json_object_s
     use erloff, only: fatal_t
+    use rojff_constants_m, only: INVALID_INPUT
     use rojff_json_object_m, only: move_into_object_unsafe
-    use rojff_utils_m, only: INVALID_INPUT
 
     implicit none
 

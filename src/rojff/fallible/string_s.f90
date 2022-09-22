@@ -1,11 +1,11 @@
 submodule(rojff_fallible_json_string_m) rojff_fallible_json_string_s
     use erloff, only: fatal_t
     use iso_varying_string, only: char
+    use rojff_constants_m, only: INVALID_INPUT
     use rojff_json_string_m, only: json_string_unsafe
     use rojff_json_value_m, only: json_value_t
     use rojff_parser_m, only: parse_json_string
     use rojff_string_cursor_m, only: string_cursor_t
-    use rojff_utils_m, only: INVALID_INPUT
 
     implicit none
 

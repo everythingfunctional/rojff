@@ -1,4 +1,5 @@
 module rojff
+    use rojff_constants_m, only: INVALID_INPUT
     use rojff_cursor_m, only: cursor_t
     use rojff_fallible_json_member_m, only: fallible_json_member_t
     use rojff_fallible_json_object_m, only: fallible_json_object_t
@@ -21,5 +22,4 @@ module rojff
     use rojff_parser_m, only: &
             parse_json_from_file, parse_json_from_string
     use rojff_string_cursor_m, only: string_cursor_t
-    use rojff_utils_m, only: INVALID_INPUT
 end module

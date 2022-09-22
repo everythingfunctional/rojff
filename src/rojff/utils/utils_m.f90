@@ -1,12 +1,7 @@
 module rojff_utils_m
-    use erloff, only: message_type_t
-
     implicit none
     private
-    public :: is_nan, to_string, INVALID_INPUT
-
-    type(message_type_t), parameter :: INVALID_INPUT = message_type_t( &
-            "Invalid Input")
+    public :: is_nan, to_string
 
     interface to_string
         pure module function integer_to_string(number) result(string)
