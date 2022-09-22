@@ -73,6 +73,8 @@ contains
                 , it("parsing 'nul' fails", check_fail_null) &
                 , it("can parse true", check_parse_true) &
                 , it("can parse false", check_parse_false) &
+                , it("parsing 'tru' fails", check_fail_true) &
+                , it("parsing 'fals' fails", check_fail_false) &
                 , it( &
                         "can parse a variety of numbers", &
                         [ example_t(number_input_t("0.0", 0.0d0)) &
@@ -174,6 +176,26 @@ contains
         if (result_%passed()) then
             result_ = assert_equals(json_bool_t(.false.), json%json)
         end if
+    end function
+
+    function check_fail_true() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string("tru")
+
+        result_ = assert_that(json%errors%has_any(), json%errors%to_string())
+    end function
+
+    function check_fail_false() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string("fals")
+
+        result_ = assert_that(json%errors%has_any(), json%errors%to_string())
     end function
 
     function check_parse_number(input) result(result_)
