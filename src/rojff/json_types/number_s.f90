@@ -15,17 +15,14 @@ contains
     end procedure
 
     module procedure create_json_number
-        type(json_number_t), allocatable :: local
-
-        allocate(local)
-        local%number = number
+        allocate(json)
+        json%number = number
         if (present(precision)) then
-            local%precision = precision
-            local%precision_provided = .true.
+            json%precision = precision
+            json%precision_provided = .true.
         else
-            local%precision_provided = .false.
+            json%precision_provided = .false.
         end if
-        call move_alloc(local, json)
     end procedure
 
     module procedure equals

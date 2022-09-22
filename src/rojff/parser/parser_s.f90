@@ -1,17 +1,17 @@
 submodule(rojff_parser_m) rojff_parser_s
     use erloff, only: fatal_t, module_t, procedure_t
-    use iso_c_binding, only: c_char, c_double, c_ptr, c_null_char, c_null_ptr
+    ! use iso_c_binding, only: c_char, c_double, c_ptr, c_null_char, c_null_ptr
     use rojff_constants_m, only: INVALID_INPUT
     use rojff_fallible_json_value_m, only: move_into_fallible_json
     use rojff_file_cursor_m, only: file_cursor_t
     use rojff_json_array_m, only: move_into_array
     use rojff_json_bool_m, only: json_bool_t, create_json_bool
     use rojff_json_element_m, only: json_element_t
-    use rojff_json_integer_m, only: create_json_integer
+    use rojff_json_integer_m, only: json_integer_t, create_json_integer
     use rojff_json_linked_list_m, only: json_linked_list_t
     use rojff_json_member_m, only: json_member_t
     use rojff_json_null_m, only: json_null_t, create_json_null
-    use rojff_json_number_m, only: create_json_number
+    use rojff_json_number_m, only: json_number_t, create_json_number
     use rojff_json_object_m, only: move_into_object
     use rojff_json_string_m, only: move_into_json_string_unsafe
     use rojff_json_value_m, only: json_value_t
@@ -339,15 +339,15 @@ contains
         class(json_value_t), allocatable, intent(out) :: json
         type(error_list_t), intent(out) :: errors
 
-        interface
-            function strtod( str, endptr ) result(d) bind(C, name="strtod" )
-                ! <stdlib.h> :: double strtod(const char *str, char **endptr)
-                import
-                character(kind=c_char,len=1),dimension(*),intent(in) :: str
-                type(c_ptr), intent(inout) :: endptr
-                real(c_double) :: d
-            end function strtod
-        end interface
+        ! interface
+        !     function strtod( str, endptr ) result(d) bind(C, name="strtod" )
+        !         ! <stdlib.h> :: double strtod(const char *str, char **endptr)
+        !         import
+        !         character(kind=c_char,len=1),dimension(*),intent(in) :: str
+        !         type(c_ptr), intent(inout) :: endptr
+        !         real(c_double) :: d
+        !     end function strtod
+        ! end interface
 
         character(len=*), parameter :: NUMBER_SYMBOLS = "0123456789+-.eENaInf"
         character(len=*), parameter :: PROCEDURE_NAME = "parse_json_number"
@@ -355,7 +355,9 @@ contains
         character(len=:), allocatable :: number_string
         integer :: starting_line, starting_column, stat, number_i, precision, exponent_location
         double precision :: number_d
-        type(c_ptr) :: endptr
+        ! type(c_ptr) :: endptr
+        type(json_integer_t), allocatable :: int_val
+        type(json_number_t), allocatable :: num_val
 
         starting_line = cursor%current_line()
         starting_column = cursor%current_column()
@@ -379,7 +381,8 @@ contains
                 .or. number_string == "-Inf") then
             read(number_string, *, iostat=stat) number_d
             if (stat == 0) then
-                call create_json_number(json, number_d)
+                call create_json_number(num_val, number_d)
+                call move_alloc(num_val, json)
             else
                 errors = error_list_t(fatal_t( &
                         INVALID_INPUT, &
@@ -396,7 +399,8 @@ contains
                 .and. index(number_string, ".") == 0) then
             read(number_string, *, iostat=stat) number_i
             if (stat == 0) then
-                call create_json_integer(json, number_i)
+                call create_json_integer(int_val, number_i)
+                call move_alloc(int_val, json)
             else
                 errors = error_list_t(fatal_t( &
                         INVALID_INPUT, &
@@ -408,13 +412,15 @@ contains
                         // " as an integer"))
             end if
         else
-            endptr = c_null_ptr
-            number_d = strtod(number_string // c_null_char, endptr)
-            if ((.not. number_d < 0.0d0) .and. (.not. number_d > 0.0d0)) then
-                read(number_string, *, iostat=stat) number_d  ! not efficient - might really be 0.0
-            else
-                stat = 0
-            end if
+            ! This would have higher performance, but it's not catching errors sufficiently
+            ! endptr = c_null_ptr
+            ! number_d = strtod(number_string // c_null_char, endptr)
+            ! if ((.not. number_d < 0.0d0) .and. (.not. number_d > 0.0d0)) then
+            !     read(number_string, *, iostat=stat) number_d  ! not efficient - might really be 0.0
+            ! else
+            !     stat = 0
+            ! end if
+            read(number_string, *, iostat=stat) number_d  ! not efficient - might really be 0.0
             if (stat == 0) then
                 exponent_location = index(number_string, "e")
                 if (exponent_location == 0) exponent_location = index(number_string, "E")
@@ -423,7 +429,8 @@ contains
                 else
                     precision = exponent_location - merge(1, 2, index(number_string, ".") == 0)
                 end if
-                call create_json_number(json, number_d, precision)
+                call create_json_number(num_val, number_d, precision)
+                call move_alloc(num_val, json)
             else
                 errors = error_list_t(fatal_t( &
                         INVALID_INPUT, &

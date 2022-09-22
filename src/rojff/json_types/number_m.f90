@@ -20,16 +20,16 @@ module rojff_json_number_m
         elemental module function constructor( &
                 number, precision) result(json_number)
             implicit none
-            type(json_number_t) :: json_number
             double precision, intent(in) :: number
             integer, optional, intent(in) :: precision
+            type(json_number_t) :: json_number
         end function
     end interface
 
     interface
         module subroutine create_json_number(json, number, precision)
             implicit none
-            class(json_value_t), allocatable, intent(out) :: json
+            type(json_number_t), allocatable, intent(out) :: json
             double precision, intent(in) :: number
             integer, optional, intent(in) :: precision
         end subroutine

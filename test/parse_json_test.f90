@@ -100,6 +100,7 @@ contains
                 , it( &
                         "when parsing a number, tracks how many digits of precision there were", &
                         check_number_significant_digits) &
+                , it("parsing an invalid number fails", check_fail_number) &
                 , it( &
                         "can parse a variety of integers", &
                         [ example_t(integer_input_t("0", 0)) &
@@ -107,6 +108,7 @@ contains
                         , example_t(integer_input_t("3", 3)) &
                         ], &
                         check_parse_integer) &
+                , it("parsing an invalid integer fails", check_fail_integer) &
                 , it("can parse a string", check_parse_string) &
                 , it("parsing an invalid string fails", check_fail_string) &
                 , it("can parse an empty array", check_parse_empty_array) &
@@ -238,6 +240,16 @@ contains
         end if
     end function
 
+    function check_fail_number() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string("1.0.e.1")
+
+        result_ = assert_that(json%errors%has_any(), json%errors%to_string())
+    end function
+
     function check_parse_integer(input) result(result_)
         class(input_t), intent(in) :: input
         type(result_t) :: result_
@@ -257,6 +269,16 @@ contains
         class default
             result_ = fail("Expected to get a integer_input_t")
         end select
+    end function
+
+    function check_fail_integer() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string("1a2")
+
+        result_ = assert_that(json%errors%has_any(), json%errors%to_string())
     end function
 
     function check_parse_string() result(result_)
@@ -456,6 +478,8 @@ contains
 ! So for now, we doing it the long and complicated way
         type(json_member_t), allocatable :: members(:)
         type(json_element_t), allocatable :: elements(:)
+        type(json_integer_t), allocatable :: int_val
+        type(json_number_t), allocatable :: num_val
         type(json_string_t), allocatable :: string_val
 
         allocate(elements(2))
@@ -476,7 +500,8 @@ contains
         call move_into_object(complex_example_, members)
         allocate(members(7))
         call move_into_member_unsafe(members(6), "GlossDef", complex_example_)
-        call create_json_integer(complex_example_, 101)
+        call create_json_integer(int_val, 101)
+        call move_alloc(int_val, complex_example_)
         call move_into_member_unsafe(members(1), "ID", complex_example_)
         call create_json_string_unsafe(string_val, "SGML")
         call move_alloc(string_val, complex_example_)
@@ -490,7 +515,8 @@ contains
         call create_json_string_unsafe(string_val, "ISO 8879:1986")
         call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(5), "Abbrev", complex_example_)
-        call create_json_number(complex_example_, 123.456d0, 6)
+        call create_json_number(num_val, 123.456d0, 6)
+        call move_alloc(num_val, complex_example_)
         call move_into_member_unsafe(members(7), "GlossSee", complex_example_)
         call move_into_object(complex_example_, members)
         allocate(members(1))

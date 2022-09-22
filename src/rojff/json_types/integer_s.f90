@@ -6,11 +6,8 @@ contains
     end procedure
 
     module procedure create_json_integer
-        type(json_integer_t), allocatable :: local
-
-        allocate(local)
-        local%number = number
-        call move_alloc(local, json)
+        allocate(json)
+        json%number = number
     end procedure
 
     module procedure equals

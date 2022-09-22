@@ -17,8 +17,8 @@ module rojff_json_bool_m
     interface json_bool_t
         elemental module function constructor(bool) result(json_bool)
             implicit none
-            type(json_bool_t) :: json_bool
             logical, intent(in) :: bool
+            type(json_bool_t) :: json_bool
         end function
     end interface
 

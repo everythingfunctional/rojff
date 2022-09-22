@@ -175,7 +175,7 @@ contains
         type(result_t) :: result_
 
         type(json_number_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_number_t), allocatable :: created
 
         copied = json_number_t(1.0d0)
         call create_json_number(created, 1.0d0)
@@ -189,7 +189,7 @@ contains
         type(result_t) :: result_
 
         type(json_number_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_number_t), allocatable :: created
 
         copied = json_number_t(1.234d0, 3)
         call create_json_number(created, 1.234d0, 3)
@@ -203,7 +203,7 @@ contains
         type(result_t) :: result_
 
         type(json_integer_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_integer_t), allocatable :: created
 
         copied = json_integer_t(1)
         call create_json_integer(created, 1)
@@ -220,6 +220,7 @@ contains
         class(json_value_t), allocatable :: created
         type(json_element_t), allocatable :: elements(:)
         type(json_null_t), allocatable :: null_val
+        type(json_number_t), allocatable :: num_val
         type(json_string_t), allocatable :: string_val
 
         copied = json_array_t( &
@@ -235,7 +236,8 @@ contains
         call create_json_string_unsafe(string_val, "Hello")
         call move_alloc(string_val, created)
         call move_into_element(elements(2), created)
-        call create_json_number(created, 2.0d0)
+        call create_json_number(num_val, 2.0d0)
+        call move_alloc(num_val, created)
         call move_into_element(elements(3), created)
         call move_into_array(created, elements)
 
@@ -253,6 +255,7 @@ contains
         class(json_value_t), allocatable :: created
         character(len=:), allocatable :: created_string
         type(json_member_t), allocatable :: members(:)
+        type(json_number_t), allocatable :: num_val
 
         copied = json_object_t( &
                 [ json_member_unsafe("sayHello", json_bool_t(.true.)) &
@@ -263,7 +266,8 @@ contains
         call create_json_bool(bool_val, .true.)
         call move_alloc(bool_val, created)
         call move_into_member_unsafe(members(1), "sayHello", created)
-        call create_json_number(created, 3.0d0)
+        call create_json_number(num_val, 3.0d0)
+        call move_alloc(num_val, created)
         call move_into_member_unsafe(members(2), "aNumber", created)
         call move_into_object(created, members)
 
@@ -294,6 +298,7 @@ contains
         type(json_element_t), allocatable :: elements(:)
         type(json_member_t), allocatable :: members(:)
         type(json_null_t), allocatable :: null_val
+        type(json_number_t), allocatable :: num_val
 
         copied = json_object_t( &
                 [ json_member_unsafe("Hello", json_array_t( &
@@ -308,7 +313,8 @@ contains
         call move_alloc(null_val, created)
         call move_into_element(elements(1), created)
         allocate(members(1))
-        call create_json_number(created, 1.0d0, 2)
+        call create_json_number(num_val, 1.0d0, 2)
+        call move_alloc(num_val, created)
         call move_into_member_unsafe(members(1), "World", created)
         call move_into_object(created, members)
         call move_into_element(elements(2), created)
@@ -344,6 +350,7 @@ contains
         type(json_element_t), allocatable :: elements(:)
         type(json_member_t), allocatable :: members(:)
         type(json_null_t), allocatable :: null_val
+        type(json_number_t), allocatable :: num_val
 
         copied = json_object_t( &
                 [ json_member_unsafe("Hello", json_array_t( &
@@ -358,7 +365,8 @@ contains
         call move_alloc(null_val, created)
         call move_into_element(elements(1), created)
         allocate(members(1))
-        call create_json_number(created, 1.0d0, 2)
+        call create_json_number(num_val, 1.0d0, 2)
+        call move_alloc(num_val, created)
         call move_into_member_unsafe(members(1), "World", created)
         call move_into_object(created, members)
         call move_into_element(elements(2), created)

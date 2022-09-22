@@ -17,15 +17,15 @@ module rojff_json_integer_m
     interface json_integer_t
         elemental module function constructor(number) result(json_integer)
             implicit none
-            type(json_integer_t) :: json_integer
             integer, intent(in) :: number
+            type(json_integer_t) :: json_integer
         end function
     end interface
 
     interface
         module subroutine create_json_integer(json, number)
             implicit none
-            class(json_value_t), allocatable, intent(out) :: json
+            type(json_integer_t), allocatable, intent(out) :: json
             integer, intent(in) :: number
         end subroutine
 
