@@ -2,7 +2,7 @@ submodule(rojff_json_null_m) rojff_json_null_s
     implicit none
 contains
     module procedure create_json_null
-        allocate(json_null_t :: json)
+        allocate(json)
     end procedure
 
     module procedure equals

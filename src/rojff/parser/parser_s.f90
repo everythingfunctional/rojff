@@ -10,7 +10,7 @@ submodule(rojff_parser_m) rojff_parser_s
     use rojff_json_integer_m, only: create_json_integer
     use rojff_json_linked_list_m, only: json_linked_list_t
     use rojff_json_member_m, only: json_member_t
-    use rojff_json_null_m, only: create_json_null
+    use rojff_json_null_m, only: json_null_t, create_json_null
     use rojff_json_number_m, only: create_json_number
     use rojff_json_object_m, only: move_into_object
     use rojff_json_string_m, only: json_string_t, create_json_string_unsafe
@@ -197,12 +197,14 @@ contains
 
         character(len=*), parameter :: PROCEDURE_NAME = "parse_json_value"
         character(len=1) :: next_character
+        type(json_null_t), allocatable :: null_val
 
         next_character = cursor%peek()
 
         select case (next_character)
         case ("n")
-            call parse_json_null(cursor, json, errors)
+            call parse_json_null(cursor, null_val, errors)
+            call move_alloc(null_val, json)
         case ("t")
             call parse_json_true(cursor, json, errors)
         case ("f")
@@ -238,10 +240,11 @@ contains
 
     subroutine parse_json_null(cursor, json, errors)
         class(cursor_t), intent(inout) :: cursor
-        class(json_value_t), allocatable, intent(out) :: json
+        type(json_null_t), allocatable, intent(out) :: json
         type(error_list_t), intent(out) :: errors
 
         character(len=4) :: null_string
+        type(json_null_t), allocatable :: null_val
         integer :: starting_line, starting_column, i
 
         starting_line = cursor%current_line()

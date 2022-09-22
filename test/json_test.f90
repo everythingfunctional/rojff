@@ -105,7 +105,7 @@ contains
         type(result_t) :: result_
 
         type(json_null_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_null_t), allocatable :: created
 
         copied = json_null_t()
         call create_json_null(created)
@@ -219,6 +219,7 @@ contains
         type(json_array_t) :: copied
         class(json_value_t), allocatable :: created
         type(json_element_t), allocatable :: elements(:)
+        type(json_null_t), allocatable :: null_val
 
         copied = json_array_t( &
                 [ json_element_t(json_null_t()) &
@@ -227,7 +228,8 @@ contains
                 ])
 
         allocate(elements(3))
-        call create_json_null(created)
+        call create_json_null(null_val)
+        call move_alloc(null_val, created)
         call move_into_element(elements(1), created)
         call create_json_string_unsafe(created, "Hello")
         call move_into_element(elements(2), created)
@@ -286,6 +288,7 @@ contains
         class(json_value_t), allocatable :: created
         type(json_element_t), allocatable :: elements(:)
         type(json_member_t), allocatable :: members(:)
+        type(json_null_t), allocatable :: null_val
 
         copied = json_object_t( &
                 [ json_member_unsafe("Hello", json_array_t( &
@@ -296,7 +299,8 @@ contains
                 ])
 
         allocate(elements(3))
-        call create_json_null(created)
+        call create_json_null(null_val)
+        call move_alloc(null_val, created)
         call move_into_element(elements(1), created)
         allocate(members(1))
         call create_json_number(created, 1.0d0, 2)
@@ -332,6 +336,7 @@ contains
         class(json_value_t), allocatable :: created
         type(json_element_t), allocatable :: elements(:)
         type(json_member_t), allocatable :: members(:)
+        type(json_null_t), allocatable :: null_val
 
         copied = json_object_t( &
                 [ json_member_unsafe("Hello", json_array_t( &
@@ -342,7 +347,8 @@ contains
                 ])
 
         allocate(elements(3))
-        call create_json_null(created)
+        call create_json_null(null_val)
+        call move_alloc(null_val, created)
         call move_into_element(elements(1), created)
         allocate(members(1))
         call create_json_number(created, 1.0d0, 2)

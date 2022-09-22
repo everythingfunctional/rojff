@@ -16,7 +16,7 @@ module rojff_json_null_m
     interface
         module subroutine create_json_null(json)
             implicit none
-            class(json_value_t), allocatable, intent(out) :: json
+            type(json_null_t), allocatable, intent(out) :: json
         end subroutine
 
         elemental module function equals(lhs, rhs)

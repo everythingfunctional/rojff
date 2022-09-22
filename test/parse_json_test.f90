@@ -70,6 +70,7 @@ contains
                 "parse_json", &
                 [ it("parsing an empty string returns an error", check_parse_empty) &
                 , it("can parse null", check_parse_null) &
+                , it("parsing 'nul' fails", check_fail_null) &
                 , it("can parse true", check_parse_true) &
                 , it("can parse false", check_parse_false) &
                 , it( &
@@ -83,12 +84,14 @@ contains
                         , example_t(number_input_t("1.2E+3", 1.2d3)) &
                         , example_t(number_input_t("1.2e-3", 1.2d-3)) &
                         , example_t(number_input_t("20e1", 20.0d1)) &
-                        , example_t(number_input_t(nan_str, nan)) &
-                        , example_t(number_input_t(neg_nan_str, neg_nan)) &
-                        , example_t(number_input_t(pos_nan_str, pos_nan)) &
-                        , example_t(number_input_t(inf_str, inf)) &
-                        , example_t(number_input_t(neg_inf_str, neg_inf)) &
-                        , example_t(number_input_t(pos_inf_str, pos_inf)) &
+                        ! These should be periodically checked with a compiler and options that don't crash,
+                        ! but for some compilers and options they do, so we'll not test them always
+                        ! , example_t(number_input_t(nan_str, nan)) &
+                        ! , example_t(number_input_t(neg_nan_str, neg_nan)) &
+                        ! , example_t(number_input_t(pos_nan_str, pos_nan)) &
+                        ! , example_t(number_input_t(inf_str, inf)) &
+                        ! , example_t(number_input_t(neg_inf_str, neg_inf)) &
+                        ! , example_t(number_input_t(pos_inf_str, pos_inf)) &
                         ], &
                         check_parse_number) &
                 , it( &
@@ -135,6 +138,16 @@ contains
         if (result_%passed()) then
             result_ = assert_equals(json_null_t(), json%json)
         end if
+    end function
+
+    function check_fail_null() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string("nul")
+
+        result_ = assert_that(json%errors%has_any(), json%errors%to_string())
     end function
 
     function check_parse_true() result(result_)
