@@ -478,6 +478,7 @@ contains
 ! So for now, we doing it the long and complicated way
         type(json_member_t), allocatable :: members(:)
         type(json_element_t), allocatable :: elements(:)
+        type(json_array_t), allocatable :: array_val
         type(json_integer_t), allocatable :: int_val
         type(json_number_t), allocatable :: num_val
         type(json_string_t), allocatable :: string_val
@@ -489,7 +490,8 @@ contains
         call create_json_string_unsafe(string_val, "XML")
         call move_alloc(string_val, complex_example_)
         call move_into_element(elements(2), complex_example_)
-        call move_into_array(complex_example_, elements)
+        call move_into_array(array_val, elements)
+        call move_alloc(array_val, complex_example_)
         allocate(members(2))
         call move_into_member_unsafe(members(2), "GlossSeeAlso", complex_example_)
         call create_json_string_unsafe( &

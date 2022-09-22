@@ -28,7 +28,7 @@ module rojff_json_array_m
     interface
         module subroutine move_into_array(json, elements)
             implicit none
-            class(json_value_t), allocatable, intent(out) :: json
+            type(json_array_t), allocatable, intent(out) :: json
             type(json_element_t), allocatable, intent(inout) :: elements(:)
         end subroutine
 

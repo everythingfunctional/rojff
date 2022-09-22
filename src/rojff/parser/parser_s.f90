@@ -4,7 +4,7 @@ submodule(rojff_parser_m) rojff_parser_s
     use rojff_constants_m, only: INVALID_INPUT
     use rojff_fallible_json_value_m, only: move_into_fallible_json
     use rojff_file_cursor_m, only: file_cursor_t
-    use rojff_json_array_m, only: move_into_array
+    use rojff_json_array_m, only: json_array_t, move_into_array
     use rojff_json_bool_m, only: json_bool_t, create_json_bool
     use rojff_json_element_m, only: json_element_t
     use rojff_json_integer_m, only: json_integer_t, create_json_integer
@@ -198,6 +198,7 @@ contains
 
         character(len=*), parameter :: PROCEDURE_NAME = "parse_json_value"
         character(len=1) :: next_character
+        type(json_array_t), allocatable :: array_val
         type(json_null_t), allocatable :: null_val
         type(json_bool_t), allocatable :: bool_val
         type(json_string_t), allocatable :: string_val
@@ -222,7 +223,8 @@ contains
             call move_alloc(string_val, json)
         case ('[')
             call cursor%next()
-            call parse_json_array(cursor, json, errors)
+            call parse_json_array(cursor, array_val, errors)
+            call move_alloc(array_val, json)
         case ('{')
             call cursor%next()
             call parse_json_object(cursor, json, errors)
@@ -446,12 +448,13 @@ contains
 
     recursive subroutine parse_json_array(cursor, json, errors)
         class(cursor_t), intent(inout) :: cursor
-        class(json_value_t), allocatable, intent(out) :: json
+        type(json_array_t), allocatable, intent(out) :: json
         type(error_list_t), intent(out) :: errors
 
         character(len=*), parameter :: PROCEDURE_NAME = "parse_json_array"
         type(json_element_t), allocatable :: elements(:)
         type(json_linked_list_t) :: parsed
+        class(json_value_t), allocatable :: next_value
 
         call skip_whitespace(cursor)
         if (cursor%finished()) then
@@ -481,12 +484,12 @@ contains
                         // " and column " // to_string(cursor%current_column())))
                 return
             end if
-            call parse_json_value(cursor, json, errors)
+            call parse_json_value(cursor, next_value, errors)
             if (errors%has_any()) then
                 errors = error_list_t(errors, module_t(MODULE_NAME), procedure_t(PROCEDURE_NAME))
                 return
             end if
-            call parsed%append(json)
+            call parsed%append(next_value)
             call skip_whitespace(cursor)
             if (cursor%finished()) then
                 errors = error_list_t(fatal_t( &

@@ -217,7 +217,8 @@ contains
         type(result_t) :: result_
 
         type(json_array_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_array_t), allocatable :: created
+        class(json_value_t), allocatable :: next_val
         type(json_element_t), allocatable :: elements(:)
         type(json_null_t), allocatable :: null_val
         type(json_number_t), allocatable :: num_val
@@ -231,14 +232,14 @@ contains
 
         allocate(elements(3))
         call create_json_null(null_val)
-        call move_alloc(null_val, created)
-        call move_into_element(elements(1), created)
+        call move_alloc(null_val, next_val)
+        call move_into_element(elements(1), next_val)
         call create_json_string_unsafe(string_val, "Hello")
-        call move_alloc(string_val, created)
-        call move_into_element(elements(2), created)
+        call move_alloc(string_val, next_val)
+        call move_into_element(elements(2), next_val)
         call create_json_number(num_val, 2.0d0)
-        call move_alloc(num_val, created)
-        call move_into_element(elements(3), created)
+        call move_alloc(num_val, next_val)
+        call move_into_element(elements(3), next_val)
         call move_into_array(created, elements)
 
         result_ = &
@@ -292,6 +293,7 @@ contains
 
         character(len=*), parameter :: EXPECTED = &
                 '{"Hello":[null,{"World":1.0},true]}'
+        type(json_array_t), allocatable :: array_val
         type(json_object_t) :: copied
         type(json_bool_t), allocatable :: bool_val
         class(json_value_t), allocatable :: created
@@ -321,7 +323,8 @@ contains
         call create_json_bool(bool_val, .true.)
         call move_alloc(bool_val, created)
         call move_into_element(elements(3), created)
-        call move_into_array(created, elements)
+        call move_into_array(array_val, elements)
+        call move_alloc(array_val, created)
         allocate(members(1))
         call move_into_member_unsafe(members(1), "Hello", created)
         call move_into_object(created, members)
@@ -345,6 +348,7 @@ contains
 // '    ]' // NEWLINE &
 // '}'
         type(json_object_t) :: copied
+        type(json_array_t), allocatable :: array_val
         type(json_bool_t), allocatable :: bool_val
         class(json_value_t), allocatable :: created
         type(json_element_t), allocatable :: elements(:)
@@ -373,7 +377,8 @@ contains
         call create_json_bool(bool_val, .true.)
         call move_alloc(bool_val, created)
         call move_into_element(elements(3), created)
-        call move_into_array(created, elements)
+        call move_into_array(array_val, elements)
+        call move_alloc(array_val, created)
         allocate(members(1))
         call move_into_member_unsafe(members(1), "Hello", created)
         call move_into_object(created, members)

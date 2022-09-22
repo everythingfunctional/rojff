@@ -12,11 +12,8 @@ contains
     end procedure
 
     module procedure move_into_array
-        type(json_array_t), allocatable :: local
-
-        allocate(local)
-        call move_alloc(elements, local%elements)
-        call move_alloc(local, json)
+        allocate(json)
+        call move_alloc(elements, json%elements)
     end procedure
 
     module procedure equals
