@@ -19,40 +19,18 @@ module rojff_string_builder_m
         procedure :: append
         procedure :: move_into
     end type
-contains
-    subroutine append(self, part)
-        class(string_builder_t), intent(inout) :: self
-        character(len=*), intent(in) :: part
 
-        if (associated(self%head)) then
-            allocate(self%tail%next)
-            self%tail => self%tail%next
-            self%tail%part = part
-            self%total_length = self%total_length + len(part)
-        else
-            allocate(self%head)
-            self%tail => self%head
-            self%head%part = part
-            self%total_length = len(part)
-        end if
-    end subroutine
+    interface
+        module subroutine append(self, part)
+            implicit none
+            class(string_builder_t), intent(inout) :: self
+            character(len=*), intent(in) :: part
+        end subroutine
 
-    subroutine move_into(self, string)
-        class(string_builder_t), intent(inout) :: self
-        character(len=:), allocatable, intent(out) :: string
-
-        type(string_node_t), pointer :: curr
-        integer :: current_position
-
-        allocate(character(len=self%total_length) :: string)
-        current_position = 1
-        curr => self%head
-        do while (associated(curr))
-            string(current_position : current_position + len(curr%part) - 1) = curr%part
-            current_position = current_position + len(curr%part)
-            curr => curr%next
-            deallocate(self%head)
-            self%head => curr
-        end do
-    end subroutine
+        module subroutine move_into(self, string)
+            implicit none
+            class(string_builder_t), intent(inout) :: self
+            character(len=:), allocatable, intent(out) :: string
+        end subroutine
+    end interface
 end module
