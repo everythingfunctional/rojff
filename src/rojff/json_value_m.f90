@@ -1,5 +1,5 @@
 module rojff_json_value_m
-    use rojff_string_sink_m, only: string_sink_t
+    use rojff_sink_m, only: sink_t
 
     implicit none
     private
@@ -28,22 +28,22 @@ module rojff_json_value_m
         end function
 
         subroutine write_to_compactly_i(self, sink)
-            import :: json_value_t, string_sink_t
+            import :: json_value_t, sink_t
 
             implicit none
 
             class(json_value_t), intent(in) :: self
-            class(string_sink_t), intent(inout) :: sink
+            class(sink_t), intent(inout) :: sink
         end subroutine
 
         subroutine write_to_expanded_i(self, indentation_level, sink)
-            import :: json_value_t, string_sink_t
+            import :: json_value_t, sink_t
 
             implicit none
 
             class(json_value_t), intent(in) :: self
             integer, intent(in) :: indentation_level
-            class(string_sink_t), intent(inout) :: sink
+            class(sink_t), intent(inout) :: sink
         end subroutine
     end interface
 

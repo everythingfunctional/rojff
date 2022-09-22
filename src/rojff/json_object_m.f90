@@ -4,7 +4,7 @@ module rojff_json_object_m
     use rojff_json_element_m, only: json_element_t
     use rojff_json_member_m, only: json_member_t
     use rojff_json_value_m, only: json_value_t
-    use rojff_string_sink_m, only: string_sink_t
+    use rojff_sink_m, only: sink_t
 
     implicit none
     private
@@ -83,7 +83,7 @@ module rojff_json_object_m
         recursive module subroutine write_to_compactly(self, sink)
             implicit none
             class(json_object_t), intent(in) :: self
-            class(string_sink_t), intent(inout) :: sink
+            class(sink_t), intent(inout) :: sink
         end subroutine
 
         recursive module subroutine write_to_expanded( &
@@ -91,7 +91,7 @@ module rojff_json_object_m
             implicit none
             class(json_object_t), intent(in) :: self
             integer, intent(in) :: indentation_level
-            class(string_sink_t), intent(inout) :: sink
+            class(sink_t), intent(inout) :: sink
         end subroutine
     end interface
 end module

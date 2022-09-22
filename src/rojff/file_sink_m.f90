@@ -1,11 +1,11 @@
 module rojff_file_sink_m
-    use rojff_string_sink_m, only: string_sink_t
+    use rojff_sink_m, only: sink_t
 
     implicit none
     private
     public :: file_sink_t
 
-    type, extends(string_sink_t) :: file_sink_t
+    type, extends(sink_t) :: file_sink_t
         private
         integer :: unit
     contains

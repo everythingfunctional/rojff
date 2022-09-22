@@ -1,6 +1,6 @@
 module rojff_json_string_m
     use rojff_json_value_m, only: json_value_t
-    use rojff_string_sink_m, only: string_sink_t
+    use rojff_sink_m, only: sink_t
     use iso_varying_string, only: varying_string
 
     implicit none
@@ -46,14 +46,14 @@ module rojff_json_string_m
         module subroutine write_to_compactly(self, sink)
             implicit none
             class(json_string_t), intent(in) :: self
-            class(string_sink_t), intent(inout) :: sink
+            class(sink_t), intent(inout) :: sink
         end subroutine
 
         module subroutine write_to_expanded(self, indentation_level, sink)
             implicit none
             class(json_string_t), intent(in) :: self
             integer, intent(in) :: indentation_level
-            class(string_sink_t), intent(inout) :: sink
+            class(sink_t), intent(inout) :: sink
         end subroutine
     end interface
 end module

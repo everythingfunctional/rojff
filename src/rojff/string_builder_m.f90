@@ -1,5 +1,5 @@
 module rojff_string_builder_m
-    use rojff_string_sink_m, only: string_sink_t
+    use rojff_sink_m, only: sink_t
 
     implicit none
     private
@@ -10,7 +10,7 @@ module rojff_string_builder_m
         type(string_node_t), pointer :: next => null()
     end type
 
-    type, extends(string_sink_t) :: string_builder_t
+    type, extends(sink_t) :: string_builder_t
         private
         type(string_node_t), pointer :: head => null()
         type(string_node_t), pointer :: tail => null()
