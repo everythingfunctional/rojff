@@ -20,67 +20,41 @@ module rojff_string_cursor_m
     end type
 
     interface string_cursor_t
-        module procedure constructor
+        pure module function constructor(string) result(cursor)
+            implicit none
+            character(len=*), intent(in) :: string
+            type(string_cursor_t) :: cursor
+        end function
     end interface
-contains
-    pure function constructor(string) result(cursor)
-        character(len=*), intent(in) :: string
-        type(string_cursor_t) :: cursor
 
-        cursor%whole_string = string
-    end function
+    interface
+        pure module function peek(self) result(next_char)
+            implicit none
+            class(string_cursor_t), intent(in) :: self
+            character(len=1) :: next_char
+        end function
 
-    pure function peek(self) result(next_char)
-        class(string_cursor_t), intent(in) :: self
-        character(len=1) :: next_char
+        module subroutine next(self)
+            implicit none
+            class(string_cursor_t), intent(inout) :: self
+        end subroutine
 
-        if (.not.self%finished()) then
-            next_char = self%whole_string(self%current_character:self%current_character)
-        else
-            next_char = " "
-        end if
-    end function
+        pure module function finished(self)
+            implicit none
+            class(string_cursor_t), intent(in) :: self
+            logical :: finished
+        end function
 
-    subroutine next(self)
-        class(string_cursor_t), intent(inout) :: self
+        pure module function current_line(self)
+            implicit none
+            class(string_cursor_t), intent(in) :: self
+            integer :: current_line
+        end function
 
-        character(len=1), parameter :: TAB = char(9)
-        character(len=1), parameter :: NEWLINE = char(10)
-        character(len=1) :: current_char
-
-        if (.not. self%finished()) then
-            current_char = self%peek()
-
-            if (current_char == NEWLINE) then
-                self%current_line_ = self%current_line_ + 1
-                self%current_column_ = 1
-            else if (current_char == TAB) then
-                self%current_column_ = self%current_column_ + 8 - mod(self%current_column_ - 1, 8)
-            else
-                self%current_column_ = self%current_column_ + 1
-            end if
-            self%current_character = self%current_character + 1
-        end if
-    end subroutine
-
-    pure function finished(self)
-        class(string_cursor_t), intent(in) :: self
-        logical :: finished
-
-        finished = self%current_character > len(self%whole_string)
-    end function
-
-    pure function current_line(self)
-        class(string_cursor_t), intent(in) :: self
-        integer :: current_line
-
-        current_line = self%current_line_
-    end function
-
-    pure function current_column(self)
-        class(string_cursor_t), intent(in) :: self
-        integer :: current_column
-
-        current_column = self%current_column_
-    end function
+        pure module function current_column(self)
+            implicit none
+            class(string_cursor_t), intent(in) :: self
+            integer :: current_column
+        end function
+    end interface
 end module
