@@ -24,7 +24,7 @@ module json_test
             move_into_array, &
             move_into_element, &
             move_into_member_unsafe, &
-            move_into_object, &
+            move_into_object_unsafe, &
             INVALID_INPUT
     use rojff_constants_m, only: NEWLINE
     use veggies, only: &
@@ -254,10 +254,11 @@ contains
         type(json_object_t) :: copied
         type(json_bool_t), allocatable :: bool_val
         character(len=:), allocatable :: copied_string
-        class(json_value_t), allocatable :: created
+        type(json_object_t), allocatable :: created
         character(len=:), allocatable :: created_string
         type(json_member_t), allocatable :: members(:)
         type(json_number_t), allocatable :: num_val
+        class(json_value_t), allocatable :: next_val
 
         copied = json_object_unsafe( &
                 [ json_member_unsafe("sayHello", json_bool_t(.true.)) &
@@ -266,12 +267,12 @@ contains
 
         allocate(members(2))
         call create_json_bool(bool_val, .true.)
-        call move_alloc(bool_val, created)
-        call move_into_member_unsafe(members(1), "sayHello", created)
+        call move_alloc(bool_val, next_val)
+        call move_into_member_unsafe(members(1), "sayHello", next_val)
         call create_json_number(num_val, 3.0d0)
-        call move_alloc(num_val, created)
-        call move_into_member_unsafe(members(2), "aNumber", created)
-        call move_into_object(created, members)
+        call move_alloc(num_val, next_val)
+        call move_into_member_unsafe(members(2), "aNumber", next_val)
+        call move_into_object_unsafe(created, members)
 
         allocate(copied_string, source = copied%to_compact_string())
         allocate(created_string, source = created%to_compact_string())
@@ -297,11 +298,12 @@ contains
         type(json_array_t), allocatable :: array_val
         type(json_object_t) :: copied
         type(json_bool_t), allocatable :: bool_val
-        class(json_value_t), allocatable :: created
+        type(json_object_t), allocatable :: created
         type(json_element_t), allocatable :: elements(:)
         type(json_member_t), allocatable :: members(:)
         type(json_null_t), allocatable :: null_val
         type(json_number_t), allocatable :: num_val
+        class(json_value_t), allocatable :: next_val
 
         copied = json_object_unsafe( &
                 [ json_member_unsafe("Hello", json_array_t( &
@@ -313,22 +315,23 @@ contains
 
         allocate(elements(3))
         call create_json_null(null_val)
-        call move_alloc(null_val, created)
-        call move_into_element(elements(1), created)
+        call move_alloc(null_val, next_val)
+        call move_into_element(elements(1), next_val)
         allocate(members(1))
         call create_json_number(num_val, 1.0d0, 2)
-        call move_alloc(num_val, created)
-        call move_into_member_unsafe(members(1), "World", created)
-        call move_into_object(created, members)
-        call move_into_element(elements(2), created)
+        call move_alloc(num_val, next_val)
+        call move_into_member_unsafe(members(1), "World", next_val)
+        call move_into_object_unsafe(created, members)
+        call move_alloc(created, next_val)
+        call move_into_element(elements(2), next_val)
         call create_json_bool(bool_val, .true.)
-        call move_alloc(bool_val, created)
-        call move_into_element(elements(3), created)
+        call move_alloc(bool_val, next_val)
+        call move_into_element(elements(3), next_val)
         call move_into_array(array_val, elements)
-        call move_alloc(array_val, created)
+        call move_alloc(array_val, next_val)
         allocate(members(1))
-        call move_into_member_unsafe(members(1), "Hello", created)
-        call move_into_object(created, members)
+        call move_into_member_unsafe(members(1), "Hello", next_val)
+        call move_into_object_unsafe(created, members)
 
         result_ = &
                 assert_equals(EXPECTED, copied%to_compact_string(), "copied") &
@@ -351,11 +354,12 @@ contains
         type(json_object_t) :: copied
         type(json_array_t), allocatable :: array_val
         type(json_bool_t), allocatable :: bool_val
-        class(json_value_t), allocatable :: created
+        type(json_object_t), allocatable :: created
         type(json_element_t), allocatable :: elements(:)
         type(json_member_t), allocatable :: members(:)
         type(json_null_t), allocatable :: null_val
         type(json_number_t), allocatable :: num_val
+        class(json_value_t), allocatable :: next_val
 
         copied = json_object_unsafe( &
                 [ json_member_unsafe("Hello", json_array_t( &
@@ -367,22 +371,23 @@ contains
 
         allocate(elements(3))
         call create_json_null(null_val)
-        call move_alloc(null_val, created)
-        call move_into_element(elements(1), created)
+        call move_alloc(null_val, next_val)
+        call move_into_element(elements(1), next_val)
         allocate(members(1))
         call create_json_number(num_val, 1.0d0, 2)
-        call move_alloc(num_val, created)
-        call move_into_member_unsafe(members(1), "World", created)
-        call move_into_object(created, members)
-        call move_into_element(elements(2), created)
+        call move_alloc(num_val, next_val)
+        call move_into_member_unsafe(members(1), "World", next_val)
+        call move_into_object_unsafe(created, members)
+        call move_alloc(created, next_val)
+        call move_into_element(elements(2), next_val)
         call create_json_bool(bool_val, .true.)
-        call move_alloc(bool_val, created)
-        call move_into_element(elements(3), created)
+        call move_alloc(bool_val, next_val)
+        call move_into_element(elements(3), next_val)
         call move_into_array(array_val, elements)
-        call move_alloc(array_val, created)
+        call move_alloc(array_val, next_val)
         allocate(members(1))
-        call move_into_member_unsafe(members(1), "Hello", created)
-        call move_into_object(created, members)
+        call move_into_member_unsafe(members(1), "Hello", next_val)
+        call move_into_object_unsafe(created, members)
 
         result_ = &
                 assert_equals(EXPECTED, copied%to_expanded_string(), "copied") &

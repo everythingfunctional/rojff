@@ -12,16 +12,8 @@ contains
         error stop "Do not use the intrinsic structure constructor!"
     end procedure
 
-    module procedure constructor
+    module procedure json_object_unsafe
         allocate(json_object%members, source = members)
-    end procedure
-
-    module procedure move_into_object
-        type(json_object_t), allocatable :: local
-
-        allocate(local)
-        call move_alloc(members, local%members)
-        call move_alloc(local, json)
     end procedure
 
     module procedure move_into_object_unsafe

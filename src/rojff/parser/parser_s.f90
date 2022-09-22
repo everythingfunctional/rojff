@@ -12,7 +12,7 @@ submodule(rojff_parser_m) rojff_parser_s
     use rojff_json_member_m, only: json_member_t
     use rojff_json_null_m, only: json_null_t, create_json_null
     use rojff_json_number_m, only: json_number_t, create_json_number
-    use rojff_json_object_m, only: move_into_object
+    use rojff_json_object_m, only: json_object_t, move_into_object_unsafe
     use rojff_json_string_m, only: move_into_json_string_unsafe
     use rojff_json_value_m, only: json_value_t
     use rojff_member_linked_list_m, only: member_linked_list_t
@@ -201,6 +201,7 @@ contains
         type(json_array_t), allocatable :: array_val
         type(json_null_t), allocatable :: null_val
         type(json_bool_t), allocatable :: bool_val
+        type(json_object_t), allocatable :: obj_val
         type(json_string_t), allocatable :: string_val
 
         next_character = cursor%peek()
@@ -227,7 +228,8 @@ contains
             call move_alloc(array_val, json)
         case ('{')
             call cursor%next()
-            call parse_json_object(cursor, json, errors)
+            call parse_json_object(cursor, obj_val, errors)
+            call move_alloc(obj_val, json)
         case default
             errors = error_list_t(fatal_t( &
                     INVALID_INPUT, &
@@ -526,13 +528,14 @@ contains
 
     recursive subroutine parse_json_object(cursor, json, errors)
         class(cursor_t), intent(inout) :: cursor
-        class(json_value_t), allocatable, intent(out) :: json
+        type(json_object_t), allocatable, intent(out) :: json
         type(error_list_t), intent(out) :: errors
 
         character(len=*), parameter :: PROCEDURE_NAME = "parse_json_object"
         type(json_member_t), allocatable :: members(:)
         type(member_linked_list_t) :: parsed
         type(json_string_t), allocatable :: key
+        class(json_value_t), allocatable :: val
         logical :: has_duplicates
         integer :: i, j
 
@@ -549,7 +552,7 @@ contains
         end if
         if (cursor%peek() == '}') then
             allocate(members(0))
-            call move_into_object(json, members)
+            call move_into_object_unsafe(json, members)
             call cursor%next()
             return
         end if
@@ -607,12 +610,12 @@ contains
                         // " and column " // to_string(cursor%current_column())))
                 return
             end if
-            call parse_json_value(cursor, json, errors)
+            call parse_json_value(cursor, val, errors)
             if (errors%has_any()) then
                 errors = error_list_t(errors, module_t(MODULE_NAME), procedure_t(PROCEDURE_NAME))
                 return
             end if
-            call parsed%append(key%string, json)
+            call parsed%append(key%string, val)
             deallocate(key) ! This is needed because nagfor is failing to deallocate it automatically at the call above
             if (cursor%finished()) then
                 errors = error_list_t(fatal_t( &
@@ -663,7 +666,7 @@ contains
                     procedure_t(PROCEDURE_NAME), &
                     'Duplicate key found: "' // members(i)%key // '"'))
         else
-            call move_into_object(json, members)
+            call move_into_object_unsafe(json, members)
         end if
     end subroutine
 

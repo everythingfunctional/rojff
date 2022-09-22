@@ -24,7 +24,7 @@ module parse_json_test
             move_into_array, &
             move_into_element, &
             move_into_member_unsafe, &
-            move_into_object, &
+            move_into_object_unsafe, &
             parse_json_from_file, &
             parse_json_from_string, &
             INVALID_INPUT
@@ -482,6 +482,7 @@ contains
         type(json_array_t), allocatable :: array_val
         type(json_integer_t), allocatable :: int_val
         type(json_number_t), allocatable :: num_val
+        type(json_object_t), allocatable :: obj_val
         type(json_string_t), allocatable :: string_val
 
         allocate(elements(2))
@@ -500,7 +501,8 @@ contains
                 "A meta-markup language, used to create markup languages such as DocBook.")
         call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(1), "para", complex_example_)
-        call move_into_object(complex_example_, members)
+        call move_into_object_unsafe(obj_val, members)
+        call move_alloc(obj_val, complex_example_)
         allocate(members(7))
         call move_into_member_unsafe(members(6), "GlossDef", complex_example_)
         call create_json_integer(int_val, 101)
@@ -521,25 +523,30 @@ contains
         call create_json_number(num_val, 123.456d0, 6)
         call move_alloc(num_val, complex_example_)
         call move_into_member_unsafe(members(7), "GlossSee", complex_example_)
-        call move_into_object(complex_example_, members)
+        call move_into_object_unsafe(obj_val, members)
+        call move_alloc(obj_val, complex_example_)
         allocate(members(1))
         call move_into_member_unsafe(members(1), "GlossEntry", complex_example_)
-        call move_into_object(complex_example_, members)
+        call move_into_object_unsafe(obj_val, members)
+        call move_alloc(obj_val, complex_example_)
         allocate(members(2))
         call move_into_member_unsafe(members(2), "GlossList", complex_example_)
         call create_json_string_unsafe(string_val, "S")
         call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(1), "title", complex_example_)
-        call move_into_object(complex_example_, members)
+        call move_into_object_unsafe(obj_val, members)
+        call move_alloc(obj_val, complex_example_)
         allocate(members(2))
         call move_into_member_unsafe(members(2), "GlossDiv", complex_example_)
         call create_json_string_unsafe(string_val, "example glossary")
         call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(1), "title", complex_example_)
-        call move_into_object(complex_example_, members)
+        call move_into_object_unsafe(obj_val, members)
+        call move_alloc(obj_val, complex_example_)
         allocate(members(1))
         call move_into_member_unsafe(members(1), "glossary", complex_example_)
-        call move_into_object(complex_example_, members)
+        call move_into_object_unsafe(obj_val, members)
+        call move_alloc(obj_val, complex_example_)
         call move_alloc(complex_example_, example)
     end function
 end module

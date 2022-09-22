@@ -8,7 +8,7 @@ module rojff_json_object_m
 
     implicit none
     private
-    public :: json_object_t, json_object_unsafe, move_into_object, move_into_object_unsafe
+    public :: json_object_t, json_object_unsafe, move_into_object_unsafe
 
     type, extends(json_value_t) :: json_object_t
         type(json_member_t), allocatable :: members(:)
@@ -30,20 +30,12 @@ module rojff_json_object_m
         end function
     end interface
 
-    interface json_object_unsafe
-        module function constructor(members) result(json_object)
+    interface
+        module function json_object_unsafe(members) result(json_object)
             implicit none
             type(json_member_t), intent(in) :: members(:)
             type(json_object_t) :: json_object
         end function
-    end interface
-
-    interface
-        module subroutine move_into_object(json, members)
-            implicit none
-            class(json_value_t), allocatable, intent(out) :: json
-            type(json_member_t), allocatable, intent(inout) :: members(:)
-        end subroutine
 
         module subroutine move_into_object_unsafe(object, members)
             implicit none
