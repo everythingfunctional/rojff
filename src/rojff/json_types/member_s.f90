@@ -39,14 +39,35 @@ contains
         json_member%value_ = element%json
     end procedure
 
-    module procedure move_into_member
+    module procedure move_into_member_v
         call move_alloc(key%string, member%key)
+        deallocate(key)
         call move_alloc(value_, member%value_)
     end procedure
 
-    module procedure move_into_member_unsafe
+    module procedure move_into_member_e
+        call move_alloc(key%string, member%key)
+        call move_alloc(element%json, member%value_)
+    end procedure
+
+    module procedure move_into_member_unsafe_cv
         member%key = key
         call move_alloc(value_, member%value_)
+    end procedure
+
+    module procedure move_into_member_unsafe_sv
+        member%key = char(key)
+        call move_alloc(value_, member%value_)
+    end procedure
+
+    module procedure move_into_member_unsafe_ce
+        member%key = key
+        call move_alloc(element%json, member%value_)
+    end procedure
+
+    module procedure move_into_member_unsafe_se
+        member%key = char(key)
+        call move_alloc(element%json, member%value_)
     end procedure
 
     module procedure equals

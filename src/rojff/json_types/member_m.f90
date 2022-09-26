@@ -82,21 +82,53 @@ module rojff_json_member_m
         end function
     end interface
 
-    interface
-        module subroutine move_into_member(member, key, value_)
+    interface move_into_member
+        module subroutine move_into_member_v(member, key, value_)
             implicit none
             type(json_member_t), intent(out) :: member
-            type(json_string_t), intent(inout) :: key
+            type(json_string_t), allocatable, intent(inout) :: key
             class(json_value_t), allocatable, intent(inout) :: value_
         end subroutine
 
-        module subroutine move_into_member_unsafe(member, key, value_)
+        impure elemental module subroutine move_into_member_e(member, key, element)
+            implicit none
+            type(json_member_t), intent(out) :: member
+            type(json_string_t), intent(inout) :: key
+            type(json_element_t), intent(inout) :: element
+        end subroutine
+    end interface
+
+    interface move_into_member_unsafe
+        module subroutine move_into_member_unsafe_cv(member, key, value_)
             implicit none
             type(json_member_t), intent(out) :: member
             character(len=*), intent(in) :: key
             class(json_value_t), allocatable, intent(inout) :: value_
         end subroutine
 
+        module subroutine move_into_member_unsafe_sv(member, key, value_)
+            implicit none
+            type(json_member_t), intent(out) :: member
+            type(varying_string), intent(in) :: key
+            class(json_value_t), allocatable, intent(inout) :: value_
+        end subroutine
+
+        impure elemental module subroutine move_into_member_unsafe_ce(member, key, element)
+            implicit none
+            type(json_member_t), intent(out) :: member
+            character(len=*), intent(in) :: key
+            type(json_element_t), intent(inout) :: element
+        end subroutine
+
+        impure elemental module subroutine move_into_member_unsafe_se(member, key, element)
+            implicit none
+            type(json_member_t), intent(out) :: member
+            type(varying_string), intent(in) :: key
+            type(json_element_t), intent(inout) :: element
+        end subroutine
+    end interface
+
+    interface
         recursive elemental module function equals(lhs, rhs)
             implicit none
             class(json_member_t), intent(in) :: lhs
