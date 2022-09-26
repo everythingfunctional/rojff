@@ -1,5 +1,5 @@
 module rojff_fallible_json_element_m
-    use erloff, only: error_list_t
+    use erloff, only: error_list_t, module_t, procedure_t
     use rojff_fallible_json_value_m, only: fallible_json_value_t
     use rojff_json_element_m, only: json_element_t
     use rojff_json_value_m, only: json_value_t
@@ -16,6 +16,27 @@ module rojff_fallible_json_element_m
     end type
 
     interface fallible_json_element_t
+        module function from_element(element) result(fallible_element)
+            implicit none
+            type(json_element_t), intent(in) :: element
+            type(fallible_json_element_t) :: fallible_element
+        end function
+
+        module function from_errors(errors) result(fallible_element)
+            implicit none
+            type(error_list_t), intent(in) :: errors
+            type(fallible_json_element_t) :: fallible_element
+        end function
+
+        module function from_fallible_element( &
+                maybe_element, module_, procedure_) result(fallible_element)
+            implicit none
+            type(fallible_json_element_t), intent(in) :: maybe_element
+            type(module_t), intent(in) :: module_
+            type(procedure_t), intent(in) :: procedure_
+            type(fallible_json_element_t) :: fallible_element
+        end function
+
         module function from_json_value(value_) result(fallible_element)
             implicit none
             class(json_value_t), intent(in) :: value_

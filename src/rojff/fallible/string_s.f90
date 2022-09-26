@@ -44,12 +44,24 @@ contains
         fallible_string%string = string
     end procedure
 
+    module procedure from_errors
+        fallible_string%errors = errors
+    end procedure
+
     module procedure from_fallible_string
         if (maybe_string%failed()) then
             fallible_string%errors = error_list_t( &
                     maybe_string%errors, module_, procedure_)
         else
             fallible_string%string = maybe_string%string
+        end if
+    end procedure
+
+    module procedure fallible_json_value_from_fallible_array
+        if (maybe_string%failed()) then
+            fallible_value = fallible_json_value_t(maybe_string%errors)
+        else
+            fallible_value = fallible_json_value_t(maybe_string%string)
         end if
     end procedure
 

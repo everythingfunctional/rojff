@@ -2,18 +2,18 @@ submodule(rojff_fallible_json_value_m) rojff_fallible_json_value_s
     implicit none
 contains
     module procedure from_value
-        fallible_json%json = json
+        fallible_value%json = value_
     end procedure
 
     module procedure from_errors
-        fallible_json%errors = errors
+        fallible_value%errors = errors
     end procedure
 
-    module procedure from_fallible_json
-        if (original%failed()) then
-            new%errors = error_list_t(original%errors, module_, procedure_)
+    module procedure from_fallible_value
+        if (maybe_value%failed()) then
+            fallible_value%errors = error_list_t(maybe_value%errors, module_, procedure_)
         else
-            new%json = original%json
+            fallible_value%json = maybe_value%json
         end if
     end procedure
 

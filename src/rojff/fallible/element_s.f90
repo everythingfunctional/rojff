@@ -1,6 +1,23 @@
 submodule(rojff_fallible_json_element_m) rojff_fallible_json_element_s
     implicit none
 contains
+    module procedure from_element
+        fallible_element%element = element
+    end procedure
+
+    module procedure from_errors
+        fallible_element%errors = errors
+    end procedure
+
+    module procedure from_fallible_element
+        if (maybe_element%failed()) then
+            fallible_element%errors = error_list_t( &
+                    maybe_element%errors, module_, procedure_)
+        else
+            fallible_element%element = maybe_element%element
+        end if
+    end procedure
+
     module procedure from_json_value
         fallible_element%element = json_element_t(value_)
     end procedure

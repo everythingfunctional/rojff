@@ -14,25 +14,25 @@ module rojff_fallible_json_value_m
     end type
 
     interface fallible_json_value_t
-        module function from_value(json) result(fallible_json)
+        module function from_value(value_) result(fallible_value)
             implicit none
-            class(json_value_t), intent(in) :: json
-            type(fallible_json_value_t) :: fallible_json
+            class(json_value_t), intent(in) :: value_
+            type(fallible_json_value_t) :: fallible_value
         end function
 
-        module function from_errors(errors) result(fallible_json)
+        module function from_errors(errors) result(fallible_value)
             implicit none
             type(error_list_t), intent(in) :: errors
-            type(fallible_json_value_t) :: fallible_json
+            type(fallible_json_value_t) :: fallible_value
         end function
 
-        module function from_fallible_json( &
-                original, module_, procedure_) result(new)
+        module function from_fallible_value( &
+                maybe_value, module_, procedure_) result(fallible_value)
             implicit none
-            type(fallible_json_value_t), intent(in) :: original
+            type(fallible_json_value_t), intent(in) :: maybe_value
             type(module_t), intent(in) :: module_
             type(procedure_t), intent(in) :: procedure_
-            type(fallible_json_value_t) :: new
+            type(fallible_json_value_t) :: fallible_value
         end function
     end interface
 

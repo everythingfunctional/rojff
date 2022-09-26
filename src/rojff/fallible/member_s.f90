@@ -54,6 +54,14 @@ contains
         end if
     end procedure
 
+    module procedure from_member
+        fallible_member%member = member
+    end procedure
+
+    module procedure from_errors
+        fallible_member%errors = errors
+    end procedure
+
     module procedure from_fallible_member
         if (maybe_member%failed()) then
             fallible_member%errors = error_list_t( &

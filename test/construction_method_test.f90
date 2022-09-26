@@ -1,6 +1,12 @@
 module construction_method_test
     use iso_varying_string, only: var_str
     use rojff, only: &
+            fallible_json_array_t, &
+            fallible_json_element_t, &
+            fallible_json_member_t, &
+            fallible_json_object_t, &
+            fallible_json_string_t, &
+            fallible_json_value_t, &
             json_array_t, &
             json_bool_t, &
             json_element_t, &
@@ -26,7 +32,7 @@ module construction_method_test
             move_into_member_unsafe, &
             move_into_object_unsafe
     use json_assertion, only: assert_equals
-    use veggies, only: test_item_t, result_t, describe, it
+    use veggies, only: test_item_t, result_t, describe, fail, it
 
     implicit none
     private
@@ -46,13 +52,19 @@ contains
 
         type(json_object_t) :: copied_without_errors
         type(json_object_t), allocatable :: moved_without_errors
+        type(fallible_json_object_t) :: maybe_copied
 
         copied_without_errors = copy_construct_without_errors()
         call move_construct_without_errors(moved_without_errors)
 
-        result_ = assert_equals( &
-                copied_without_errors, &
-                moved_without_errors)
+        result_ = assert_equals(copied_without_errors, moved_without_errors)
+
+        maybe_copied = copy_construct_with_errors()
+        if (maybe_copied%failed()) then
+            result_ = result_.and.fail(maybe_copied%errors%to_string())
+        else
+            result_ = result_.and.assert_equals(copied_without_errors, maybe_copied%object)
+        end if
     end function
 
     function copy_construct_without_errors() result(object)
@@ -226,4 +238,35 @@ contains
 
         call move_into_object_unsafe(object, top_members)
     end subroutine
+
+    function copy_construct_with_errors() result(maybe_object)
+        type(fallible_json_object_t) :: maybe_object
+
+        maybe_object = fallible_json_object_t( &
+                [ fallible_json_member_t("1", json_null_t()) &
+                , fallible_json_member_t(var_str("2"), json_bool_t(.true.)) &
+                , fallible_json_member_t(fallible_json_string_t("3"), json_bool_t(.false.)) &
+                , fallible_json_member_t(fallible_json_string_t(var_str("4")), json_number_t(3.14d0)) &
+                , fallible_json_member_t("5", json_integer_t(42)) &
+                , fallible_json_member_t("6", fallible_json_value_t(fallible_json_string_t("hello"))) &
+                , fallible_json_member_t("7", fallible_json_value_t(fallible_json_object_t([json_member_t::]))) &
+                , fallible_json_member_t("8", fallible_json_value_t(fallible_json_array_t( &
+                        [ fallible_json_element_t(json_null_t()) &
+                        , fallible_json_element_t(json_bool_t(.true.)) &
+                        , fallible_json_element_t(json_bool_t(.false.)) &
+                        , fallible_json_element_t(json_number_t(3.14d0)) &
+                        , fallible_json_element_t(json_integer_t(42)) &
+                        , fallible_json_element_t(fallible_json_value_t(fallible_json_string_t("world"))) &
+                        , fallible_json_element_t(fallible_json_value_t(fallible_json_object_t([json_member_t::]))) &
+                        , fallible_json_element_t(json_array_t( &
+                            [ json_element_t(json_null_t()) &
+                            , json_element_t(json_bool_t(.true.)) &
+                            , json_element_t(json_bool_t(.false.)) &
+                            , json_element_t(json_number_t(3.14d0)) &
+                            , json_element_t(json_integer_t(42)) &
+                            , json_element_t(json_array_t([json_element_t::])) &
+                            ])) &
+                        ]))) &
+                ])
+    end function
 end module

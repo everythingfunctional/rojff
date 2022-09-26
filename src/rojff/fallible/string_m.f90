@@ -1,11 +1,12 @@
 module rojff_fallible_json_string_m
     use erloff, only: error_list_t, module_t, procedure_t
     use iso_varying_string, only: varying_string
+    use rojff_fallible_json_value_m, only: fallible_json_value_t
     use rojff_json_string_m, only: json_string_t
 
     implicit none
     private
-    public :: fallible_json_string_t
+    public :: fallible_json_string_t, fallible_json_value_t
 
     type :: fallible_json_string_t
         type(json_string_t) :: string
@@ -35,6 +36,12 @@ module rojff_fallible_json_string_m
             type(fallible_json_string_t) :: fallible_string
         end function
 
+        module function from_errors(errors) result(fallible_string)
+            implicit none
+            type(error_list_t), intent(in) :: errors
+            type(fallible_json_string_t) :: fallible_string
+        end function
+
         impure elemental module function from_fallible_string( &
                 maybe_string, module_, procedure_) result(fallible_string)
             implicit none
@@ -42,6 +49,15 @@ module rojff_fallible_json_string_m
             type(module_t), intent(in) :: module_
             type(procedure_t), intent(in) :: procedure_
             type(fallible_json_string_t) :: fallible_string
+        end function
+    end interface
+
+    interface fallible_json_value_t
+        module function fallible_json_value_from_fallible_array( &
+                maybe_string) result(fallible_value)
+            implicit none
+            type(fallible_json_string_t), intent(in) :: maybe_string
+            type(fallible_json_value_t) :: fallible_value
         end function
     end interface
 

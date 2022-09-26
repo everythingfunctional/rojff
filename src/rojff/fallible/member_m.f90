@@ -75,6 +75,18 @@ module rojff_fallible_json_member_m
             type(fallible_json_member_t) :: fallible_member
         end function
 
+        module function from_member(member) result(fallible_member)
+            implicit none
+            type(json_member_t), intent(in) :: member
+            type(fallible_json_member_t) :: fallible_member
+        end function
+
+        module function from_errors(errors) result(fallible_member)
+            implicit none
+            type(error_list_t), intent(in) :: errors
+            type(fallible_json_member_t) :: fallible_member
+        end function
+
         module function from_fallible_member( &
                 maybe_member, module_, procedure_) result(fallible_member)
             implicit none

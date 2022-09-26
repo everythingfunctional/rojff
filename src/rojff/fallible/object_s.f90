@@ -7,6 +7,14 @@ submodule(rojff_fallible_json_object_m) rojff_fallible_json_object_s
 
     character(len=*), parameter :: MODULE_NAME = "rojff_fallible_json_object_m"
 contains
+    module procedure from_object
+        fallible_object%object = object
+    end procedure
+
+    module procedure from_errors
+        fallible_object%errors = errors
+    end procedure
+
     module procedure from_members
         type(json_member_t), allocatable :: local_members(:)
 
@@ -40,6 +48,14 @@ contains
                     maybe_object%errors, module_, procedure_)
         else
             fallible_object%object = maybe_object%object
+        end if
+    end procedure
+
+    module procedure fallible_json_value_from_fallible_array
+        if (maybe_object%failed()) then
+            fallible_value = fallible_json_value_t(maybe_object%errors)
+        else
+            fallible_value = fallible_json_value_t(maybe_object%object)
         end if
     end procedure
 
