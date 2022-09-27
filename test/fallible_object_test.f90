@@ -38,10 +38,10 @@ contains
         type(fallible_json_object_t) :: maybe_object
         type(json_member_t), allocatable :: members(:)
 
-        members = &
+        allocate(members, source = &
                 [ json_member_unsafe("1", json_integer_t(1)) &
                 , json_member_unsafe("2", json_integer_t(2)) &
-                ]
+                ])
         maybe_object = fallible_json_object_t(members)
         if (maybe_object%failed()) then
             result_ = fail(maybe_object%errors%to_string())
@@ -58,10 +58,10 @@ contains
         type(fallible_json_object_t) :: maybe_object
         type(json_member_t), allocatable :: members(:)
 
-        members = &
+        allocate(members, source = &
                 [ json_member_unsafe("1", json_integer_t(1)) &
                 , json_member_unsafe("1", json_integer_t(2)) &
-                ]
+                ])
         maybe_object = fallible_json_object_t(members)
         result_ = assert_that(&
                 maybe_object%errors.hasAnyFrom.module_t("rojff_fallible_json_object_m"), &

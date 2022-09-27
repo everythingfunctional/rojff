@@ -1,7 +1,7 @@
 submodule(rojff_fallible_json_object_m) rojff_fallible_json_object_s
     use erloff, only: fatal_t
     use rojff_constants_m, only: INVALID_INPUT
-    use rojff_fallible_json_value_m, only: move_into_fallible_value
+    use rojff_fallible_json_value_m, only: move_into_fallible_value_ => move_into_fallible_value
     use rojff_json_member_m, only: move_into_member
     use rojff_json_object_m, only: move_into_object_unsafe
     use rojff_json_value_m, only: json_value_t
@@ -44,7 +44,7 @@ contains
                 type(fallible_json_member_t), allocatable :: local_maybes(:)
                 type(json_member_t), allocatable :: local_members(:)
 
-                local_maybes = maybe_members
+                allocate(local_maybes, source = maybe_members)
                 allocate(local_members(num_members))
                 do i = 1, num_members
                     call move_into_member(local_members(i), local_maybes(i)%member)
@@ -152,7 +152,7 @@ contains
             fallible_value = fallible_json_value_t(fallible_object%errors)
         else
             call move_alloc(fallible_object%object, tmp_val)
-            call move_into_fallible_value(fallible_value, tmp_val)
+            call move_into_fallible_value_(fallible_value, tmp_val)
         end if
     end procedure
 

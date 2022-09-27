@@ -10,7 +10,8 @@ module rojff_fallible_json_string_m
             fallible_json_string_t, &
             fallible_json_value_t, &
             create_fallible_json_string, &
-            move_into_fallible_string
+            move_into_fallible_string, &
+            move_into_fallible_value
 
     type :: fallible_json_string_t
         type(json_string_t), allocatable :: string

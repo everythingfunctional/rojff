@@ -1,5 +1,5 @@
 submodule(rojff_fallible_json_array_m) rojff_fallible_json_array_s
-    use rojff_fallible_json_value_m, only: move_into_fallible_value
+    use rojff_fallible_json_value_m, only: move_into_fallible_value_ => move_into_fallible_value
     use rojff_json_array_m, only: move_into_array
     use rojff_json_element_m, only: move_into_element
     use rojff_json_value_m, only: json_value_t
@@ -30,7 +30,7 @@ contains
     module procedure from_fallible_elements
         type(fallible_json_element_t), allocatable :: local_elements(:)
 
-        local_elements = maybe_elements
+        allocate(local_elements, source = maybe_elements)
         call move_into_fallible_array(fallible_array, local_elements)
     end procedure
 
@@ -93,7 +93,7 @@ contains
             fallible_value = fallible_json_value_t(fallible_array%errors)
         else
             call move_alloc(fallible_array%array, tmp_val)
-            call move_into_fallible_value(fallible_value, tmp_val)
+            call move_into_fallible_value_(fallible_value, tmp_val)
         end if
     end procedure
 

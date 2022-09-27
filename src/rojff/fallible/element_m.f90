@@ -6,7 +6,7 @@ module rojff_fallible_json_element_m
 
     implicit none
     private
-    public :: fallible_json_element_t
+    public :: fallible_json_element_t, move_into_fallible_element
 
     type :: fallible_json_element_t
         type(json_element_t) :: element

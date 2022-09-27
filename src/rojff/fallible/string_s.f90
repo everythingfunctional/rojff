@@ -2,7 +2,7 @@ submodule(rojff_fallible_json_string_m) rojff_fallible_json_string_s
     use erloff, only: fatal_t
     use iso_varying_string, only: char
     use rojff_constants_m, only: INVALID_INPUT
-    use rojff_fallible_json_value_m, only: move_into_fallible_value
+    use rojff_fallible_json_value_m, only: move_into_fallible_value_ => move_into_fallible_value
     use rojff_json_value_m, only: json_value_t
     use rojff_parser_m, only: parse_json_string
     use rojff_string_cursor_m, only: string_cursor_t
@@ -112,7 +112,7 @@ contains
             fallible_value = fallible_json_value_t(fallible_string%errors)
         else
             call move_alloc(fallible_string%string, tmp_val)
-            call move_into_fallible_value(fallible_value, tmp_val)
+            call move_into_fallible_value_(fallible_value, tmp_val)
         end if
     end procedure
 

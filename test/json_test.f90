@@ -488,8 +488,8 @@ contains
                 , json_member_unsafe("second", json_string_unsafe("world")) &
                 , json_member_unsafe("third", json_string_unsafe("goodbye")) &
                 ])
-        keys = object%keys()
-        values = object%values()
+        allocate(keys, source = object%keys())
+        allocate(values, source = object%values())
         result_ = assert_equals(size(keys), size(values), "number of members")
         do i = 1, size(keys)
             maybe_value = object%get(keys(i))
