@@ -3,6 +3,8 @@ submodule(rojff_parser_m) rojff_parser_s
     ! use iso_c_binding, only: c_char, c_double, c_ptr, c_null_char, c_null_ptr
     use rojff_constants_m, only: INVALID_INPUT
     use rojff_fallible_json_value_m, only: move_into_fallible_value
+    use rojff_fallible_json_object_m, only: &
+            fallible_json_object_t, move_into_fallible_object
     use rojff_file_cursor_m, only: file_cursor_t
     use rojff_json_array_m, only: json_array_t, move_into_array
     use rojff_json_bool_m, only: json_bool_t, create_json_bool
@@ -424,7 +426,7 @@ contains
             ! else
             !     stat = 0
             ! end if
-            read(number_string, *, iostat=stat) number_d  ! not efficient - might really be 0.0
+            read(number_string, *, iostat=stat) number_d  ! not efficient
             if (stat == 0) then
                 exponent_location = index(number_string, "e")
                 if (exponent_location == 0) exponent_location = index(number_string, "E")
@@ -536,8 +538,7 @@ contains
         type(member_linked_list_t) :: parsed
         type(json_string_t), allocatable :: key
         class(json_value_t), allocatable :: val
-        logical :: has_duplicates
-        integer :: i, j
+        type(fallible_json_object_t) :: maybe_object
 
         call skip_whitespace(cursor)
         if (cursor%finished()) then
@@ -648,25 +649,14 @@ contains
             end select
         end do
         call parsed%move_into_members(members)
-
-        has_duplicates = .false.
-        unique_search: do i = 2, size(members)
-            do j = 1, i-1
-                if (members(i)%key == members(j)%key) then
-                    has_duplicates = .true.
-                    exit unique_search
-                end if
-            end do
-        end do unique_search
-
-        if (has_duplicates) then
-            errors = error_list_t(fatal_t( &
-                    INVALID_INPUT, &
+        call move_into_fallible_object(maybe_object, members)
+        if (maybe_object%failed()) then
+            errors = error_list_t( &
+                    maybe_object%errors, &
                     module_t(MODULE_NAME), &
-                    procedure_t(PROCEDURE_NAME), &
-                    'Duplicate key found: "' // members(i)%key // '"'))
+                    procedure_t(PROCEDURE_NAME))
         else
-            call move_into_object_unsafe(json, members)
+            call move_alloc(maybe_object%object, json)
         end if
     end subroutine
 
