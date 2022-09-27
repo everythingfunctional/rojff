@@ -66,7 +66,7 @@ contains
       fallible_real%errors_ = json%errors
     else
       fallible_real = fallible_real_t( &
-          fallible_real_t(json%json), &
+          fallible_real_t(json%value_), &
           module_t(MODULE_NAME), &
           procedure_t("from_fallible_json_value"))
     end if

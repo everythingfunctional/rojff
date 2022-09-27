@@ -143,7 +143,7 @@ contains
 
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_null_t(), json%json)
+            result_ = assert_equals(json_null_t(), json%value_)
         end if
     end function
 
@@ -166,7 +166,7 @@ contains
 
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_bool_t(.true.), json%json)
+            result_ = assert_equals(json_bool_t(.true.), json%value_)
         end if
     end function
 
@@ -179,7 +179,7 @@ contains
 
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_bool_t(.false.), json%json)
+            result_ = assert_equals(json_bool_t(.false.), json%value_)
         end if
     end function
 
@@ -216,7 +216,7 @@ contains
             if (result_%passed()) then
                 result_ = assert_equals( &
                         json_number_t(input%value_()), &
-                        json%json, &
+                        json%value_, &
                         "Original string: " // input%string())
             end if
         class default
@@ -232,7 +232,7 @@ contains
         json = parse_json_from_string("1.23e4")
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            select type (number => json%json)
+            select type (number => json%value_)
             type is (json_number_t)
                 result_ = assert_equals(3, number%precision)
             class default
@@ -264,7 +264,7 @@ contains
             if (result_%passed()) then
                 result_ = assert_equals( &
                         json_integer_t(input%value_()), &
-                        json%json, &
+                        json%value_, &
                         "Original string: " // input%string())
             end if
         class default
@@ -293,7 +293,7 @@ contains
 
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_string_unsafe(THE_STRING(2:len(THE_STRING)-1)), json%json)
+            result_ = assert_equals(json_string_unsafe(THE_STRING(2:len(THE_STRING)-1)), json%value_)
         end if
     end function
 
@@ -317,7 +317,7 @@ contains
 
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_array_t(empty_elements), json%json)
+            result_ = assert_equals(json_array_t(empty_elements), json%value_)
         end if
     end function
 
@@ -332,7 +332,7 @@ contains
         if (result_%passed()) then
             result_ = assert_equals( &
                     json_array_t([json_element_t(json_number_t(20d1))]), &
-                    json%json)
+                    json%value_)
         end if
     end function
 
@@ -351,7 +351,7 @@ contains
                             , json_element_t(json_null_t()) &
                             , json_element_t(json_null_t()) &
                             ]), &
-                    json%json)
+                    json%value_)
         end if
     end function
 
@@ -365,7 +365,7 @@ contains
 
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_object_unsafe(empty_members), json%json)
+            result_ = assert_equals(json_object_unsafe(empty_members), json%value_)
         end if
     end function
 
@@ -380,7 +380,7 @@ contains
         if (result_%passed()) then
             result_ = assert_equals( &
                     json_object_unsafe([json_member_unsafe("first", json_null_t())]), &
-                    json%json)
+                    json%value_)
         end if
     end function
 
@@ -399,7 +399,7 @@ contains
                             , json_member_unsafe("second", json_null_t()) &
                             , json_member_unsafe("third", json_null_t()) &
                             ]), &
-                    json%json)
+                    json%value_)
         end if
     end function
 
@@ -421,7 +421,7 @@ contains
 
         result_ = assert_not(parsed%errors%has_any(), parsed%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(example, parsed%json)
+            result_ = assert_equals(example, parsed%value_)
         end if
     end function
 

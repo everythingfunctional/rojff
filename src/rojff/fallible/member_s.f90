@@ -151,7 +151,7 @@ contains
         if (any([maybe_key%failed(), maybe_value%failed()])) then
             fallible_member%errors = error_list_t([maybe_key%errors, maybe_value%errors])
         else
-            call move_into_member(fallible_member%member, maybe_key%string, maybe_value%json)
+            call move_into_member(fallible_member%member, maybe_key%string, maybe_value%value_)
         end if
     end procedure
 

@@ -8,7 +8,7 @@ module rojff_fallible_json_value_m
 
     type :: fallible_json_value_t
         type(error_list_t) :: errors
-        class(json_value_t), allocatable :: json
+        class(json_value_t), allocatable :: value_
     contains
         procedure :: failed
     end type

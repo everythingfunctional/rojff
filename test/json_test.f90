@@ -410,7 +410,7 @@ contains
 
         result_ = assert_not(retrieved%errors%has_any(), retrieved%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_string_unsafe("third"), retrieved%json)
+            result_ = assert_equals(json_string_unsafe("third"), retrieved%value_)
         end if
     end function
 
@@ -432,7 +432,7 @@ contains
             if (maybe_item%failed()) then
                 result_ = result_.and.fail(maybe_item%errors%to_string())
             else
-                result_ = result_.and.assert_equals(array%elements(i)%json, maybe_item%json)
+                result_ = result_.and.assert_equals(array%elements(i)%json, maybe_item%value_)
             end if
         end do
     end function
@@ -470,7 +470,7 @@ contains
 
         result_ = assert_not(retrieved%errors%has_any(), retrieved%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_string_unsafe("hello"), retrieved%json)
+            result_ = assert_equals(json_string_unsafe("hello"), retrieved%value_)
         end if
     end function
 
@@ -496,7 +496,7 @@ contains
             if (maybe_value%failed()) then
                 result_ = result_.and.fail(maybe_value%errors%to_string())
             else
-                result_ = result_.and.assert_equals(values(i)%json, maybe_value%json)
+                result_ = result_.and.assert_equals(values(i)%json, maybe_value%value_)
             end if
         end do
     end function
