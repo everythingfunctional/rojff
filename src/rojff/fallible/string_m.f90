@@ -6,10 +6,14 @@ module rojff_fallible_json_string_m
 
     implicit none
     private
-    public :: fallible_json_string_t, fallible_json_value_t
+    public :: &
+            fallible_json_string_t, &
+            fallible_json_value_t, &
+            create_fallible_json_string, &
+            move_into_fallible_string
 
     type :: fallible_json_string_t
-        type(json_string_t) :: string
+        type(json_string_t), allocatable :: string
         type(error_list_t) :: errors
     contains
         procedure :: failed
@@ -52,13 +56,59 @@ module rojff_fallible_json_string_m
         end function
     end interface
 
+    interface create_fallible_json_string
+        module subroutine create_from_character(fallible_string, string)
+            implicit none
+            type(fallible_json_string_t), intent(out) :: fallible_string
+            character(len=*), intent(in) :: string
+        end subroutine
+
+        module subroutine create_from_string(fallible_string, string)
+            implicit none
+            type(fallible_json_string_t), intent(out) :: fallible_string
+            type(varying_string), intent(in) :: string
+        end subroutine
+    end interface
+
+    interface move_into_fallible_string
+        module subroutine move_from_character(fallible_string, string)
+            implicit none
+            type(fallible_json_string_t), intent(out) :: fallible_string
+            character(len=:), allocatable, intent(inout) :: string
+        end subroutine
+
+        module subroutine move_from_json_string(fallible_string, string)
+            implicit none
+            type(fallible_json_string_t), intent(out) :: fallible_string
+            type(json_string_t), allocatable, intent(inout) :: string
+        end subroutine
+
+        module subroutine move_from_fallible_string( &
+                fallible_string, maybe_string, module_, procedure_)
+            implicit none
+            type(fallible_json_string_t), intent(out) :: fallible_string
+            type(fallible_json_string_t), intent(inout) :: maybe_string
+            type(module_t), intent(in) :: module_
+            type(procedure_t), intent(in) :: procedure_
+        end subroutine
+    end interface
+
     interface fallible_json_value_t
-        module function fallible_json_value_from_fallible_array( &
+        module function fallible_json_value_from_fallible_string( &
                 maybe_string) result(fallible_value)
             implicit none
             type(fallible_json_string_t), intent(in) :: maybe_string
             type(fallible_json_value_t) :: fallible_value
         end function
+    end interface
+
+    interface move_into_fallible_value
+        module subroutine move_fallible_string_into_fallible_value( &
+                fallible_value, fallible_string)
+            implicit none
+            type(fallible_json_value_t), intent(out) :: fallible_value
+            type(fallible_json_string_t), intent(inout) :: fallible_string
+        end subroutine
     end interface
 
     interface

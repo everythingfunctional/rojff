@@ -86,7 +86,7 @@ module rojff_json_member_m
         module subroutine move_into_member_v(member, key, value_)
             implicit none
             type(json_member_t), intent(out) :: member
-            type(json_string_t), allocatable, intent(inout) :: key
+            type(json_string_t), intent(inout) :: key
             class(json_value_t), allocatable, intent(inout) :: value_
         end subroutine
 
@@ -95,6 +95,12 @@ module rojff_json_member_m
             type(json_member_t), intent(out) :: member
             type(json_string_t), intent(inout) :: key
             type(json_element_t), intent(inout) :: element
+        end subroutine
+
+        impure elemental module subroutine move_components(to, from)
+            implicit none
+            type(json_member_t), intent(out) :: to
+            type(json_member_t), intent(inout) :: from
         end subroutine
     end interface
 

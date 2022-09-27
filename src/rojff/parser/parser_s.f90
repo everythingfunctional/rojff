@@ -2,7 +2,7 @@ submodule(rojff_parser_m) rojff_parser_s
     use erloff, only: fatal_t, module_t, procedure_t
     ! use iso_c_binding, only: c_char, c_double, c_ptr, c_null_char, c_null_ptr
     use rojff_constants_m, only: INVALID_INPUT
-    use rojff_fallible_json_value_m, only: move_into_fallible_json
+    use rojff_fallible_json_value_m, only: move_into_fallible_value
     use rojff_file_cursor_m, only: file_cursor_t
     use rojff_json_array_m, only: json_array_t, move_into_array
     use rojff_json_bool_m, only: json_bool_t, create_json_bool
@@ -45,7 +45,7 @@ contains
                     module_t(MODULE_NAME), &
                     procedure_t("parse_json_from_file")))
         else
-            call move_into_fallible_json(fallible_json, json)
+            call move_into_fallible_value(fallible_json, json)
         end if
     end procedure
 
@@ -62,7 +62,7 @@ contains
                     module_t(MODULE_NAME), &
                     procedure_t("parse_json_from_string")))
         else
-            call move_into_fallible_json(fallible_json, json)
+            call move_into_fallible_value(fallible_json, json)
         end if
     end procedure
 

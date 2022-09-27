@@ -1,4 +1,6 @@
 submodule(rojff_fallible_json_element_m) rojff_fallible_json_element_s
+    use rojff_json_element_m, only: move_into_element
+
     implicit none
 contains
     module procedure from_element
@@ -27,6 +29,18 @@ contains
             fallible_element%errors = maybe_value%errors
         else
             fallible_element%element = json_element_t(maybe_value%json)
+        end if
+    end procedure
+
+    module procedure move_from_value
+        call move_into_element(fallible_element%element, value_)
+    end procedure
+
+    module procedure move_from_fallible_value
+        if (maybe_value%failed()) then
+            fallible_element%errors = maybe_value%errors
+        else
+            call move_into_element(fallible_element%element, maybe_value%json)
         end if
     end procedure
 

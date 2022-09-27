@@ -23,13 +23,21 @@ module rojff_json_element_m
         end function
     end interface
 
-    interface
-        module subroutine move_into_element(element, json)
+    interface move_into_element
+        module subroutine move_from_value(element, json)
             implicit none
             type(json_element_t), intent(out) :: element
             class(json_value_t), allocatable, intent(inout) :: json
         end subroutine
 
+        module subroutine move_from_element(to, from)
+            implicit none
+            type(json_element_t), intent(out) :: to
+            type(json_element_t), intent(inout) :: from
+        end subroutine
+    end interface
+
+    interface
         recursive elemental module function equals(lhs, rhs)
             implicit none
             class(json_element_t), intent(in) :: lhs

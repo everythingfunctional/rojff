@@ -7,7 +7,11 @@ module rojff_fallible_json_object_m
 
     implicit none
     private
-    public :: fallible_json_object_t, fallible_json_value_t, move_into_fallible_object
+    public :: &
+            fallible_json_object_t, &
+            fallible_json_value_t, &
+            move_into_fallible_object, &
+            move_into_fallible_value
 
     type :: fallible_json_object_t
         type(json_object_t), allocatable :: object
@@ -67,6 +71,35 @@ module rojff_fallible_json_object_m
             implicit none
             type(fallible_json_object_t), intent(out) :: fallible_object
             type(json_member_t), allocatable, intent(inout) :: members(:)
+        end subroutine
+
+        module subroutine move_from_fallible_members(fallible_object, maybe_members)
+            implicit none
+            type(fallible_json_object_t), intent(out) :: fallible_object
+            type(fallible_json_member_t), intent(inout) :: maybe_members(:)
+        end subroutine
+
+        module subroutine move_from_object(fallible_object, object)
+            implicit none
+            type(fallible_json_object_t), intent(out) :: fallible_object
+            type(json_object_t), allocatable, intent(inout) :: object
+        end subroutine
+
+        module subroutine move_from_fallible_object( &
+                fallible_object, maybe_object, module_, procedure_)
+            implicit none
+            type(fallible_json_object_t), intent(out) :: fallible_object
+            type(fallible_json_object_t), intent(inout) :: maybe_object
+            type(module_t), intent(in) :: module_
+            type(procedure_t), intent(in) :: procedure_
+        end subroutine
+    end interface
+
+    interface move_into_fallible_value
+        module subroutine move_to_fallible_value(fallible_value, fallible_object)
+            implicit none
+            type(fallible_json_value_t), intent(out) :: fallible_value
+            type(fallible_json_object_t), intent(inout) :: fallible_object
         end subroutine
     end interface
 

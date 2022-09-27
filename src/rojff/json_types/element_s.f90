@@ -5,8 +5,12 @@ contains
         element%json = json
     end procedure
 
-    module procedure move_into_element
+    module procedure move_from_value
         call move_alloc(json, element%json)
+    end procedure
+
+    module procedure move_from_element
+        call move_alloc(from%json, to%json)
     end procedure
 
     module procedure equals

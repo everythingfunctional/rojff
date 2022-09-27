@@ -7,10 +7,14 @@ module rojff_fallible_json_array_m
 
     implicit none
     private
-    public :: fallible_json_array_t, fallible_json_value_t
+    public :: &
+            fallible_json_array_t, &
+            fallible_json_value_t, &
+            move_into_fallible_array, &
+            move_into_fallible_value
 
     type :: fallible_json_array_t
-        type(json_array_t) :: array
+        type(json_array_t), allocatable :: array
         type(error_list_t) :: errors
     contains
         procedure :: failed
@@ -58,6 +62,43 @@ module rojff_fallible_json_array_m
             type(fallible_json_array_t), intent(in) :: maybe_array
             type(fallible_json_value_t) :: fallible_value
         end function
+    end interface
+
+    interface move_into_fallible_array
+        module subroutine move_elements(fallible_array, elements)
+            implicit none
+            type(fallible_json_array_t), intent(out) :: fallible_array
+            type(json_element_t), allocatable, intent(inout) :: elements(:)
+        end subroutine
+
+        module subroutine move_fallible_elements(fallible_array, maybe_elements)
+            implicit none
+            type(fallible_json_array_t), intent(out) :: fallible_array
+            type(fallible_json_element_t), intent(inout) :: maybe_elements(:)
+        end subroutine
+
+        module subroutine move_from_array(fallible_array, array)
+            implicit none
+            type(fallible_json_array_t), intent(out) :: fallible_array
+            type(json_array_t), allocatable, intent(inout) :: array
+        end subroutine
+
+        module subroutine move_from_fallible_array( &
+                fallible_array, maybe_array, module_, procedure_)
+            implicit none
+            type(fallible_json_array_t), intent(out) :: fallible_array
+            type(fallible_json_array_t), intent(inout) :: maybe_array
+            type(module_t), intent(in) :: module_
+            type(procedure_t), intent(in) :: procedure_
+        end subroutine
+    end interface
+
+    interface move_into_fallible_value
+        module subroutine move_to_fallible_value(fallible_value, fallible_array)
+            implicit none
+            type(fallible_json_value_t), intent(out) :: fallible_value
+            type(fallible_json_array_t), intent(inout) :: fallible_array
+        end subroutine
     end interface
 
     interface

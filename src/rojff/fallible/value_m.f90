@@ -4,7 +4,7 @@ module rojff_fallible_json_value_m
 
     implicit none
     private
-    public :: fallible_json_value_t, move_into_fallible_json
+    public :: fallible_json_value_t, move_into_fallible_value
 
     type :: fallible_json_value_t
         type(error_list_t) :: errors
@@ -36,13 +36,24 @@ module rojff_fallible_json_value_m
         end function
     end interface
 
-    interface
-        module subroutine move_into_fallible_json(fallible_json, json)
+    interface move_into_fallible_value
+        module subroutine move_from_value(fallible_value, value_)
             implicit none
-            type(fallible_json_value_t), intent(out) :: fallible_json
-            class(json_value_t), allocatable, intent(inout) :: json
+            type(fallible_json_value_t), intent(out) :: fallible_value
+            class(json_value_t), allocatable, intent(inout) :: value_
         end subroutine
 
+        module subroutine move_from_fallible_value( &
+                fallible_value, maybe_value, module_, procedure_)
+            implicit none
+            type(fallible_json_value_t), intent(out) :: fallible_value
+            type(fallible_json_value_t), intent(inout) :: maybe_value
+            type(module_t), intent(in) :: module_
+            type(procedure_t), intent(in) :: procedure_
+        end subroutine
+    end interface
+
+    interface
         elemental module function failed(self)
             implicit none
             class(fallible_json_value_t), intent(in) :: self

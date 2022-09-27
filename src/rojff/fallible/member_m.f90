@@ -9,7 +9,7 @@ module rojff_fallible_json_member_m
 
     implicit none
     private
-    public :: fallible_json_member_t
+    public :: fallible_json_member_t, move_into_fallible_member
 
     type :: fallible_json_member_t
         type(json_member_t) :: member
@@ -95,6 +95,71 @@ module rojff_fallible_json_member_m
             type(procedure_t), intent(in) :: procedure_
             type(fallible_json_member_t) :: fallible_member
         end function
+    end interface
+
+    interface move_into_fallible_member
+        module subroutine move_character_and_value(fallible_member, key, value_)
+            implicit none
+            type(fallible_json_member_t), intent(out) :: fallible_member
+            character(len=*), intent(in) :: key
+            class(json_value_t), allocatable, intent(inout) :: value_
+        end subroutine
+
+        module subroutine move_character_and_fallible_value( &
+                fallible_member, key, maybe_value)
+            implicit none
+            type(fallible_json_member_t), intent(out) :: fallible_member
+            character(len=*), intent(in) :: key
+            type(fallible_json_value_t), intent(inout) :: maybe_value
+        end subroutine
+
+        module subroutine move_string_and_value(fallible_member, key, value_)
+            implicit none
+            type(fallible_json_member_t), intent(out) :: fallible_member
+            type(varying_string), intent(in) :: key
+            class(json_value_t), allocatable, intent(inout) :: value_
+        end subroutine
+
+        module subroutine move_string_and_fallible_value( &
+                fallible_member, key, maybe_value)
+            implicit none
+            type(fallible_json_member_t), intent(out) :: fallible_member
+            type(varying_string), intent(in) :: key
+            type(fallible_json_value_t), intent(inout) :: maybe_value
+        end subroutine
+
+        module subroutine move_json_string_and_fallible_value( &
+                fallible_member, key, maybe_value)
+            implicit none
+            type(fallible_json_member_t), intent(out) :: fallible_member
+            type(json_string_t), allocatable, intent(inout) :: key
+            type(fallible_json_value_t), intent(inout) :: maybe_value
+        end subroutine
+
+        module subroutine move_fallible_string_and_value( &
+                fallible_member, maybe_key, value_)
+            implicit none
+            type(fallible_json_member_t), intent(out) :: fallible_member
+            type(fallible_json_string_t), intent(inout) :: maybe_key
+            class(json_value_t), allocatable, intent(inout) :: value_
+        end subroutine
+
+        module subroutine move_fallible_string_and_fallible_value( &
+                fallible_member, maybe_key, maybe_value)
+            implicit none
+            type(fallible_json_member_t), intent(out) :: fallible_member
+            type(fallible_json_string_t), intent(inout) :: maybe_key
+            type(fallible_json_value_t), intent(inout) :: maybe_value
+        end subroutine
+
+        module subroutine move_from_fallible_member( &
+                fallible_member, maybe_member, module_, procedure_)
+            implicit none
+            type(fallible_json_member_t), intent(out) :: fallible_member
+            type(fallible_json_member_t), intent(inout) :: maybe_member
+            type(module_t), intent(in) :: module_
+            type(procedure_t), intent(in) :: procedure_
+        end subroutine
     end interface
 
     interface

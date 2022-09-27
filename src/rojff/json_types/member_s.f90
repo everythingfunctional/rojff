@@ -41,13 +41,17 @@ contains
 
     module procedure move_into_member_v
         call move_alloc(key%string, member%key)
-        deallocate(key)
         call move_alloc(value_, member%value_)
     end procedure
 
     module procedure move_into_member_e
         call move_alloc(key%string, member%key)
         call move_alloc(element%json, member%value_)
+    end procedure
+
+    module procedure move_components
+        call move_alloc(from%key, to%key)
+        call move_alloc(from%value_, to%value_)
     end procedure
 
     module procedure move_into_member_unsafe_cv

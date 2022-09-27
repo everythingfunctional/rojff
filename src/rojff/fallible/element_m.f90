@@ -50,6 +50,20 @@ module rojff_fallible_json_element_m
         end function
     end interface
 
+    interface move_into_fallible_element
+        module subroutine move_from_value(fallible_element, value_)
+            implicit none
+            type(fallible_json_element_t), intent(out) :: fallible_element
+            class(json_value_t), allocatable, intent(inout) :: value_
+        end subroutine
+
+        module subroutine move_from_fallible_value(fallible_element, maybe_value)
+            implicit none
+            type(fallible_json_element_t), intent(out) :: fallible_element
+            type(fallible_json_value_t), intent(inout) :: maybe_value
+        end subroutine
+    end interface
+
     interface
         elemental module function failed(self)
             implicit none

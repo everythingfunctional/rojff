@@ -2,15 +2,27 @@ module rojff
     use rojff_constants_m, only: INVALID_INPUT
     use rojff_cursor_m, only: cursor_t
     use rojff_fallible_json_array_m, only: &
-                fallible_json_array_t, fallible_json_value_t
-    use rojff_fallible_json_element_m, only: fallible_json_element_t
-    use rojff_fallible_json_member_m, only: fallible_json_member_t
+                fallible_json_array_t, &
+                fallible_json_value_t, &
+                move_into_fallible_array, &
+                move_into_fallible_value
+    use rojff_fallible_json_element_m, only: &
+                fallible_json_element_t, move_into_fallible_element
+    use rojff_fallible_json_member_m, only: &
+                fallible_json_member_t, move_into_fallible_member
     use rojff_fallible_json_object_m, only: &
-                fallible_json_object_t, fallible_json_value_t
+                fallible_json_object_t, &
+                fallible_json_value_t, &
+                move_into_fallible_object, &
+                move_into_fallible_value
     use rojff_fallible_json_string_m, only: &
-                fallible_json_string_t, fallible_json_value_t
+                fallible_json_string_t, &
+                fallible_json_value_t, &
+                create_fallible_json_string, &
+                move_into_fallible_string, &
+                move_into_fallible_value
     use rojff_fallible_json_value_m, only: &
-            fallible_json_value_t, move_into_fallible_json
+            fallible_json_value_t, move_into_fallible_value
     use rojff_json_array_m, only: json_array_t, move_into_array
     use rojff_json_bool_m, only: json_bool_t, create_json_bool
     use rojff_json_element_m, only: json_element_t, move_into_element
