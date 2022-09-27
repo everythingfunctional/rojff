@@ -5,18 +5,41 @@
 With an interface inspired by [jsonff](https://gitlab.com/everythingfunctional/jsonff),
 the data semantics and parser are redesigned to allow for high performance.
 
-The constructors, `json_null_t`, `json_bool_t`, `json_integer_t`,
-`json_number_t`, `fallible_json_string_t`, `json_array_t` and `json_object_t`
-are provided for building up JSON data structures in Fortran.
-Note that the procedure to create a `json_string_t` ensures that the string is valid according to the JSON standard.
-*Unsafe* versions of the json string and member constructors are provided
-in the event you are certain that you are only dealing with valid strings.
+A full set of procedures are provided for either combination of two orthogonal aspects of constructing a JSON data structure:
 
-Additionally there are procedures which use `allocatable` arguments
-to move data into a JSON data structure, in order to avoid copying data.
-One should generally avoid using these procedures to construct the JSON
-unless armed with specific evidence that using the functional constructors
-is actually significantly impacting performance due to the data copying.
+* Functional style constructors enabling single-expression construction **vs** move semantics to avoid data copying
+* Check for possible errors **vs** avoid error checks
+
+Functions with the same name as the type (or `unsafe` substituted for `_t` to indicate avoidance of error checks) are provided for the functional style.
+Subroutines named `create_*` or `move_into_*` are provided for avoiding data copying.
+
+No error checking is required for values of type `json_null_t`, `json_bool_t`, `json_integer_t`, or `json_number_t`, so no fallible types or unsafe procedures are provided for them.
+Construction of these types done like:
+
+functional | move
+-----------|------
+`json_null_t()` | `create_json_null(null_var)`
+`json_bool_t(.true.)` | `create_json_bool(bool_var, .true.)`
+`json_integer_t(1)` | `create_json_integer(int_var, 1)`
+`json_number_t(3.14d0)` | `create_json_number(num_var, 3.14d0)`
+
+The construction of a string can check that it is a valid json string (i.e. contains only proper escape sequences and no unescaped quotes).
+The construction of an object can check that no duplicate keys are present.
+The construction of strings, arrays and objects can be accomplished via the following different methods.
+
+functional unsafe | function with errors | move unsafe | move with errors
+------------------|----------------------|-------------|-----------------
+N/A               | `fallible_json_value_t(val)` | N/A | `move_into_fallible_json_value(maybe_val, val)`
+`json_string_unsafe(string)` | `fallible_json_string_t(string)` | `create_json_string_unsafe(str, string)` | `create_fallible_json_string(maybe_str, string)`
+`json_element_t(val)` | `fallible_json_element_t(maybe_val)` | `move_into_element(elem, val)` | `move_into_fallible_element(maybe_elem, maybe_val)`
+`json_array_t(elems)` | `fallible_json_array_t(maybe_elems)` | `move_into_array(array, elems)` | `move_into_fallible_array(maybe_array, maybe_elems)`
+`json_member_unsafe(key, val)` | `fallible_json_member_t(key, val)` | `move_into_member_unsafe(member, key, val)` | `move_into_fallible_member(maybe_member, maybe_key, maybe_val)`
+`json_object_unsafe(members)` | `fallible_json_object_t(maybe_members)` | `move_into_object(obj, members)` | `move_into_fallible_object(maybe_obj, maybe_members)`
+
+Full examples of constructing the same data structure all four different ways are provided in the [construction method test](test/construction_method_test.f90).
+It is recommended to start with the functional style with error checking.
+If sufficient testing has been performed, and any strings will not come from user input, then switching to the unsafe methods can be considered.
+If sufficient evidence has been seen that performance is a problem, then it may be beneficial to switch to the `create_*` and `move_*` methods.
 
 Once constructed, JSON values can be converted to string representation in either compact or expanded, human-readable formats.
 Additionally, procedures are provided (`parse_json_from_string` and `parse_json_from_file`)
@@ -40,26 +63,23 @@ A detailed references on the functionality of rojff is available in
 To create a simple reader and writer for JSON three steps are usually required.
 A small and concise example to read JSON from a file and pretty print it is given here.
 
-```Fortran
+```fortran
 program example
-    use iso_varying_string
-    use jsonff
-    use erloff
+    use iso_varying_string, only: char
+    use rojff
 
     implicit none
 
     type(fallible_json_value_t) :: parsed_json
-    character(len=:), alloctable :: string
 
     parsed_json = parse_json_from_file('index.json')
 
     if (parsed_json%failed()) then
-        call put_line(parsed_json%errors%to_string())
-        error stop
+        error stop char(parsed_json%errors%to_string())
     end if
 
-    string = parsed_json%json%to_expanded_string()
-end program example
+    print *, parsed_json%value_%to_expanded_string()
+end program
 ```
 
 A JSON document can be parsed from a string with the `parse_json_from_string` function
@@ -70,8 +90,10 @@ To verify the correctness of the parsed JSON the `fallible_json_value_t` can be 
 In case of failure the `error_list_t` component can be accessed via `%errors`
 and should be handled appropriately by the caller.
 
-If the JSON document was correct the `json_value_t` can be accessed via `%json` and processed further.
+If the JSON document was correct the `json_value_t` can be accessed via `%value_` and processed further.
 Serialization with the `%to_expanded_string()` or `%to_compact_string()` method returns a `character(len=:), allocatable`.
+Serialization to a file can be performed with the `%save_expanded_to(file_name)` or `%save_compactly_to(file_name)` methods.
+If there is a chance the file may already exist, the `status="replace"` optional argument should be included.
 
 The *literal* value (e.g. null) is identified by its type alone and contains no data.
 The scalar values (e.g. bool, string, integer and number) contain their values,
