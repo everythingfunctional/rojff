@@ -19,11 +19,12 @@ module json_test
             create_json_number, &
             create_json_string_unsafe, &
             json_member_unsafe, &
+            json_object_unsafe, &
             json_string_unsafe, &
             move_into_array, &
             move_into_element, &
             move_into_member_unsafe, &
-            move_into_object, &
+            move_into_object_unsafe, &
             INVALID_INPUT
     use rojff_constants_m, only: NEWLINE
     use veggies, only: &
@@ -105,7 +106,7 @@ contains
         type(result_t) :: result_
 
         type(json_null_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_null_t), allocatable :: created
 
         copied = json_null_t()
         call create_json_null(created)
@@ -119,7 +120,7 @@ contains
         type(result_t) :: result_
 
         type(json_bool_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_bool_t), allocatable :: created
 
         copied = json_bool_t(.true.)
         call create_json_bool(created, .true.)
@@ -133,7 +134,7 @@ contains
         type(result_t) :: result_
 
         type(json_bool_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_bool_t), allocatable :: created
 
         copied = json_bool_t(.false.)
         call create_json_bool(created, .false.)
@@ -147,7 +148,7 @@ contains
         type(result_t) :: result_
 
         type(json_string_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_string_t), allocatable :: created
 
         copied = json_string_unsafe("Hello")
         call create_json_string_unsafe(created, "Hello")
@@ -175,7 +176,7 @@ contains
         type(result_t) :: result_
 
         type(json_number_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_number_t), allocatable :: created
 
         copied = json_number_t(1.0d0)
         call create_json_number(created, 1.0d0)
@@ -189,7 +190,7 @@ contains
         type(result_t) :: result_
 
         type(json_number_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_number_t), allocatable :: created
 
         copied = json_number_t(1.234d0, 3)
         call create_json_number(created, 1.234d0, 3)
@@ -203,7 +204,7 @@ contains
         type(result_t) :: result_
 
         type(json_integer_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_integer_t), allocatable :: created
 
         copied = json_integer_t(1)
         call create_json_integer(created, 1)
@@ -217,8 +218,12 @@ contains
         type(result_t) :: result_
 
         type(json_array_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_array_t), allocatable :: created
+        class(json_value_t), allocatable :: next_val
         type(json_element_t), allocatable :: elements(:)
+        type(json_null_t), allocatable :: null_val
+        type(json_number_t), allocatable :: num_val
+        type(json_string_t), allocatable :: string_val
 
         copied = json_array_t( &
                 [ json_element_t(json_null_t()) &
@@ -227,12 +232,15 @@ contains
                 ])
 
         allocate(elements(3))
-        call create_json_null(created)
-        call move_into_element(elements(1), created)
-        call create_json_string_unsafe(created, "Hello")
-        call move_into_element(elements(2), created)
-        call create_json_number(created, 2.0d0)
-        call move_into_element(elements(3), created)
+        call create_json_null(null_val)
+        call move_alloc(null_val, next_val)
+        call move_into_element(elements(1), next_val)
+        call create_json_string_unsafe(string_val, "Hello")
+        call move_alloc(string_val, next_val)
+        call move_into_element(elements(2), next_val)
+        call create_json_number(num_val, 2.0d0)
+        call move_alloc(num_val, next_val)
+        call move_into_element(elements(3), next_val)
         call move_into_array(created, elements)
 
         result_ = &
@@ -244,22 +252,27 @@ contains
         type(result_t) :: result_
 
         type(json_object_t) :: copied
+        type(json_bool_t), allocatable :: bool_val
         character(len=:), allocatable :: copied_string
-        class(json_value_t), allocatable :: created
+        type(json_object_t), allocatable :: created
         character(len=:), allocatable :: created_string
         type(json_member_t), allocatable :: members(:)
+        type(json_number_t), allocatable :: num_val
+        class(json_value_t), allocatable :: next_val
 
-        copied = json_object_t( &
+        copied = json_object_unsafe( &
                 [ json_member_unsafe("sayHello", json_bool_t(.true.)) &
                 , json_member_unsafe("aNumber", json_number_t(3.0d0)) &
                 ])
 
         allocate(members(2))
-        call create_json_bool(created, .true.)
-        call move_into_member_unsafe(members(1), "sayHello", created)
-        call create_json_number(created, 3.0d0)
-        call move_into_member_unsafe(members(2), "aNumber", created)
-        call move_into_object(created, members)
+        call create_json_bool(bool_val, .true.)
+        call move_alloc(bool_val, next_val)
+        call move_into_member_unsafe(members(1), "sayHello", next_val)
+        call create_json_number(num_val, 3.0d0)
+        call move_alloc(num_val, next_val)
+        call move_into_member_unsafe(members(2), "aNumber", next_val)
+        call move_into_object_unsafe(created, members)
 
         allocate(copied_string, source = copied%to_compact_string())
         allocate(created_string, source = created%to_compact_string())
@@ -282,33 +295,43 @@ contains
 
         character(len=*), parameter :: EXPECTED = &
                 '{"Hello":[null,{"World":1.0},true]}'
+        type(json_array_t), allocatable :: array_val
         type(json_object_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_bool_t), allocatable :: bool_val
+        type(json_object_t), allocatable :: created
         type(json_element_t), allocatable :: elements(:)
         type(json_member_t), allocatable :: members(:)
+        type(json_null_t), allocatable :: null_val
+        type(json_number_t), allocatable :: num_val
+        class(json_value_t), allocatable :: next_val
 
-        copied = json_object_t( &
+        copied = json_object_unsafe( &
                 [ json_member_unsafe("Hello", json_array_t( &
                         [ json_element_t(json_null_t()) &
-                        , json_element_t(json_object_t([json_member_unsafe("World", json_number_t(1.0d0))])) &
+                        , json_element_t(json_object_unsafe([json_member_unsafe("World", json_number_t(1.0d0))])) &
                         , json_element_t(json_bool_t(.true.)) &
                         ])) &
                 ])
 
         allocate(elements(3))
-        call create_json_null(created)
-        call move_into_element(elements(1), created)
+        call create_json_null(null_val)
+        call move_alloc(null_val, next_val)
+        call move_into_element(elements(1), next_val)
         allocate(members(1))
-        call create_json_number(created, 1.0d0, 2)
-        call move_into_member_unsafe(members(1), "World", created)
-        call move_into_object(created, members)
-        call move_into_element(elements(2), created)
-        call create_json_bool(created, .true.)
-        call move_into_element(elements(3), created)
-        call move_into_array(created, elements)
+        call create_json_number(num_val, 1.0d0, 2)
+        call move_alloc(num_val, next_val)
+        call move_into_member_unsafe(members(1), "World", next_val)
+        call move_into_object_unsafe(created, members)
+        call move_alloc(created, next_val)
+        call move_into_element(elements(2), next_val)
+        call create_json_bool(bool_val, .true.)
+        call move_alloc(bool_val, next_val)
+        call move_into_element(elements(3), next_val)
+        call move_into_array(array_val, elements)
+        call move_alloc(array_val, next_val)
         allocate(members(1))
-        call move_into_member_unsafe(members(1), "Hello", created)
-        call move_into_object(created, members)
+        call move_into_member_unsafe(members(1), "Hello", next_val)
+        call move_into_object_unsafe(created, members)
 
         result_ = &
                 assert_equals(EXPECTED, copied%to_compact_string(), "copied") &
@@ -329,32 +352,42 @@ contains
 // '    ]' // NEWLINE &
 // '}'
         type(json_object_t) :: copied
-        class(json_value_t), allocatable :: created
+        type(json_array_t), allocatable :: array_val
+        type(json_bool_t), allocatable :: bool_val
+        type(json_object_t), allocatable :: created
         type(json_element_t), allocatable :: elements(:)
         type(json_member_t), allocatable :: members(:)
+        type(json_null_t), allocatable :: null_val
+        type(json_number_t), allocatable :: num_val
+        class(json_value_t), allocatable :: next_val
 
-        copied = json_object_t( &
+        copied = json_object_unsafe( &
                 [ json_member_unsafe("Hello", json_array_t( &
                         [ json_element_t(json_null_t()) &
-                        , json_element_t(json_object_t([json_member_unsafe("World", json_number_t(1.0d0))])) &
+                        , json_element_t(json_object_unsafe([json_member_unsafe("World", json_number_t(1.0d0))])) &
                         , json_element_t(json_bool_t(.true.)) &
                         ])) &
                 ])
 
         allocate(elements(3))
-        call create_json_null(created)
-        call move_into_element(elements(1), created)
+        call create_json_null(null_val)
+        call move_alloc(null_val, next_val)
+        call move_into_element(elements(1), next_val)
         allocate(members(1))
-        call create_json_number(created, 1.0d0, 2)
-        call move_into_member_unsafe(members(1), "World", created)
-        call move_into_object(created, members)
-        call move_into_element(elements(2), created)
-        call create_json_bool(created, .true.)
-        call move_into_element(elements(3), created)
-        call move_into_array(created, elements)
+        call create_json_number(num_val, 1.0d0, 2)
+        call move_alloc(num_val, next_val)
+        call move_into_member_unsafe(members(1), "World", next_val)
+        call move_into_object_unsafe(created, members)
+        call move_alloc(created, next_val)
+        call move_into_element(elements(2), next_val)
+        call create_json_bool(bool_val, .true.)
+        call move_alloc(bool_val, next_val)
+        call move_into_element(elements(3), next_val)
+        call move_into_array(array_val, elements)
+        call move_alloc(array_val, next_val)
         allocate(members(1))
-        call move_into_member_unsafe(members(1), "Hello", created)
-        call move_into_object(created, members)
+        call move_into_member_unsafe(members(1), "Hello", next_val)
+        call move_into_object_unsafe(created, members)
 
         result_ = &
                 assert_equals(EXPECTED, copied%to_expanded_string(), "copied") &
@@ -377,7 +410,7 @@ contains
 
         result_ = assert_not(retrieved%errors%has_any(), retrieved%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_string_unsafe("third"), retrieved%json)
+            result_ = assert_equals(json_string_unsafe("third"), retrieved%value_)
         end if
     end function
 
@@ -399,7 +432,7 @@ contains
             if (maybe_item%failed()) then
                 result_ = result_.and.fail(maybe_item%errors%to_string())
             else
-                result_ = result_.and.assert_equals(array%elements(i)%json, maybe_item%json)
+                result_ = result_.and.assert_equals(array%elements(i)%json, maybe_item%value_)
             end if
         end do
     end function
@@ -428,7 +461,7 @@ contains
         type(json_object_t) :: object
         type(fallible_json_value_t) :: retrieved
 
-        object = json_object_t( &
+        object = json_object_unsafe( &
                 [ json_member_unsafe("first", json_string_unsafe("hello")) &
                 , json_member_unsafe("second", json_string_unsafe("goodbye")) &
                 ])
@@ -437,7 +470,7 @@ contains
 
         result_ = assert_not(retrieved%errors%has_any(), retrieved%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_string_unsafe("hello"), retrieved%json)
+            result_ = assert_equals(json_string_unsafe("hello"), retrieved%value_)
         end if
     end function
 
@@ -450,20 +483,20 @@ contains
         type(json_object_t) :: object
         type(json_element_t), allocatable :: values(:)
 
-        object = json_object_t( &
+        object = json_object_unsafe( &
                 [ json_member_unsafe("first", json_string_unsafe("hello")) &
                 , json_member_unsafe("second", json_string_unsafe("world")) &
                 , json_member_unsafe("third", json_string_unsafe("goodbye")) &
                 ])
-        keys = object%keys()
-        values = object%values()
+        allocate(keys, source = object%keys())
+        allocate(values, source = object%values())
         result_ = assert_equals(size(keys), size(values), "number of members")
         do i = 1, size(keys)
             maybe_value = object%get(keys(i))
             if (maybe_value%failed()) then
                 result_ = result_.and.fail(maybe_value%errors%to_string())
             else
-                result_ = result_.and.assert_equals(values(i)%json, maybe_value%json)
+                result_ = result_.and.assert_equals(values(i)%json, maybe_value%value_)
             end if
         end do
     end function
@@ -474,7 +507,7 @@ contains
         type(json_object_t) :: object
         type(fallible_json_value_t) :: retrieved
 
-        object = json_object_t( &
+        object = json_object_unsafe( &
                 [ json_member_unsafe("first", json_string_unsafe("hello")) &
                 , json_member_unsafe("second", json_string_unsafe("goodbye")) &
                 ])

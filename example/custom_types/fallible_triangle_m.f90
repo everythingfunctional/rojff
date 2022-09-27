@@ -48,7 +48,7 @@ contains
             fallible_triangle%errors_ = maybe_json%errors
         else
             fallible_triangle = fallible_triangle_t( &
-                    fallible_triangle_t(maybe_json%json), &
+                    fallible_triangle_t(maybe_json%value_), &
                     module_t(MODULE_NAME), &
                     procedure_t("from_fallible_json"))
         end if

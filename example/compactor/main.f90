@@ -27,7 +27,7 @@ program compactor
     else
         print *, "Parsed in ", real(finish-start)/real(count_rate), " seconds"
         call system_clock(start)
-        call json%json%save_compactly_to(output_file, status="REPLACE")
+        call json%value_%save_compactly_to(output_file, status="REPLACE")
         call system_clock(finish)
         print *, "Saved in ", real(finish-start)/real(count_rate), " seconds"
     end if

@@ -17,5 +17,5 @@ output_dir: ../public
 graph: true
 extra_mods: erloff:https://everythingfunctional.gitlab.io/erloff/
             iso_varying_string:https://everythingfunctional.gitlab.io/iso_varying_string/
-            vegetables:https://everythingfunctional.gitlab.io/vegetables/
+            veggies:https://everythingfunctional.gitlab.io/veggies/
 ...

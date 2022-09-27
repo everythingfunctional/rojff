@@ -12,17 +12,19 @@ module parse_json_test
             json_member_t, &
             json_null_t, &
             json_number_t, &
+            json_string_t, &
             json_object_t, &
             json_value_t, &
             create_json_integer, &
             create_json_number, &
             create_json_string_unsafe, &
             json_member_unsafe, &
+            json_object_unsafe, &
             json_string_unsafe, &
             move_into_array, &
             move_into_element, &
             move_into_member_unsafe, &
-            move_into_object, &
+            move_into_object_unsafe, &
             parse_json_from_file, &
             parse_json_from_string, &
             INVALID_INPUT
@@ -45,33 +47,36 @@ contains
     function test_parse_json() result(tests)
         type(test_item_t) :: tests
 
-        character(len=:), allocatable :: nan_str
-        character(len=:), allocatable :: neg_nan_str
-        character(len=:), allocatable :: pos_nan_str
-        character(len=:), allocatable :: inf_str
-        character(len=:), allocatable :: neg_inf_str
-        character(len=:), allocatable :: pos_inf_str
-        double precision :: nan, neg_nan, pos_nan, inf, neg_inf, pos_inf
+        ! character(len=:), allocatable :: nan_str
+        ! character(len=:), allocatable :: neg_nan_str
+        ! character(len=:), allocatable :: pos_nan_str
+        ! character(len=:), allocatable :: inf_str
+        ! character(len=:), allocatable :: neg_inf_str
+        ! character(len=:), allocatable :: pos_inf_str
+        ! double precision :: nan, neg_nan, pos_nan, inf, neg_inf, pos_inf
 
-        nan_str = "NaN"
-        neg_nan_str = "-NaN"
-        pos_nan_str = "+NaN"
-        inf_str = "Inf"
-        neg_inf_str = "-Inf"
-        pos_inf_str = "+Inf"
-        read(nan_str, *) nan
-        read(neg_nan_str, *) neg_nan
-        read(pos_nan_str, *) pos_nan
-        read(inf_str, *) inf
-        read(neg_inf_str, *) neg_inf
-        read(pos_inf_str, *) pos_inf
+        ! nan_str = "NaN"
+        ! neg_nan_str = "-NaN"
+        ! pos_nan_str = "+NaN"
+        ! inf_str = "Inf"
+        ! neg_inf_str = "-Inf"
+        ! pos_inf_str = "+Inf"
+        ! read(nan_str, *) nan
+        ! read(neg_nan_str, *) neg_nan
+        ! read(pos_nan_str, *) pos_nan
+        ! read(inf_str, *) inf
+        ! read(neg_inf_str, *) neg_inf
+        ! read(pos_inf_str, *) pos_inf
 
         tests = describe( &
                 "parse_json", &
                 [ it("parsing an empty string returns an error", check_parse_empty) &
                 , it("can parse null", check_parse_null) &
+                , it("parsing 'nul' fails", check_fail_null) &
                 , it("can parse true", check_parse_true) &
                 , it("can parse false", check_parse_false) &
+                , it("parsing 'tru' fails", check_fail_true) &
+                , it("parsing 'fals' fails", check_fail_false) &
                 , it( &
                         "can parse a variety of numbers", &
                         [ example_t(number_input_t("0.0", 0.0d0)) &
@@ -83,17 +88,20 @@ contains
                         , example_t(number_input_t("1.2E+3", 1.2d3)) &
                         , example_t(number_input_t("1.2e-3", 1.2d-3)) &
                         , example_t(number_input_t("20e1", 20.0d1)) &
-                        , example_t(number_input_t(nan_str, nan)) &
-                        , example_t(number_input_t(neg_nan_str, neg_nan)) &
-                        , example_t(number_input_t(pos_nan_str, pos_nan)) &
-                        , example_t(number_input_t(inf_str, inf)) &
-                        , example_t(number_input_t(neg_inf_str, neg_inf)) &
-                        , example_t(number_input_t(pos_inf_str, pos_inf)) &
+                        ! These should be periodically checked with a compiler and options that don't crash,
+                        ! but for some compilers and options they do, so we'll not test them always
+                        ! , example_t(number_input_t(nan_str, nan)) &
+                        ! , example_t(number_input_t(neg_nan_str, neg_nan)) &
+                        ! , example_t(number_input_t(pos_nan_str, pos_nan)) &
+                        ! , example_t(number_input_t(inf_str, inf)) &
+                        ! , example_t(number_input_t(neg_inf_str, neg_inf)) &
+                        ! , example_t(number_input_t(pos_inf_str, pos_inf)) &
                         ], &
                         check_parse_number) &
                 , it( &
                         "when parsing a number, tracks how many digits of precision there were", &
                         check_number_significant_digits) &
+                , it("parsing an invalid number fails", check_fail_number) &
                 , it( &
                         "can parse a variety of integers", &
                         [ example_t(integer_input_t("0", 0)) &
@@ -101,7 +109,9 @@ contains
                         , example_t(integer_input_t("3", 3)) &
                         ], &
                         check_parse_integer) &
+                , it("parsing an invalid integer fails", check_fail_integer) &
                 , it("can parse a string", check_parse_string) &
+                , it("parsing an invalid string fails", check_fail_string) &
                 , it("can parse an empty array", check_parse_empty_array) &
                 , it("can parse an array with a single element", check_parse_single_array) &
                 , it("can parse an array with multiple elements", check_parse_multi_array) &
@@ -133,8 +143,18 @@ contains
 
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_null_t(), json%json)
+            result_ = assert_equals(json_null_t(), json%value_)
         end if
+    end function
+
+    function check_fail_null() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string("nul")
+
+        result_ = assert_that(json%errors%has_any(), json%errors%to_string())
     end function
 
     function check_parse_true() result(result_)
@@ -146,7 +166,7 @@ contains
 
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_bool_t(.true.), json%json)
+            result_ = assert_equals(json_bool_t(.true.), json%value_)
         end if
     end function
 
@@ -159,8 +179,28 @@ contains
 
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_bool_t(.false.), json%json)
+            result_ = assert_equals(json_bool_t(.false.), json%value_)
         end if
+    end function
+
+    function check_fail_true() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string("tru")
+
+        result_ = assert_that(json%errors%has_any(), json%errors%to_string())
+    end function
+
+    function check_fail_false() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string("fals")
+
+        result_ = assert_that(json%errors%has_any(), json%errors%to_string())
     end function
 
     function check_parse_number(input) result(result_)
@@ -176,7 +216,7 @@ contains
             if (result_%passed()) then
                 result_ = assert_equals( &
                         json_number_t(input%value_()), &
-                        json%json, &
+                        json%value_, &
                         "Original string: " // input%string())
             end if
         class default
@@ -192,13 +232,23 @@ contains
         json = parse_json_from_string("1.23e4")
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            select type (number => json%json)
+            select type (number => json%value_)
             type is (json_number_t)
                 result_ = assert_equals(3, number%precision)
             class default
                 result_ = fail("expected a json_number_t, but got: " // number%to_compact_string())
             end select
         end if
+    end function
+
+    function check_fail_number() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string("1.0.e.1")
+
+        result_ = assert_that(json%errors%has_any(), json%errors%to_string())
     end function
 
     function check_parse_integer(input) result(result_)
@@ -214,12 +264,22 @@ contains
             if (result_%passed()) then
                 result_ = assert_equals( &
                         json_integer_t(input%value_()), &
-                        json%json, &
+                        json%value_, &
                         "Original string: " // input%string())
             end if
         class default
             result_ = fail("Expected to get a integer_input_t")
         end select
+    end function
+
+    function check_fail_integer() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string("1a2")
+
+        result_ = assert_that(json%errors%has_any(), json%errors%to_string())
     end function
 
     function check_parse_string() result(result_)
@@ -233,8 +293,18 @@ contains
 
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_string_unsafe(THE_STRING(2:len(THE_STRING)-1)), json%json)
+            result_ = assert_equals(json_string_unsafe(THE_STRING(2:len(THE_STRING)-1)), json%value_)
         end if
+    end function
+
+    function check_fail_string() result(result_)
+        type(result_t) :: result_
+
+        type(fallible_json_value_t) :: json
+
+        json = parse_json_from_string('"invalid \escape"')
+
+        result_ = assert_that(json%errors%has_any(), json%errors%to_string())
     end function
 
     function check_parse_empty_array() result(result_)
@@ -247,7 +317,7 @@ contains
 
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_array_t(empty_elements), json%json)
+            result_ = assert_equals(json_array_t(empty_elements), json%value_)
         end if
     end function
 
@@ -262,7 +332,7 @@ contains
         if (result_%passed()) then
             result_ = assert_equals( &
                     json_array_t([json_element_t(json_number_t(20d1))]), &
-                    json%json)
+                    json%value_)
         end if
     end function
 
@@ -281,7 +351,7 @@ contains
                             , json_element_t(json_null_t()) &
                             , json_element_t(json_null_t()) &
                             ]), &
-                    json%json)
+                    json%value_)
         end if
     end function
 
@@ -295,7 +365,7 @@ contains
 
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(json_object_t(empty_members), json%json)
+            result_ = assert_equals(json_object_unsafe(empty_members), json%value_)
         end if
     end function
 
@@ -309,8 +379,8 @@ contains
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
             result_ = assert_equals( &
-                    json_object_t([json_member_unsafe("first", json_null_t())]), &
-                    json%json)
+                    json_object_unsafe([json_member_unsafe("first", json_null_t())]), &
+                    json%value_)
         end if
     end function
 
@@ -324,12 +394,12 @@ contains
         result_ = assert_not(json%errors%has_any(), json%errors%to_string())
         if (result_%passed()) then
             result_ = assert_equals( &
-                    json_object_t( &
+                    json_object_unsafe( &
                             [ json_member_unsafe("first", json_null_t()) &
                             , json_member_unsafe("second", json_null_t()) &
                             , json_member_unsafe("third", json_null_t()) &
                             ]), &
-                    json%json)
+                    json%value_)
         end if
     end function
 
@@ -351,7 +421,7 @@ contains
 
         result_ = assert_not(parsed%errors%has_any(), parsed%errors%to_string())
         if (result_%passed()) then
-            result_ = assert_equals(example, parsed%json)
+            result_ = assert_equals(example, parsed%value_)
         end if
     end function
 
@@ -409,51 +479,74 @@ contains
 ! So for now, we doing it the long and complicated way
         type(json_member_t), allocatable :: members(:)
         type(json_element_t), allocatable :: elements(:)
+        type(json_array_t), allocatable :: array_val
+        type(json_integer_t), allocatable :: int_val
+        type(json_number_t), allocatable :: num_val
+        type(json_object_t), allocatable :: obj_val
+        type(json_string_t), allocatable :: string_val
 
         allocate(elements(2))
-        call create_json_string_unsafe(complex_example_, "GML")
+        call create_json_string_unsafe(string_val, "GML")
+        call move_alloc(string_val, complex_example_)
         call move_into_element(elements(1), complex_example_)
-        call create_json_string_unsafe(complex_example_, "XML")
+        call create_json_string_unsafe(string_val, "XML")
+        call move_alloc(string_val, complex_example_)
         call move_into_element(elements(2), complex_example_)
-        call move_into_array(complex_example_, elements)
+        call move_into_array(array_val, elements)
+        call move_alloc(array_val, complex_example_)
         allocate(members(2))
         call move_into_member_unsafe(members(2), "GlossSeeAlso", complex_example_)
         call create_json_string_unsafe( &
-                complex_example_, &
+                string_val, &
                 "A meta-markup language, used to create markup languages such as DocBook.")
+        call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(1), "para", complex_example_)
-        call move_into_object(complex_example_, members)
+        call move_into_object_unsafe(obj_val, members)
+        call move_alloc(obj_val, complex_example_)
         allocate(members(7))
         call move_into_member_unsafe(members(6), "GlossDef", complex_example_)
-        call create_json_integer(complex_example_, 101)
+        call create_json_integer(int_val, 101)
+        call move_alloc(int_val, complex_example_)
         call move_into_member_unsafe(members(1), "ID", complex_example_)
-        call create_json_string_unsafe(complex_example_, "SGML")
+        call create_json_string_unsafe(string_val, "SGML")
+        call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(2), "SortAs", complex_example_)
-        call create_json_string_unsafe(complex_example_, "Standard Generalized Markup Language")
+        call create_json_string_unsafe(string_val, "Standard Generalized Markup Language")
+        call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(3), "GlossTerm", complex_example_)
-        call create_json_string_unsafe(complex_example_, "SGML")
+        call create_json_string_unsafe(string_val, "SGML")
+        call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(4), "Acronym", complex_example_)
-        call create_json_string_unsafe(complex_example_, "ISO 8879:1986")
+        call create_json_string_unsafe(string_val, "ISO 8879:1986")
+        call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(5), "Abbrev", complex_example_)
-        call create_json_number(complex_example_, 123.456d0, 6)
+        call create_json_number(num_val, 123.456d0, 6)
+        call move_alloc(num_val, complex_example_)
         call move_into_member_unsafe(members(7), "GlossSee", complex_example_)
-        call move_into_object(complex_example_, members)
+        call move_into_object_unsafe(obj_val, members)
+        call move_alloc(obj_val, complex_example_)
         allocate(members(1))
         call move_into_member_unsafe(members(1), "GlossEntry", complex_example_)
-        call move_into_object(complex_example_, members)
+        call move_into_object_unsafe(obj_val, members)
+        call move_alloc(obj_val, complex_example_)
         allocate(members(2))
         call move_into_member_unsafe(members(2), "GlossList", complex_example_)
-        call create_json_string_unsafe(complex_example_, "S")
+        call create_json_string_unsafe(string_val, "S")
+        call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(1), "title", complex_example_)
-        call move_into_object(complex_example_, members)
+        call move_into_object_unsafe(obj_val, members)
+        call move_alloc(obj_val, complex_example_)
         allocate(members(2))
         call move_into_member_unsafe(members(2), "GlossDiv", complex_example_)
-        call create_json_string_unsafe(complex_example_, "example glossary")
+        call create_json_string_unsafe(string_val, "example glossary")
+        call move_alloc(string_val, complex_example_)
         call move_into_member_unsafe(members(1), "title", complex_example_)
-        call move_into_object(complex_example_, members)
+        call move_into_object_unsafe(obj_val, members)
+        call move_alloc(obj_val, complex_example_)
         allocate(members(1))
         call move_into_member_unsafe(members(1), "glossary", complex_example_)
-        call move_into_object(complex_example_, members)
+        call move_into_object_unsafe(obj_val, members)
+        call move_alloc(obj_val, complex_example_)
         call move_alloc(complex_example_, example)
     end function
 end module

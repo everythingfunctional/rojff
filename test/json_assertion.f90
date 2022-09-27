@@ -1,6 +1,6 @@
 module json_assertion
     use rojff, only: json_member_t, json_value_t
-    use rojff_string_builder_m, only: string_builder_t
+    use rojff_string_sink_m, only: string_sink_t
     use veggies, only: &
             result_t, &
             fail, &
@@ -59,15 +59,15 @@ contains
         character(len=*), intent(in) :: message
         type(result_t) :: result_
 
-        type(string_builder_t) :: expected_builder
-        type(string_builder_t) :: actual_builder
+        type(string_sink_t) :: expected_sink
+        type(string_sink_t) :: actual_sink
         character(len=:), allocatable :: expected_string
         character(len=:), allocatable :: actual_string
 
-        call expected%write_to_compactly(expected_builder)
-        call expected_builder%move_into(expected_string)
-        call actual%write_to_compactly(actual_builder)
-        call actual_builder%move_into(actual_string)
+        call expected%write_to_compactly(expected_sink)
+        call expected_sink%move_into(expected_string)
+        call actual%write_to_compactly(actual_sink)
+        call actual_sink%move_into(actual_string)
         if (expected == actual) then
             result_ = succeed(with_user_message(make_equals_success_message( &
                     expected_string), &
