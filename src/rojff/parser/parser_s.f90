@@ -261,6 +261,7 @@ contains
         starting_line = cursor%current_line()
         starting_column = cursor%current_column()
 
+        null_string = "    "
         do i = 1, 4
             null_string(i:i) = cursor%peek()
             call cursor%next()
@@ -291,6 +292,7 @@ contains
         starting_line = cursor%current_line()
         starting_column = cursor%current_column()
 
+        true_string = "    "
         do i = 1, 4
             true_string(i:i) = cursor%peek()
             call cursor%next()
@@ -321,6 +323,7 @@ contains
         starting_line = cursor%current_line()
         starting_column = cursor%current_column()
 
+        false_string = "     "
         do i = 1, 5
             false_string(i:i) = cursor%peek()
             call cursor%next()
@@ -581,7 +584,7 @@ contains
             else
                 call cursor%next()
             end if
-            call parse_json_string(cursor, key, errors) ! nagfor is failing to deallocate key automatically here
+            call parse_json_string(cursor, key, errors)
             if (errors%has_any()) then
                 errors = error_list_t(errors, module_t(MODULE_NAME), procedure_t(PROCEDURE_NAME))
                 return
@@ -617,7 +620,6 @@ contains
                 return
             end if
             call parsed%append(key%string, val)
-            deallocate(key) ! This is needed because nagfor is failing to deallocate it automatically at the call above
             if (cursor%finished()) then
                 errors = error_list_t(fatal_t( &
                         INVALID_INPUT, &
