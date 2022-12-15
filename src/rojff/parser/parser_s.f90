@@ -277,7 +277,7 @@ contains
                     "At line " // to_string(starting_line) &
                     // " and column " // to_string(starting_column) &
                     // " found " // null_string(1:min(i, 4)) &
-                    // ', but expected null'))
+                    // ', did you mean "' // null_string(1:min(i, 4)) //'..."'))
         end if
     end subroutine
 
@@ -308,7 +308,7 @@ contains
                     "At line " // to_string(starting_line) &
                     // " and column " // to_string(starting_column) &
                     // " found " // true_string(1:min(i, 4)) &
-                    // ', but expected true'))
+                    // ', did you mean "' // true_string(1:min(i, 4)) //'..."'))
         end if
     end subroutine
 
@@ -339,7 +339,7 @@ contains
                     "At line " // to_string(starting_line) &
                     // " and column " // to_string(starting_column) &
                     // " found " // false_string(1:min(i, 4)) &
-                    // ', but expected false'))
+                    // ', did you mean "' // false_string(1:min(i, 4)) //'..."'))
         end if
     end subroutine
 
