@@ -60,11 +60,28 @@ contains
                 end if
             end do
         end if
-        element = fallible_json_value_t(error_list_t(fatal_t( &
-                NOT_FOUND, &
-                module_t(MODULE_NAME), &
-                procedure_t("get_c"), &
-                '"' // key // '" not found in ' // self%to_compact_string())))
+        block
+            character(len=:), allocatable :: object_string
+
+            if (allocated(self%members)) then
+                object_string = '{'
+                do i = 1, size(self%members)-1
+                    object_string = object_string // '"' // self%members(i)%key // '" : ..., '
+                end do
+                if (size(self%members) > 0) then
+                    object_string = object_string // '"' // self%members(size(self%members))%key // '" : ...'
+                end if
+                object_string = object_string // '}'
+            else
+                object_string = '{}'
+            end if
+
+            element = fallible_json_value_t(error_list_t(fatal_t( &
+                    NOT_FOUND, &
+                    module_t(MODULE_NAME), &
+                    procedure_t("get_c"), &
+                    '"' // key // '" not found in ' // object_string)))
+        end block
     end procedure
 
     module procedure get_s
