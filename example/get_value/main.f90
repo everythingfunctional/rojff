@@ -25,11 +25,11 @@ program main
     type is (json_string_t)
       print *, 'Hello, ', str%string
     class default
-      print *, 'Not a string'; stop 1
+      print *, 'Not a string: ', str%to_compact_string(); stop 1
     end select
 
   class default
-    print *, 'Not an object'; stop 1
+    print *, 'Not an object: ', obj%to_compact_string(); stop 1
   end select
 
 end program
