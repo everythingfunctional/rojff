@@ -10,7 +10,7 @@ program main
   json = parse_json_from_string('{ "hello": "World!"}')
 
   if (json%failed()) then
-    print *, char(json%errors%to_string()); return
+    print *, char(json%errors%to_string()); stop 1
   end if
 
   select type (obj => json%value_)
@@ -18,18 +18,18 @@ program main
     result = obj%get('hello')
 
     if (result%failed()) then
-      print *, char(result%errors%to_string()); return
+      print *, char(result%errors%to_string()); stop 1
     end if
 
     select type (str => result%value_)
     type is (json_string_t)
       print *, 'Hello, ', str%string
     class default
-      print *, 'Not a string'
+      print *, 'Not a string'; stop 1
     end select
 
   class default
-    print *, 'Not an object'
+    print *, 'Not an object'; stop 1
   end select
 
 end program
