@@ -107,7 +107,9 @@ which are guaranteed to be returned in matching order, via `get_keys` and `get_v
 
 ### Real World Usage For Inputs
 
-In most cases, you're going to have inputs in JSON format corresponding to derived types in your program.
+An example of parsing a JSON string and retrieving a value by its key can be found in `example/get_value`. It also includes basic error handling.
+
+In most cases, however, you're going to have inputs in JSON format corresponding to derived types in your program.
 The example in `example/custom_types` illustrates how this might be done for a triangle area calculator.
 It allows for easy composition and reuse, while still handling all the possible errors that might occur with regards to erroneous input.
 Any errors that occur trying to access a component of the JSON are propagated through.
